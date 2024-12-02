@@ -37,6 +37,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -55,11 +56,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="GameProject\NewProjectView.xaml">
+    <Compile Include="Utilities\Serializer.cs" />
+    <Page Include="GameProject\Frontend\NewProjectView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GameProject\OpenProjectView.xaml">
+    <Page Include="GameProject\Frontend\OpenProjectView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -71,23 +73,25 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GameProject\NewProjectView.xaml.cs">
+    <Compile Include="GameProject\Backend\NewProject.cs" />
+    <Compile Include="Common\ViewModelBase.cs" />
+    <Compile Include="GameProject\Frontend\NewProjectView.xaml.cs">
       <DependentUpon>NewProjectView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GameProject\OpenProjectView.xaml.cs">
+    <Compile Include="GameProject\Frontend\OpenProjectView.xaml.cs">
       <DependentUpon>OpenProjectView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="GameProject\ProjectBrowserDialogue.xaml">
+    <Page Include="GameProject\Frontend\ProjectBrowserDialogue.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GameProject\ProjectBrowserDialogue.xaml.cs">
+    <Compile Include="GameProject\Frontend\ProjectBrowserDialogue.xaml.cs">
       <DependentUpon>ProjectBrowserDialogue.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -115,5 +119,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
