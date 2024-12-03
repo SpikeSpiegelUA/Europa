@@ -1,5 +1,7 @@
-﻿using System;
+﻿using EuropaEditor.Utilities;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -19,53 +21,66 @@ namespace EuropaEditor.GameProject.Backend
         public string ProjectFile { get; set; }
         [DataMember]
         public List<string> ProjectFolders { get; set; }
+
+        public byte[] Icon { get; set; }
+        public byte[] Screenshot { get; set; }
+
+        public string IconFilePath { get; set; }
+        public string ScreenshotFilePath { get; set; }
+        public string ProjectFilePath { get; set; }
     }
+
     internal class NewProject : ViewModelBase
     {
         //TODO: get the path from the installation location.
         private readonly string _templatePath = @"..\..\EuropaEditor\ProjectTemplates\";
-        private string _name = "New project";
-        public string Name
+        private string _projectName = "New project";
+        public string ProjectName
         {
-            get => _name;
+            get => _projectName;
             set
             {
-                if (!_name.Equals(value))
+                if (!_projectName.Equals(value))
                 {
-                    _name = value;
-                    OnPropertyChanged(nameof(Path));
+                    _projectName = value;
+                    OnPropertyChanged(nameof(ProjectPath));
                 }
             }
         }
 
-        private string _path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\EuropaProject\";
-        public string Path
+        private string _projectPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\EuropaProject\";
+        public string ProjectPath
         {
-            get => _path;
+            get => _projectPath;
             set
             {
-                if (!_path.Equals(value))
+                if (!_projectPath.Equals(value))
                 {
-                    _path = value;
-                    OnPropertyChanged(nameof(Path));
+                    _projectPath = value;
+                    OnPropertyChanged(nameof(ProjectPath));
                 }
             }
         }
+
+        private ObservableCollection<ProjectTemplate> _projectTemplates = new ObservableCollection<ProjectTemplate>();
+        public ReadOnlyObservableCollection<ProjectTemplate> ProjectTemplates { get; }
+
         public NewProject()
         {
+            ProjectTemplates = new ReadOnlyObservableCollection<ProjectTemplate>(_projectTemplates);
             try
             {
                 var templatesFiles = Directory.GetFiles(_templatePath, "template.xml", SearchOption.AllDirectories);
                 Debug.Assert(templatesFiles.Any());
                 foreach(var file in templatesFiles)
                 {
-                    var template = new ProjectTemplate()
-                    {
-                        ProjectType = "Empty Project",
-                        ProjectFile = "project.europa",
-                        ProjectFolders = new List<string> { ".Europa", "Content", "GameCode" }
-                    }; 
-
+                    var template = Serializer.FromFile<ProjectTemplate>(file);
+                    template.IconFilePath = Path.Combine(Path.GetDirectoryName(file), "Icon.png");
+                    template.Icon = File.ReadAllBytes(template.IconFilePath);
+                    template.ScreenshotFilePath = Path.Combine(Path.GetDirectoryName(file), "Screenshot.png");
+                    template.Screenshot = File.ReadAllBytes(template.ScreenshotFilePath);
+                    template.ProjectFilePath = Path.Combine(Path.GetDirectoryName(file), template.ProjectFile);
+                    _projectTemplates.Add(template);
                 }
             }
             catch (Exception ex)

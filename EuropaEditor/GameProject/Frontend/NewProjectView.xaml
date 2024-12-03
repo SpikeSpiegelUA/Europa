@@ -3,15 +3,31 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:EuropaEditor.GameProject"
-             xmlns:myns="clr-namespace:EuropaEditor.GameProject.Backend"
+             xmlns:local="clr-namespace:EuropaEditor"
+             xmlns:Backend="clr-namespace:EuropaEditor.GameProject.Backend"
              mc:Ignorable="d" Width="800"
-             d:DataContext="{d:DesignInstance Type=myns:NewProject, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance Type=Backend:NewProject, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <Backend:NewProject/>
+    </UserControl.DataContext>
     <StackPanel Background="White">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <ListBox Width="195" Height="250"/>
-            <Border Width="400" Height="250" Margin="5, 0, 0, 0"/>
+            <ListBox Width="195" Height="250" ItemsSource="{Binding ProjectTemplates}" x:Name="templatesListBox" SelectedIndex="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding Icon}" Margin="0, 0, 5, 0"/>
+                            <TextBlock Text="{Binding ProjectType}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <Border Width="400" Height="250" Margin="5, 0, 0, 0">
+                <Border.Background>
+                    <ImageBrush ImageSource="{Binding Path=SelectedItem.Screenshot, ElementName=templatesListBox}"/>
+                </Border.Background>
+            </Border>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 30, 0, 0">
             <TextBlock Text ="Name" Width="55"/>
