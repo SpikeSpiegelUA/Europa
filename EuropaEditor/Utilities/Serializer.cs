@@ -18,6 +18,7 @@ namespace EuropaEditor.Utilities
                 var fileStream = new FileStream(path, FileMode.Create);
                 var serializer = new DataContractSerializer(typeof(T));
                 serializer.WriteObject(fileStream, instance);
+                fileStream.Close();
             }
             catch(Exception ex)
             {
@@ -33,6 +34,7 @@ namespace EuropaEditor.Utilities
                 var fileStream = new FileStream(path, FileMode.Open);
                 var serializer = new DataContractSerializer(typeof(T));
                 T instance = (T)serializer.ReadObject(fileStream);
+                fileStream.Close();
                 return instance;
             }
             catch (Exception ex)

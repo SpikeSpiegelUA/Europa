@@ -1,1 +1,10 @@
-<ProjectTemplate xmlns="http://schemas.datacontract.org/2004/07/EuropaEditor.GameProject.Backend" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"> <ProjectFile>project.europa</ProjectFile><ProjectFolders xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays"> <a:string>.Europa</a:string> <a:string>Content</a:string> <a:string>GameCode</a:string> </ProjectFolders> <ProjectType> Empty Project</ProjectType></ProjectTemplate>
+<ProjectTemplate xmlns="http://schemas.datacontract.org/2004/07/EuropaEditor.GameProject.Backend" 
+	xmlns:i="http://www.w3.org/2001/XMLSchema-instance"> 
+	<ProjectFile>project.europa</ProjectFile>
+	<ProjectFolders xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays"> 
+		<a:string>.Europa</a:string> 
+		<a:string>Content</a:string> 
+		<a:string>GameCode</a:string> 
+	</ProjectFolders> 
+	<ProjectType> Empty Project</ProjectType>
+</ProjectTemplate>

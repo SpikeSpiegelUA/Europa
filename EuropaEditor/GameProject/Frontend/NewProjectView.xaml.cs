@@ -1,5 +1,7 @@
-﻿using System;
+﻿using EuropaEditor.GameProject.Backend;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +25,21 @@ namespace EuropaEditor.GameProject
         public NewProjectView()
         {
             InitializeComponent();
+        }
+
+        private void OnCreateButton_Click(object sender, RoutedEventArgs e)
+        {
+            var newProject = DataContext as NewProject;
+            var projectPath = newProject.CreateProject(templatesListBox.SelectedItem as ProjectTemplate);
+            bool dialogResult = false;
+            var window = Window.GetWindow(this);
+            if (!string.IsNullOrEmpty(projectPath))
+            {
+                dialogResult = true;
+                OpenProject.Open(new ProjectData() { ProjectName = newProject.ProjectName, ProjectPath = projectPath });
+            }
+            window.DialogResult = dialogResult;
+            window.Close();
         }
     }
 }

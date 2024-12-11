@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EuropaEditor.GameProject.Backend;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,13 @@ namespace EuropaEditor
         {
             InitializeComponent();
             Loaded += OnMainWindowLoaded;
+            Closed += OnMainWindowClosed;
+        }
+
+        private void OnMainWindowClosed(object sender, EventArgs e)
+        {
+            Loaded -= OnMainWindowLoaded;
+            Project.CurrentProject?.Unload();
         }
 
         private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
@@ -34,14 +42,15 @@ namespace EuropaEditor
 
         private void ProjectBrowserDialogueControl()
         {
-            var ProjectBrowserDialogue = new ProjectBrowserDialogue();
-            if (ProjectBrowserDialogue.ShowDialog() == false)
+            var projectBrowserDialogue = new ProjectBrowserDialogue();
+            if (projectBrowserDialogue.ShowDialog() == false || projectBrowserDialogue.DataContext == null)
             {
                 Application.Current.Shutdown();
             }
             else
             {
-
+                Project.CurrentProject?.Unload();
+                DataContext = projectBrowserDialogue.DataContext;
             }
         }
     }

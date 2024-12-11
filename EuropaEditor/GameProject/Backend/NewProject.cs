@@ -43,6 +43,7 @@ namespace EuropaEditor.GameProject.Backend
                 if (!_projectName.Equals(value))
                 {
                     _projectName = value;
+                    ValidateProjectPath();
                     OnPropertyChanged(nameof(ProjectPath));
                 }
             }
@@ -57,13 +58,124 @@ namespace EuropaEditor.GameProject.Backend
                 if (!_projectPath.Equals(value))
                 {
                     _projectPath = value;
+                    ValidateProjectPath();
                     OnPropertyChanged(nameof(ProjectPath));
+                }
+            }
+        }
+
+        private bool _isValid = false;
+
+        public bool IsValid
+        {
+            get => _isValid;
+            set
+            {
+                if(_isValid != value)
+                {
+                    _isValid = value;
+                    OnPropertyChanged(nameof(IsValid));
+                }
+            }
+        }
+
+        private string _errorMessage = string.Empty;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                if (_errorMessage != value)
+                {
+                    _errorMessage = value;
+                    OnPropertyChanged(nameof(ErrorMessage));
                 }
             }
         }
 
         private ObservableCollection<ProjectTemplate> _projectTemplates = new ObservableCollection<ProjectTemplate>();
         public ReadOnlyObservableCollection<ProjectTemplate> ProjectTemplates { get; }
+
+        private bool ValidateProjectPath()
+        {
+            var path = ProjectPath;
+            if (!path.Last().Equals(Path.DirectorySeparatorChar))
+                path += Path.DirectorySeparatorChar;
+            path += $@"{ProjectName}\";
+
+            IsValid = false;
+            if (string.IsNullOrWhiteSpace(ProjectName.Trim()))
+            {
+                ErrorMessage = "Type in a project name.";
+            }
+            else if(ProjectName.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
+            {
+                ErrorMessage = "Invalid character(s) used in a project name.";
+            }
+            else if (string.IsNullOrWhiteSpace(path.Trim()))
+            {
+                ErrorMessage = "Select a valid project folder.";
+            }
+            else if (path.IndexOfAny(Path.GetInvalidPathChars()) != -1)
+            {
+                ErrorMessage = "Invalid character(s) used in a project path.";
+            }
+            else if (Directory.Exists(path) && Directory.EnumerateFileSystemEntries(path).Any())
+            {
+                ErrorMessage = "Selected project folder already exists and is not empty.";
+            }
+            else
+            {
+                ErrorMessage = string.Empty;
+                IsValid = true;
+            }
+            return IsValid;
+        }
+
+        public string CreateProject(ProjectTemplate projectTemplate)
+        {
+            ValidateProjectPath();
+            if(!IsValid)
+                return string.Empty;
+            if (!ProjectPath.Last().Equals(Path.DirectorySeparatorChar))
+                ProjectPath += Path.DirectorySeparatorChar;
+            var path = ProjectPath + $@"{ProjectName}\";
+
+            try
+            {
+                if(!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+                foreach(string folder in projectTemplate.ProjectFolders)
+                {
+                    Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), folder)));
+                }
+                var EuropaDirectoryInfo = new DirectoryInfo(path + @".europa\");
+                EuropaDirectoryInfo.Attributes |= FileAttributes.Hidden;
+                File.Copy(projectTemplate.IconFilePath, Path.GetFullPath(Path.Combine(EuropaDirectoryInfo.FullName, "Icon.png")));
+                File.Copy(projectTemplate.ScreenshotFilePath, Path.GetFullPath(Path.Combine(EuropaDirectoryInfo.FullName, "Screenshot.png")));
+
+                var projectXML = File.ReadAllText(projectTemplate.ProjectFilePath);
+                projectXML = string.Format(projectXML, ProjectName, ProjectPath);
+                var projectPath = Path.GetFullPath(Path.Combine(path, $"{ProjectName}{Project.Extension}"));
+                File.WriteAllText(projectPath, projectXML);
+          
+                ProjectData projectData = new ProjectData();
+                projectData.ProjectName = ProjectName;
+                projectData.ProjectPath = ProjectPath;
+                projectData.Icon = projectTemplate.Icon;
+                projectData.Screenshot = projectTemplate.Screenshot;
+                projectData.DateAndTime = DateTime.Now;
+                OpenProject.AddNewProject(projectData);
+
+                return path;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                //TODO: log error.
+                return string.Empty;
+            }
+        }
 
         public NewProject()
         {
@@ -82,6 +194,7 @@ namespace EuropaEditor.GameProject.Backend
                     template.ProjectFilePath = Path.Combine(Path.GetDirectoryName(file), template.ProjectFile);
                     _projectTemplates.Add(template);
                 }
+                ValidateProjectPath();
             }
             catch (Exception ex)
             {
