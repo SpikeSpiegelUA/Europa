@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace EuropaEditor.GameProject.Backend
 {
@@ -25,6 +26,25 @@ namespace EuropaEditor.GameProject.Backend
         [DataMember(Name = "Scenes")]
         private ObservableCollection<Scene> _scenes = new ObservableCollection<Scene>();
         public ReadOnlyObservableCollection<Scene> Scenes { get; private set; }
+
+        public static UndoRedo UndoRedoManager { get; } = new UndoRedo();
+
+        public ICommand RemoveScene { get; set; }
+        public ICommand AddScene { get; set; }
+        public ICommand Undo { get; set; }
+        public ICommand Redo { get; set; }
+
+        private void AddSceneInternal(in string sceneName){
+            Debug.Assert(!string.IsNullOrEmpty(sceneName.Trim()));
+            _scenes.Add(new Scene(this, sceneName));
+        }
+        private void RemoveSceneInternal(in Scene scene)
+        {
+            Debug.Assert(scene != null);
+            Debug.Assert(_scenes.Contains(scene));
+            _scenes.Remove(scene);
+        }
+
         public static Project CurrentProject => Application.Current.MainWindow?.DataContext as Project;
 
         private Scene _activeScene;
@@ -68,6 +88,35 @@ namespace EuropaEditor.GameProject.Backend
                 OnPropertyChanged(nameof(Scenes));
             }
             ActiveScene = Scenes.FirstOrDefault(x => x.IsActive);
+            AddScene = new RelayCommand<object>(x =>
+            {
+                AddSceneInternal($"New Scene {_scenes.Count}");
+                var newScene = _scenes.Last();
+                var sceneIndex = _scenes.Count - 1;
+                UndoRedoManager.AddUndo(new UndoRedoAction(
+                    () => RemoveSceneInternal(newScene),
+                    () => _scenes.Insert(sceneIndex, newScene),
+                    $"Add {newScene.Name}"
+                    ));
+            });
+
+            RemoveScene = new RelayCommand<Scene>(x =>
+            {
+                var sceneIndex = _scenes.IndexOf(x);
+                RemoveSceneInternal(x);
+
+                UndoRedoManager.AddUndo(new UndoRedoAction(
+                    () => _scenes.Insert(sceneIndex, x),
+                    () => RemoveSceneInternal(x),
+                    $"Remove {x.Name}"
+                    ));
+            }, 
+            x => !x.IsActive
+            );
+
+            Undo = new RelayCommand<object>(x => UndoRedoManager.Undo(), x => UndoRedoManager.UndoList.Any());
+
+            Redo = new RelayCommand<object>(x => UndoRedoManager.Redo(), x => UndoRedoManager.RedoList.Any());
         }
 
         public Project(string name, string path)
@@ -78,5 +127,10 @@ namespace EuropaEditor.GameProject.Backend
             _scenes.Add(new Scene(this, "Default Scene"));
             OnDeserialized(new StreamingContext());
         }
+
+        public Project(){
+
+        }
+
     }
 }
