@@ -6,6 +6,7 @@
 	<Path>{1}</Path>
 	<Scenes>
 		<Scene z:Id="i2">
+			<Game_x0020_Entities xmlns:a="http://schemas.datacontract.org/2004/07/EuropaEditor.%D0%A1omponents"/>
 			<IsActive>true</IsActive>
 			<Name>Default Scene</Name>
 			<Project z:Ref="i1"/>

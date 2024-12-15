@@ -42,6 +42,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,6 +63,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Common\RelayCommand.cs" />
+    <Compile Include="Dictionaries\ControlTemplates.xaml.cs">
+      <DependentUpon>ControlTemplates.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\WorldEditor\GameEntityView.xaml.cs">
+      <DependentUpon>GameEntityView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\WorldEditor\ProjectLayoutView.xaml.cs">
       <DependentUpon>ProjectLayoutView.xaml</DependentUpon>
     </Compile>
@@ -76,6 +83,17 @@
     <Compile Include="Utilities\UndoRedoView.xaml.cs">
       <DependentUpon>UndoRedoView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Сomponents\Component.cs" />
+    <Compile Include="Сomponents\GameEntity.cs" />
+    <Compile Include="Сomponents\TransformComponent.cs" />
+    <Page Include="Dictionaries\ControlTemplates.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\WorldEditor\GameEntityView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Editors\WorldEditor\ProjectLayoutView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

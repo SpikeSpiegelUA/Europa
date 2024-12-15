@@ -1,6 +1,9 @@
 ﻿using EuropaEditor.GameProject.Backend;
+using EuropaEditor.Utilities;
+using EuropaEditor.Сomponents;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +27,39 @@ namespace EuropaEditor.Editors.WorldEditor
         public ProjectLayoutView()
         {
             InitializeComponent();
+        }
+
+        private void OnAddGameEntityButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var buttonScene = button.DataContext as Scene;
+            buttonScene.AddGameEntityCommand.Execute(new GameEntity(buttonScene) { Name = "Empty game entity" });
+        }
+
+        private void OnGameEntities_ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            GameEntityView.Instance.DataContext = null;
+            if(e.AddedItems.Count > 0)
+            {
+                GameEntityView.Instance.DataContext = (sender as ListBox).SelectedItems[0];
+            }
+            var listBox = sender as ListBox;
+            var newSelection = listBox.SelectedItems.Cast<GameEntity>().ToList();
+            var previousSelection = newSelection.Except(e.AddedItems.Cast<GameEntity>()).Concat(e.RemovedItems.Cast<GameEntity>()).ToList();
+
+            Project.UndoRedoManager.AddUndo(new UndoRedoAction(
+                () => 
+                {
+                    listBox.UnselectAll();
+                    previousSelection.ForEach(x => (listBox.ItemContainerGenerator.ContainerFromItem(x) as ListBoxItem).IsSelected = true);
+                },
+                () => 
+                {
+                    listBox.UnselectAll();
+                    newSelection.ForEach(x => (listBox.ItemContainerGenerator.ContainerFromItem(x) as ListBoxItem).IsSelected = true);
+                },
+                "Game entities selection changed"
+                ));
         }
     }
 }

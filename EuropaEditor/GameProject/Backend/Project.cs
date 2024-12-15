@@ -21,7 +21,7 @@ namespace EuropaEditor.GameProject.Backend
         public string Name { get; private set; } = "New Project";
         [DataMember]
         public string Path { get; private set; }
-        public string FullPath => $"{Path}{Name}{Extension}";
+        public string FullPath => $@"{Path}{Name}\{Name}{Extension}";
 
         [DataMember(Name = "Scenes")]
         private ObservableCollection<Scene> _scenes = new ObservableCollection<Scene>();
@@ -31,8 +31,9 @@ namespace EuropaEditor.GameProject.Backend
 
         public ICommand RemoveScene { get; set; }
         public ICommand AddScene { get; set; }
-        public ICommand Undo { get; set; }
-        public ICommand Redo { get; set; }
+        public ICommand UndoCommand { get; set; }
+        public ICommand RedoCommand { get; set; }
+        public ICommand SaveCommand { get; set; }
 
         private void AddSceneInternal(in string sceneName){
             Debug.Assert(!string.IsNullOrEmpty(sceneName.Trim()));
@@ -114,9 +115,10 @@ namespace EuropaEditor.GameProject.Backend
             x => !x.IsActive
             );
 
-            Undo = new RelayCommand<object>(x => UndoRedoManager.Undo(), x => UndoRedoManager.UndoList.Any());
+            UndoCommand = new RelayCommand<object>(x => UndoRedoManager.Undo(), x => UndoRedoManager.UndoList.Any());
+            RedoCommand = new RelayCommand<object>(x => UndoRedoManager.Redo(), x => UndoRedoManager.RedoList.Any());
 
-            Redo = new RelayCommand<object>(x => UndoRedoManager.Redo(), x => UndoRedoManager.RedoList.Any());
+            SaveCommand = new RelayCommand<object>(x => Save(this));
         }
 
         public Project(string name, string path)
@@ -124,7 +126,7 @@ namespace EuropaEditor.GameProject.Backend
             Name = name;
             Path = path;
 
-            _scenes.Add(new Scene(this, "Default Scene"));
+            _scenes.Add(new Scene(this, "Default Scene") { IsActive = true });
             OnDeserialized(new StreamingContext());
         }
 

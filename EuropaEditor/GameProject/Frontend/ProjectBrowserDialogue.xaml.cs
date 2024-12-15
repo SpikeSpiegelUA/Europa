@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EuropaEditor.GameProject.Backend;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,18 @@ namespace EuropaEditor
         public ProjectBrowserDialogue()
         {
             InitializeComponent();
+            Loaded += OnProjectBrowserDialogue_Loaded;
+        }
+
+        private void OnProjectBrowserDialogue_Loaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= OnProjectBrowserDialogue_Loaded;
+            if (!OpenProject.Projects.Any())
+            {
+                openProjectButton.IsEnabled = false;
+                openProjectView.Visibility = Visibility.Hidden;
+                OnToggleProjectButton_Click(createProjectButton, new RoutedEventArgs());
+            }
         }
 
         private void OnToggleProjectButton_Click(object sender, RoutedEventArgs e)

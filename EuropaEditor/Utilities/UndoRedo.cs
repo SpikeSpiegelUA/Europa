@@ -34,56 +34,71 @@ namespace EuropaEditor.Utilities
             Debug.Assert(undoAction != null && redoAction != null);
             _undoAction = undoAction;
             _redoAction = redoAction;
-        }   
+        }
+
+        public UndoRedoAction(string propertyName, object instance, object undoValue, object redoValue, string undoRedoActionName) 
+            : this( () => instance.GetType().GetProperty(propertyName).SetValue(instance, undoValue), 
+                    () => instance.GetType().GetProperty(propertyName).SetValue(instance, redoValue),
+                    undoRedoActionName)
+        {}
     }
 
     public class UndoRedo
     {
-            private ObservableCollection<IUndoRedo> _redoList = new ObservableCollection<IUndoRedo>();
-            private ObservableCollection<IUndoRedo> _undoList = new ObservableCollection<IUndoRedo>();
+        private ObservableCollection<IUndoRedo> _redoList = new ObservableCollection<IUndoRedo>();
+        private ObservableCollection<IUndoRedo> _undoList = new ObservableCollection<IUndoRedo>();
 
-            public ReadOnlyObservableCollection<IUndoRedo> RedoList { get; }
-            public ReadOnlyObservableCollection<IUndoRedo> UndoList { get; }
+        public ReadOnlyObservableCollection<IUndoRedo> RedoList { get; }
+        public ReadOnlyObservableCollection<IUndoRedo> UndoList { get; }
 
-            public void Reset()
-            {
-                _undoList.Clear();
-                _redoList.Clear();
-            }
+    private bool _enableAdd = true;
 
-            public void AddUndo(IUndoRedo cmd)
+    public void Reset()
+        {
+            _undoList.Clear();
+            _redoList.Clear();
+        }
+
+        public void AddUndo(IUndoRedo cmd)
+        {
+            if (_enableAdd)
             {
                 _undoList.Add(cmd);
                 _redoList.Clear();
             }
+        }
 
-            public void Undo()
+        public void Undo()
+        {
+            if (_undoList.Any())
             {
-                if (_undoList.Any())
-                {
-                    var cmd = _undoList.Last();
-                    _undoList.RemoveAt(_undoList.Count - 1);
-                    cmd.Undo();
-                    _redoList.Insert(0, cmd);
-                }
-            }
-
-            public void Redo()
-            {
-                if (_redoList.Any())
-                {
-                    var cmd = _redoList.First();
-                    _redoList.RemoveAt(0);
-                    cmd.Redo();
-                    _undoList.Add(cmd);
-                }
-            }
-
-
-            public UndoRedo()
-            {
-                RedoList = new ReadOnlyObservableCollection<IUndoRedo>(_redoList);
-                UndoList = new ReadOnlyObservableCollection<IUndoRedo>(_undoList);
+                var cmd = _undoList.Last();
+                _undoList.RemoveAt(_undoList.Count - 1);
+                _enableAdd = false;
+                cmd.Undo();
+                _enableAdd = true;
+                _redoList.Insert(0, cmd);
             }
         }
+
+        public void Redo()
+        {
+            if (_redoList.Any())
+            {
+                var cmd = _redoList.First();
+                _redoList.RemoveAt(0);
+                _enableAdd = false;
+                cmd.Redo();
+                _enableAdd = true;
+                _undoList.Add(cmd);
+            }
+        }
+
+
+        public UndoRedo()
+        {
+            RedoList = new ReadOnlyObservableCollection<IUndoRedo>(_redoList);
+            UndoList = new ReadOnlyObservableCollection<IUndoRedo>(_undoList);
+        }
+    }
 }
