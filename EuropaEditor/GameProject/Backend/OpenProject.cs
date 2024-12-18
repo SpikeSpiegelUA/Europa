@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 
 namespace EuropaEditor.GameProject.Backend
 {
@@ -101,7 +102,8 @@ namespace EuropaEditor.GameProject.Backend
             catch(Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                //TODO: log error.
+                Logger.Log(MessageType.Error, $"Failed to read projects data");
+                throw;
             }
         }
     }

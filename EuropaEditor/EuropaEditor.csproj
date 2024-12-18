@@ -78,6 +78,10 @@
     <Compile Include="GameProject\Backend\OpenProject.cs" />
     <Compile Include="GameProject\Backend\Project.cs" />
     <Compile Include="GameProject\Backend\Scene.cs" />
+    <Compile Include="GameProject\Frontend\LoggerView.xaml.cs">
+      <DependentUpon>LoggerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\Logger.cs" />
     <Compile Include="Utilities\Serializer.cs" />
     <Compile Include="Utilities\UndoRedo.cs" />
     <Compile Include="Utilities\UndoRedoView.xaml.cs">
@@ -99,6 +103,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Editors\WorldEditor\WorldEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GameProject\Frontend\LoggerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

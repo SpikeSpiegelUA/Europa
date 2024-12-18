@@ -73,11 +73,12 @@ namespace EuropaEditor.GameProject.Backend
         public static void Save(Project projectToSave)
         {
             Serializer.ToFile(projectToSave, projectToSave.FullPath);
+            Logger.Log(MessageType.Info, $"Project saved to {projectToSave.FullPath}");
         }
 
         public void Unload()
         {
-
+            UndoRedoManager.Reset();
         }
 
         [OnDeserialized]

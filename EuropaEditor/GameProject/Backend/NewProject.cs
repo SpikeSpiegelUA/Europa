@@ -166,14 +166,13 @@ namespace EuropaEditor.GameProject.Backend
                 projectData.Screenshot = projectTemplate.Screenshot;
                 projectData.DateAndTime = DateTime.Now;
                 OpenProject.AddNewProject(projectData);
-
                 return path;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
-                //TODO: log error.
-                return string.Empty;
+                Logger.Log(MessageType.Error, $"Failed to create {ProjectName} project");
+                throw;
             }
         }
 
@@ -199,7 +198,8 @@ namespace EuropaEditor.GameProject.Backend
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                //TODO: log error.
+                Logger.Log(MessageType.Error, $"Failed to read project templates");
+                throw;
             }
         }
     }

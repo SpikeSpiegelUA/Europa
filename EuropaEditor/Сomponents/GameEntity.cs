@@ -53,7 +53,7 @@ namespace EuropaEditor.Сomponents
         public ReadOnlyObservableCollection<Component> Components { get; private set; }
         
         public ICommand RenameCommand { get; private set; }
-        public ICommand EnableCommand { get; private set; }
+        public ICommand IsEnableCommand { get; private set; }
 
         [DataMember]
         public Scene ParentScene { get; set; }
@@ -72,6 +72,15 @@ namespace EuropaEditor.Сomponents
                 Project.UndoRedoManager.AddUndo(new UndoRedoAction(nameof(Name), this, oldName, x,
                     $"Change the name of a game entity from \"{oldName}\" to \"{x}\""));
             }, x => x != _name);
+
+            IsEnableCommand = new RelayCommand<bool>(x =>
+            {
+                bool oldValue = _isEnabled;
+                IsEnabled = x;
+
+                Project.UndoRedoManager.AddUndo(new UndoRedoAction(nameof(IsEnabled), this, oldValue, x,
+                    x ? $"Enable {Name}" : $"Disable {Name}"));
+            });
         }
 
         public GameEntity()
