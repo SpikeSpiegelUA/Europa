@@ -8,8 +8,14 @@ using System.Threading.Tasks;
 
 namespace EuropaEditor.Сomponents
 {
+    //Use an empty interface to let _componentns collection in MSEntity have MSComponent as a type.
+    //MSComponent is a generic type, so we need to use an interface in that collection.
+    interface IMSComponent{
+
+    }
+
     [DataContract]
-    public class Component : ViewModelBase
+    public abstract class Component : ViewModelBase
     {
         [DataMember]
         public GameEntity Owner;
@@ -19,5 +25,10 @@ namespace EuropaEditor.Сomponents
             Debug.Assert(owner != null);
             Owner = owner;
         }
+    }
+
+    abstract class MSComponent<T> : ViewModelBase, IMSComponent where T : Component
+    {
+
     }
 }
