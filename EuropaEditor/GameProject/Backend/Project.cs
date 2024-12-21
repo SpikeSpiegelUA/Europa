@@ -14,7 +14,7 @@ using System.Windows.Input;
 namespace EuropaEditor.GameProject.Backend
 {
     [DataContract(Name = "Game")]
-    public class Project : ViewModelBase
+    internal class Project : ViewModelBase
     {
         public static string Extension = ".europa";
         [DataMember]

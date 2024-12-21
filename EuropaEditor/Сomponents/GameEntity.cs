@@ -15,7 +15,7 @@ namespace EuropaEditor.Сomponents
 {
     [DataContract]
     [KnownType(typeof(TransformComponent))]
-    class GameEntity : ViewModelBase
+    public class GameEntity : ViewModelBase
     {
         private bool _isEnabled = true;
         [DataMember]
@@ -52,9 +52,6 @@ namespace EuropaEditor.Сomponents
         [DataMember(Name = "Components")]
         private ObservableCollection<Component> _components = new ObservableCollection<Component>();
         public ReadOnlyObservableCollection<Component> Components { get; private set; }
-        
-        public ICommand RenameCommand { get; private set; }
-        public ICommand IsEnableCommand { get; private set; }
 
         [DataMember]
         public Scene ParentScene { get; set; }
@@ -64,24 +61,6 @@ namespace EuropaEditor.Сomponents
         {
             Components = new ReadOnlyObservableCollection<Component>(_components);
             OnPropertyChanged(nameof(Components));
-
-            RenameCommand = new RelayCommand<string>(x =>
-            {
-                var oldName = _name;
-                Name = x;
-
-                Project.UndoRedoManager.AddUndo(new UndoRedoAction(nameof(Name), this, oldName, x,
-                    $"Change the name of a game entity from \"{oldName}\" to \"{x}\""));
-            }, x => x != _name);
-
-            IsEnableCommand = new RelayCommand<bool>(x =>
-            {
-                bool oldValue = _isEnabled;
-                IsEnabled = x;
-
-                Project.UndoRedoManager.AddUndo(new UndoRedoAction(nameof(IsEnabled), this, oldValue, x,
-                    x ? $"Enable {Name}" : $"Disable {Name}"));
-            });
         }
 
         public GameEntity()
@@ -89,7 +68,7 @@ namespace EuropaEditor.Сomponents
 
         }
 
-        public GameEntity(Scene parentScene)
+        internal GameEntity(Scene parentScene)
         {
             Debug.Assert(parentScene != null);
             ParentScene = parentScene;
@@ -101,6 +80,8 @@ namespace EuropaEditor.Сomponents
     //Basic abstract class for multiselection entitites.
     abstract class MSEntity : ViewModelBase
     {
+        //Control if this class can update its "children" entities.
+        private bool _enableUpdates = true;
         //Set this to a nullable type, so if values in SelectedEntities are different, set this to null.
         private bool? _isEnabled = true;
         public bool? IsEnabled
@@ -157,22 +138,46 @@ namespace EuropaEditor.Сomponents
             var value = getProperty(entities.First());
             foreach (var entity in entities.Skip(1))
             {
+                if (!value.IsTheSameAs(getProperty(entity)))
+                    return null;
+            }
+            return value;
+        }
+
+        public static bool? GetMixedValue(List<GameEntity> entities, Func<GameEntity, bool?> getProperty)
+        {
+            var value = getProperty(entities.First());
+            foreach (var entity in entities.Skip(1))
+            {
                 if (value != getProperty(entity))
                     return null;
             }
             return value;
         }
 
-        protected virtual bool UpdateMSGameEntity(string propertyName)
+        public static string GetMixedValue(List<GameEntity> entities, Func<GameEntity, string> getProperty)
         {
-            IsEnabled = GetMixedValue(SelectedEntities, new Func<GameEntity, bool>(x => x.IsEnabled));
-            IsEnabled = GetMixedValue(SelectedEntities, new Func<GameEntity, string>(x => x.Name));
+            var value = getProperty(entities.First());
+            foreach (var entity in entities.Skip(1))
+            {
+                if (!value.Equals(getProperty(entity)))
+                    return null;
+            }
+            return value;
+        }
+
+        protected virtual bool UpdateMSGameEntity()
+        {
+            IsEnabled = GetMixedValue(SelectedEntities, new Func<GameEntity, bool?>(x => x.IsEnabled));
+            Name = GetMixedValue(SelectedEntities, new Func<GameEntity, string>(x => x.Name));
             return true;
         }
 
-        public void Refrest()
+        public void Refresh()
         {
-            UpdateMSGameEntity
+            _enableUpdates = false;
+            UpdateMSGameEntity();
+            _enableUpdates = true;
         }
 
         public MSEntity(List<GameEntity> selectedEntities)
@@ -182,13 +187,17 @@ namespace EuropaEditor.Сomponents
             SelectedEntities = selectedEntities;
             PropertyChanged += (s, e) =>
             {
-                UpdateGameEntities(e.PropertyName);
+                if(_enableUpdates)
+                    UpdateGameEntities(e.PropertyName);
             };
         }
     }
 
     class MSGameEntity : MSEntity
     {
-
+        public MSGameEntity(List<GameEntity> entities) : base(entities)
+        {
+            Refresh();
+        }
     }
 }

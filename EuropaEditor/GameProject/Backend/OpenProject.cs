@@ -70,7 +70,7 @@ namespace EuropaEditor.GameProject.Backend
             WriteProjectData();
         }
 
-        public static Project Open(ProjectData projectData)
+        internal static Project Open(ProjectData projectData)
         {
             ReadProjectData();
             var project = _projects.FirstOrDefault(x => x.FullPath == projectData.FullPath);

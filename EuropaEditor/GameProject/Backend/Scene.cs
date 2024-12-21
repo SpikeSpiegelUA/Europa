@@ -32,7 +32,7 @@ namespace EuropaEditor.GameProject.Backend
         }
 
         [DataMember]
-        public Project Project { get; private set; }
+        internal Project Project { get; private set; }
 
         private bool _isActive = false;
         [DataMember]
@@ -104,7 +104,7 @@ namespace EuropaEditor.GameProject.Backend
             });
         }
 
-        public Scene(Project project, string name)
+        internal Scene(Project project, string name)
         {
             Debug.Assert(project != null);
             Project = project;
