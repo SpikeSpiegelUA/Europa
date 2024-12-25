@@ -12,5 +12,5 @@ namespace Europa::TransformComponent {
 	};
 
 	TransformID CreateTransform(const InitInfo& initInfo, GameEntity::EntityID entityID);
-	void RemoveTransformComponent()
+	void RemoveTransformComponent(TransformID idToRemove);
 }

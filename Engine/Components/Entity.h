@@ -1,5 +1,4 @@
 #pragma once
-
 #include "CommonHeaders.h"
 #include "ComponentsCommon.h"
 
@@ -18,10 +17,10 @@ namespace Europa {
 		};
 
 		//Create a new game entity in the project.
-		EntityID CreateGameEntity(const EntityInfo& entityInfo);
+		Entity CreateGameEntity(const EntityInfo& entityInfo);
 		//Remove a game entity from the project.
-		void RemoveGameEntity(EntityID id);
+		void RemoveGameEntity(Entity entity);
 		//Check, if an Entity is Valid and was not destroyed.
-		bool IsAlive(EntityID id);
+		bool IsAlive(Entity entity);
 	}
 }
