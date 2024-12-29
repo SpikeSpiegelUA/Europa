@@ -8,9 +8,12 @@
     <ClInclude Include="Components\ComponentsCommon.h" />
     <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="Utilities\Utilities.h" />
-    <ClInclude Include="EngineAPI\GameEntity.h" />
+    <ClInclude Include="EngineAPI\GameEntityAPI.h" />
+    <ClInclude Include="EngineAPI\TransformComponentAPI.h" />
+    <ClInclude Include="Utilities\MathTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\Entity.cpp" />
+    <ClCompile Include="Components\TransformComponent.cpp" />
   </ItemGroup>
 </Project>

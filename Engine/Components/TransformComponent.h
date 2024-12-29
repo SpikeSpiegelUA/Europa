@@ -3,7 +3,6 @@
 #include "ComponentsCommon.h"
 
 namespace Europa::TransformComponent {
-	DEFINE_TYPED_ID(TransformID);
 
 	struct InitInfo {
 		float position[3]{};
@@ -11,6 +10,6 @@ namespace Europa::TransformComponent {
 		float scale[3]{1.f, 1.f, 1.f};
 	};
 
-	TransformID CreateTransform(const InitInfo& initInfo, GameEntity::EntityID entityID);
-	void RemoveTransformComponent(TransformID idToRemove);
+	Component CreateTransform(const InitInfo& initInfo, GameEntity::Entity entity);
+	void RemoveTransformComponent(Component componentToRemove);
 }

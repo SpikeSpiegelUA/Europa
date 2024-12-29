@@ -2,4 +2,4 @@
 
 #include "CommonHeaders.h"
 #include "Id.h"
-#include "..\EngineAPI\GameEntity.h"
+#include "..\EngineAPI\GameEntityAPI.h"
