@@ -10,7 +10,7 @@ namespace Europa::ID {
 	namespace Internal {
 		//Generation is used to determite, whether there were an entity in this index, that got deleted. Increment it by 1 if you
 		//are writing a new game entity in this index.
-		constexpr uint32 GenerationBits{ 8 };
+		constexpr uint32 GenerationBits{ 10 };
 		//Index part is just an index of a game entity in the game entities array.
 		constexpr uint32 IndexBits{ sizeof(IDType) * 8 - GenerationBits };
 
@@ -48,6 +48,11 @@ namespace Europa::ID {
 	//Increment the generation of an id by 1.
 	constexpr inline IDType NewGeneration(IDType id) {
 		const IDType generation{ ID::Generation(id) + 1 };
+
+
+
+
+
 		assert(generation < (((uint64)1 << Internal::GenerationBits) - 1));
 		return Index(id) | (generation << Internal::IndexBits);
 	}

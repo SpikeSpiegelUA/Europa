@@ -5,8 +5,8 @@
 namespace Europa::TransformComponent {
 
 	struct InitInfo {
-		float position[3]{};
-		float rotation[4]{};
+		float position[3]{0.f, 0.f, 0.f};
+		float rotation[4]{0.f, 0.f, 0.f, 0.f};
 		float scale[3]{1.f, 1.f, 1.f};
 	};
 
