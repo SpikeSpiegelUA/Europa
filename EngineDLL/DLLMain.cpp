@@ -2,6 +2,8 @@
 #include <Windows.h>
 #include <crtdbg.h>
 
+#pragma comment (lib, "engine.lib")
+
 #define WIN32_LEAN_AND_MEAN
 
 BOOL APIENTRY DllMain( HMODULE hModule,

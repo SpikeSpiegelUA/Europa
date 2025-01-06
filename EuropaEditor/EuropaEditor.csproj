@@ -82,7 +82,7 @@
       <DependentUpon>LoggerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utilities\Logger.cs" />
-    <Compile Include="Utilities\MathUtilities.cs" />
+    <Compile Include="Utilities\Utilities.cs" />
     <Compile Include="Utilities\Serializer.cs" />
     <Compile Include="Utilities\UndoRedo.cs" />
     <Compile Include="Utilities\UndoRedoView.xaml.cs">
