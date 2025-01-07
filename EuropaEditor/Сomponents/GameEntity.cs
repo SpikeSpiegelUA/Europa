@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using EuropaEditor.DLLWrapper;
 
 namespace EuropaEditor.Сomponents
 {
@@ -25,7 +26,7 @@ namespace EuropaEditor.Сomponents
             {
                 if (_entityID != value)
                 {
-                    value = _entityID;
+                    _entityID = value;
                     OnPropertyChanged(nameof(EntityID));
                 }
             }
@@ -87,6 +88,9 @@ namespace EuropaEditor.Сomponents
         [DataMember(Name = "Components")]
         private ObservableCollection<Component> _components = new ObservableCollection<Component>();
         public ReadOnlyObservableCollection<Component> Components { get; private set; }
+
+        public Component GetComponent(Type type) => Components.FirstOrDefault(c => c.GetType() == type);
+        public T GetComponent<T>() where T : Component => GetComponent(typeof(T)) as T;
 
         [DataMember]
         public Scene ParentScene { get; set; }

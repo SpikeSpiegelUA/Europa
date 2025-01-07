@@ -53,7 +53,6 @@ namespace Europa::GameEntity {
 			TransformComponent::RemoveTransformComponent(TransformComponents[index]);
 			TransformComponents[index] = TransformComponent::Component{};
 			FreeIDs.push_back(entityID);
-
 		}
 	}
 	bool IsAlive(Entity entity)
