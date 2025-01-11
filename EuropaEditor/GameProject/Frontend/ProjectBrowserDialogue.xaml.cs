@@ -37,6 +37,16 @@ namespace EuropaEditor
             }
         }
 
+        private void AnimateToCreateProject()
+        {
+            
+        }
+
+        private void AnimateToOpenProject()
+        {
+           
+        }
+
         private void OnToggleProjectButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender == openProjectButton)
@@ -44,6 +54,9 @@ namespace EuropaEditor
                 if (createProjectButton.IsChecked == true)
                 {
                     createProjectButton.IsChecked = false;
+                    AnimateToOpenProject();
+                    openProjectView.IsEnabled = true;
+                    newProjectView.IsEnabled = false;
                     projectActionsStackPanel.Margin = new Thickness(0.0);
                 }
                 openProjectButton.IsChecked = true;
@@ -53,6 +66,9 @@ namespace EuropaEditor
                 if (openProjectButton.IsChecked == true)
                 {
                     openProjectButton.IsChecked = false;
+                    AnimateToCreateProject();
+                    openProjectView.IsEnabled = false;
+                    newProjectView.IsEnabled = true;
                     projectActionsStackPanel.Margin = new Thickness(-800.0, 0.0, 0.0, 0.0);
                 }
                 createProjectButton.IsChecked = true;
