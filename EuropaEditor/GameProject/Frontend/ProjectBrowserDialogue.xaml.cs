@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -20,6 +21,8 @@ namespace EuropaEditor
     /// </summary>
     public partial class ProjectBrowserDialogue : Window
     {
+        private readonly CubicEase _cubicEasing = new CubicEase() { EasingMode = EasingMode.EaseInOut };
+
         public ProjectBrowserDialogue()
         {
             InitializeComponent();
@@ -39,12 +42,30 @@ namespace EuropaEditor
 
         private void AnimateToCreateProject()
         {
-            
+            var highlightAnimation = new DoubleAnimation(230, 400, new Duration(TimeSpan.FromSeconds(0.2)));
+            //highlightAnimation.EasingFunction = _cubicEasing;
+            highlightAnimation.Completed += (s, e) =>
+            {
+                var thicknessAnimation = new ThicknessAnimation(new Thickness(0), new Thickness(-1600.0, 0.0, 0.0, 0.0), 
+                    new Duration(TimeSpan.FromSeconds(0.5)));
+                thicknessAnimation.EasingFunction = _cubicEasing;
+                projectActionsStackPanel.BeginAnimation(MarginProperty, thicknessAnimation);
+            };
+            highLightRectangle.BeginAnimation(Canvas.LeftProperty, highlightAnimation);
         }
 
         private void AnimateToOpenProject()
         {
-           
+            var highlightAnimation = new DoubleAnimation(400, 230, new Duration(TimeSpan.FromSeconds(0.2)));
+            //highlightAnimation.EasingFunction = _cubicEasing;
+            highlightAnimation.Completed += (s, e) =>
+            {
+                var thicknessAnimation = new ThicknessAnimation(new Thickness(-1600.0, 0.0, 0.0, 0.0),
+                    new Thickness(0), new Duration(TimeSpan.FromSeconds(0.5)));
+                thicknessAnimation.EasingFunction = _cubicEasing;
+                projectActionsStackPanel.BeginAnimation(MarginProperty, thicknessAnimation);
+            };
+            highLightRectangle.BeginAnimation(Canvas.LeftProperty, highlightAnimation);
         }
 
         private void OnToggleProjectButton_Click(object sender, RoutedEventArgs e)
@@ -57,7 +78,6 @@ namespace EuropaEditor
                     AnimateToOpenProject();
                     openProjectView.IsEnabled = true;
                     newProjectView.IsEnabled = false;
-                    projectActionsStackPanel.Margin = new Thickness(0.0);
                 }
                 openProjectButton.IsChecked = true;
             }
@@ -69,7 +89,6 @@ namespace EuropaEditor
                     AnimateToCreateProject();
                     openProjectView.IsEnabled = false;
                     newProjectView.IsEnabled = true;
-                    projectActionsStackPanel.Margin = new Thickness(-800.0, 0.0, 0.0, 0.0);
                 }
                 createProjectButton.IsChecked = true;
             }

@@ -50,10 +50,10 @@
             <RowDefinition Height="auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Canvas x:Name="OpenCreateCanvas">
+        <Canvas x:Name="openCreateCanvas">
             <Rectangle Width="{Binding Path=ActualWidth, ElementName=createProjectButton}"
-                       Height="{Binding Path=ActualHeight, ElementName=OpenCreateCanvas}"
-                       x:Name="HighLightRectangle" Canvas.Left="230" Opacity="0.3">
+                       Height="{Binding Path=ActualHeight, ElementName=openCreateCanvas}"
+                       x:Name="highLightRectangle" Canvas.Left="230" Opacity="0.3">
                 <Rectangle.Effect>
                     <BlurEffect Radius="10" KernelType="Gaussian"/>
                 </Rectangle.Effect>
@@ -87,7 +87,7 @@
                 </LinearGradientBrush>
             </Rectangle.Fill>
         </Rectangle>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0">
             <ToggleButton Content="Open project" Name="openProjectButton" Margin="10, 20, 0, 20" Click="OnToggleProjectButton_Click"
                           IsChecked="True"/>
             <ToggleButton Content="Create project" Name="createProjectButton" FontSize="32" Margin="40, 20, 0, 20" 
@@ -95,7 +95,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1" Name="projectActionsStackPanel">
             <myns:OpenProjectView x:Name="openProjectView"/>
-            <myns:NewProjectView x:Name="newProjectView"/>
+            <myns:NewProjectView x:Name="newProjectView" Margin="800,0,0,0"/>
         </StackPanel>
     </Grid>
 </Window>
