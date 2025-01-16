@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace EuropaEditor.GameProject.Frontend
+namespace EuropaEditor.Utilities
 {
     /// <summary>
     /// Interaction logic for LoggerView.xaml

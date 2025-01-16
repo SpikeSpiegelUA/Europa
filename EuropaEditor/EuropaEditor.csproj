@@ -79,7 +79,7 @@
     <Compile Include="GameProject\Backend\OpenProject.cs" />
     <Compile Include="GameProject\Backend\Project.cs" />
     <Compile Include="GameProject\Backend\Scene.cs" />
-    <Compile Include="GameProject\Frontend\LoggerView.xaml.cs">
+    <Compile Include="Utilities\LoggerView.xaml.cs">
       <DependentUpon>LoggerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utilities\Logger.cs" />
@@ -112,7 +112,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GameProject\Frontend\LoggerView.xaml">
+    <Page Include="Utilities\LoggerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
