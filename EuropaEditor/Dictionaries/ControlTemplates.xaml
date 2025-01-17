@@ -21,6 +21,11 @@
         <EventSetter Event="KeyDown" Handler="OnTextBox_KeyDown"/>
     </Style>
 
+    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource TextBoxStyle}" x:Key="TextBoxStyle_WithRename">
+        <EventSetter Event="KeyDown" Handler="OnTextBoxRename_KeyDown"/>
+        <EventSetter Event="LostFocus" Handler="OnTextBoxRename_LostFocus"/>
+    </Style>
+    
     <Style x:Key="SimpleButton" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="{StaticResource Editor.Window.GrayBrush3}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Editor.Window.GrayBrush5}"/>

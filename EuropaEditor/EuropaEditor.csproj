@@ -79,6 +79,7 @@
     <Compile Include="GameProject\Backend\OpenProject.cs" />
     <Compile Include="GameProject\Backend\Project.cs" />
     <Compile Include="GameProject\Backend\Scene.cs" />
+    <Compile Include="Utilities\Controls\NumberBox.cs" />
     <Compile Include="Utilities\LoggerView.xaml.cs">
       <DependentUpon>LoggerView.xaml</DependentUpon>
     </Compile>
