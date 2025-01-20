@@ -10,14 +10,24 @@ using System.Windows.Input;
 
 namespace EuropaEditor.Utilities.Controls
 {
-    [TemplatePart(Name = "PART_textblock", Type = typeof(TextBlock))]
-    [TemplatePart(Name = "PART_textbox", Type = typeof(TextBox))]
+    [TemplatePart(Name = "PART_textBlock", Type = typeof(TextBlock))]
+    [TemplatePart(Name = "PART_textBox", Type = typeof(TextBox))]
     class NumberBox : Control
     {
         private double _originalValue;
         private double _MouseXStart;
         private bool _captured = false;
+        private double _multiplier;
         private bool _valueChanged = false;
+
+        public double Multiplier
+        {
+            get => (double)GetValue(MultiplierProperty);
+            set => SetValue(MultiplierProperty, value);
+        }
+        public static readonly DependencyProperty MultiplierProperty = DependencyProperty.Register(nameof(Multiplier), typeof(double),
+            typeof(NumberBox), new PropertyMetadata(1.0));
+
         public string Value
         {
             get => (string)GetValue(ValueProperty);
@@ -30,7 +40,7 @@ namespace EuropaEditor.Utilities.Controls
         {
             base.OnApplyTemplate();
 
-            if(GetTemplateChild("PART_textblock") is TextBlock textBlock)
+            if(GetTemplateChild("PART_textBlock") is TextBlock textBlock)
             {
                 textBlock.MouseLeftButtonDown += OnTextBlock_Mouse_LBD;
                 textBlock.MouseLeftButtonUp += OnTextBlock_Mouse_LBU;
@@ -46,7 +56,13 @@ namespace EuropaEditor.Utilities.Controls
                 var delta = (MouseX - _MouseXStart);
                 if(Math.Abs(delta) > SystemParameters.MinimumHorizontalDragDistance)
                 {
-                    var newValue = _originalValue + delta;
+                    if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                        _multiplier = 0.001;
+                    else if(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                        _multiplier = 0.1;
+                    else
+                        _multiplier = 0.01;
+                    var newValue = _originalValue + (delta * _multiplier * Multiplier);
                     Value = newValue.ToString("0.#####");
                     _valueChanged = true;
                 }
@@ -76,7 +92,6 @@ namespace EuropaEditor.Utilities.Controls
             _captured = true;
             _valueChanged = false;
             e.Handled = true;
-
             _MouseXStart = e.GetPosition(this).X;
         }
 
