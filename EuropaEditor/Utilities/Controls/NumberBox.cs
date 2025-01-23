@@ -15,7 +15,7 @@ namespace EuropaEditor.Utilities.Controls
     class NumberBox : Control
     {
         private double _originalValue;
-        private double _MouseXStart;
+        private double _mouseXStart;
         private bool _captured = false;
         private double _multiplier;
         private bool _valueChanged = false;
@@ -53,7 +53,7 @@ namespace EuropaEditor.Utilities.Controls
             if (_captured)
             {
                 var MouseX = e.GetPosition(this).X;
-                var delta = (MouseX - _MouseXStart);
+                var delta = (MouseX - _mouseXStart);
                 if(Math.Abs(delta) > SystemParameters.MinimumHorizontalDragDistance)
                 {
                     if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
@@ -92,7 +92,7 @@ namespace EuropaEditor.Utilities.Controls
             _captured = true;
             _valueChanged = false;
             e.Handled = true;
-            _MouseXStart = e.GetPosition(this).X;
+            _mouseXStart = e.GetPosition(this).X;
         }
 
         static NumberBox()

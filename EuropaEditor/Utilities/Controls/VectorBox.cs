@@ -8,29 +8,59 @@ using System.Windows.Controls;
 
 namespace EuropaEditor.Utilities.Controls
 {
+    public enum EVectorType
+    {
+        Vector2,
+        Vector3,
+        Vector4
+    }
     class VectorBox : Control
     {
+        public EVectorType VectorType
+        {
+            get => (EVectorType)GetValue(VectorTypeProperty);
+            set => SetValue(VectorTypeProperty, value);
+        }
+        public static readonly DependencyProperty VectorTypeProperty = DependencyProperty.Register(nameof(VectorType), typeof(EVectorType),
+            typeof(VectorBox), new PropertyMetadata(EVectorType.Vector3));
+
+        public Orientation VectorBoxOrientation
+        {
+            get => (Orientation)GetValue(VectorBoxOrientationProperty);
+            set => SetValue(VectorBoxOrientationProperty, value);
+        }
+        public static readonly DependencyProperty VectorBoxOrientationProperty = DependencyProperty.Register(nameof(VectorBoxOrientation), 
+            typeof(Orientation), typeof(VectorBox), new PropertyMetadata(Orientation.Horizontal));
+
+        public double Multiplier
+        {
+            get => (double)GetValue(MultiplierProperty);
+            set => SetValue(MultiplierProperty, value);
+        }
+        public static readonly DependencyProperty MultiplierProperty = DependencyProperty.Register(nameof(Multiplier), typeof(double),
+            typeof(VectorBox), new PropertyMetadata(1.0));
+
         public string X
         {
             get => (string)GetValue(XProperty);
             set => SetValue(XProperty, value);
         }
         public static readonly DependencyProperty XProperty = DependencyProperty.Register(nameof(X), typeof(string),
-            typeof(NumberBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+            typeof(VectorBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
         public string Y
         {
             get => (string)GetValue(YProperty);
             set => SetValue(YProperty, value);
         }
         public static readonly DependencyProperty YProperty = DependencyProperty.Register(nameof(Y), typeof(string),
-            typeof(NumberBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+            typeof(VectorBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
         public string Z
         {
             get => (string)GetValue(ZProperty);
             set => SetValue(ZProperty, value);
         }
         public static readonly DependencyProperty ZProperty = DependencyProperty.Register(nameof(Z), typeof(string),
-            typeof(NumberBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+            typeof(VectorBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         public string W
         {
@@ -38,7 +68,7 @@ namespace EuropaEditor.Utilities.Controls
             set => SetValue(WProperty, value);
         }
         public static readonly DependencyProperty WProperty = DependencyProperty.Register(nameof(W), typeof(string),
-            typeof(NumberBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+            typeof(VectorBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         static VectorBox()
         {

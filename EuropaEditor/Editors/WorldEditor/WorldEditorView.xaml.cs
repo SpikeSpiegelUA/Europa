@@ -32,7 +32,6 @@ namespace EuropaEditor.Editors.WorldEditor
         {
             Loaded -= OnWorldEditor_Loaded;
             Focus();
-            ((INotifyCollectionChanged)Project.UndoRedoManager.UndoList).CollectionChanged += (s, d) => Focus();
         }
     }
 }

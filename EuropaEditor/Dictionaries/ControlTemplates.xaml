@@ -460,4 +460,158 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="{x:Type controls:ScalarBox}" x:Key="{x:Type controls:ScalarBox}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Foreground" Value="{StaticResource Editor.FontBrush}"/>
+        <Setter Property="Background" Value="{StaticResource Editor.Window.GrayBrush2}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Editor.Window.GrayBrush5}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="ToolTipService.InitialShowDelay" Value="3000"/>
+        <Setter Property="ToolTipService.BetweenShowDelay" Value="1000"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border x:Name="scalarBoxBorder" SnapsToDevicePixels="True" Margin="0,2,0,3"
+                                Background="{TemplateBinding Background}" Padding="5,2"
+                                BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="10"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid MinWidth="50" x:Name="scalarBoxGrid">
+                            <TextBlock x:Name="PART_textBlock"
+                                   Text="{Binding Value, RelativeSource={RelativeSource TemplatedParent}}"
+                                   HorizontalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="SizeWE"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBox x:Name="PART_textBox" BorderThickness="0" Padding="0"
+                                 Text="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=Explicit}"
+                                 Foreground="{TemplateBinding Foreground}" Visibility="Collapsed"
+                                 Style="{StaticResource TextBoxStyle_WithRename}" HorizontalContentAlignment="Center"
+                                 HorizontalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" TargetName="scalarBoxBorder" Value="{StaticResource Editor.Window.GrayBrush6}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" TargetName="scalarBoxGrid" Value="0.5"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding Visibility, ElementName=PART_textBox}" Value="Visible">
+                            <Setter Property="Visibility" TargetName="PART_textBlock" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Value, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                            <Setter Property="Background" TargetName="PART_textBlock" Value="{StaticResource Editor.Disabled.FontBrush}"/>
+                            <Setter Property="ToolTip" TargetName="PART_textBlock" Value="Mixed values"/>
+                            <Setter Property="MinWidth" TargetName="PART_textBlock" Value="20"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style TargetType="{x:Type controls:VectorBox}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Background" Value="{StaticResource Editor.Window.GrayBrush2}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Editor.Window.GrayBrush5}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:VectorBox}">
+                    <ControlTemplate.Resources>
+                        <Style TargetType="{x:Type controls:NumberBox}" BasedOn="{StaticResource {x:Type controls:NumberBox}}">
+                            <Setter Property="MinWidth" Value="50"/>
+                            <Setter Property="ToolTipService.InitialShowDelay" Value="3000"/>
+                            <Setter Property="ToolTipService.BetweenShowDelay" Value="1000"/>
+                            <Setter Property="Multiplier" Value="{Binding Multiplier, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Style>
+                    </ControlTemplate.Resources>
+                    <Border x:Name="vectorBoxBorder" SnapsToDevicePixels="True" Margin="0,2,0,3"
+                                Background="{TemplateBinding Background}" Padding="5,2"
+                                BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="10"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid x:Name="vectorBoxGrid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="columnDefinition0"/>
+                                <ColumnDefinition x:Name="columnDefinition1"/>
+                                <ColumnDefinition x:Name="columnDefinition2"/>
+                                <ColumnDefinition x:Name="columnDefinition3"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition x:Name="rowDefinition0"/>
+                                <RowDefinition x:Name="rowDefinition1"/>
+                                <RowDefinition x:Name="rowDefinition2"/>
+                                <RowDefinition x:Name="rowDefinition3"/>
+                            </Grid.RowDefinitions>
+                            <controls:NumberBox x:Name="numberBoxX" Foreground="{StaticResource Editor.RedBrush}" 
+                                                    Value="{Binding X, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                    ToolTip="X Value"/>
+                            <controls:NumberBox x:Name="numberBoxY" Foreground="{StaticResource Editor.GreenBrush}" 
+                                                    Value="{Binding Y, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                    ToolTip="Y Value"/>
+                            <controls:NumberBox x:Name="numberBoxZ" Foreground="{StaticResource Editor.BlueBrush}" 
+                                                    Value="{Binding Z, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                    ToolTip="Z Value"/>
+                            <controls:NumberBox x:Name="numberBoxW" Foreground="{StaticResource Editor.FontBrush}" 
+                                                    Value="{Binding W, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                    ToolTip="W Value"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding VectorBoxOrientation, RelativeSource={RelativeSource Self}}" Value="Vertical">
+                            <Setter Property="Grid.Row" TargetName="numberBoxX" Value="0"/>
+                            <Setter Property="Grid.Row" TargetName="numberBoxY" Value="1"/>
+                            <Setter Property="Grid.Row" TargetName="numberBoxZ" Value="2"/>
+                            <Setter Property="Grid.Row" TargetName="numberBoxW" Value="3"/>
+                            <Setter Property="Width" TargetName="columnDefinition1" Value="Auto"/>
+                            <Setter Property="Width" TargetName="columnDefinition2" Value="Auto"/>
+                            <Setter Property="Width" TargetName="columnDefinition3" Value="Auto"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding VectorBoxOrientation, RelativeSource={RelativeSource Self}}" Value="Horizontal">
+                            <Setter Property="Grid.Column" TargetName="numberBoxX" Value="0"/>
+                            <Setter Property="Grid.Column" TargetName="numberBoxY" Value="1"/>
+                            <Setter Property="Grid.Column" TargetName="numberBoxZ" Value="2"/>
+                            <Setter Property="Grid.Column" TargetName="numberBoxW" Value="3"/>
+                            <Setter Property="Height" TargetName="rowDefinition1" Value="Auto"/>
+                            <Setter Property="Height" TargetName="rowDefinition2" Value="Auto"/>
+                            <Setter Property="Height" TargetName="rowDefinition3" Value="Auto"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding VectorType, RelativeSource={RelativeSource Self}}" Value="Vector2">
+                            <Setter Property="Width" TargetName="columnDefinition2" Value="Auto"/>
+                            <Setter Property="Width" TargetName="columnDefinition3" Value="Auto"/>
+                            <Setter Property="Height" TargetName="rowDefinition2" Value="Auto"/>
+                            <Setter Property="Height" TargetName="rowDefinition3" Value="Auto"/>
+                            <Setter Property="Visibility" TargetName="numberBoxZ" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="numberBoxW" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding VectorType, RelativeSource={RelativeSource Self}}" Value="Vector3">
+                            <Setter Property="Width" TargetName="columnDefinition3" Value="Auto"/>
+                            <Setter Property="Height" TargetName="rowDefinition3" Value="Auto"/>
+                            <Setter Property="Visibility" TargetName="numberBoxZ" Value="Visible"/>
+                            <Setter Property="Visibility" TargetName="numberBoxW" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding VectorType, RelativeSource={RelativeSource Self}}" Value="Vector4">
+                            <Setter Property="Visibility" TargetName="numberBoxZ" Value="Visible"/>
+                            <Setter Property="Visibility" TargetName="numberBoxW" Value="Visible"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" TargetName="vectorBoxBorder" Value="{StaticResource Editor.Window.GrayBrush6}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" TargetName="vectorBoxGrid" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
 </ResourceDictionary>

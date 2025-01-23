@@ -11,12 +11,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using EuropaEditor.DLLWrapper;
+using System.Xml.Linq;
 
 namespace EuropaEditor.Сomponents
 {
     [DataContract]
     [KnownType(typeof(TransformComponent))]
-    public class GameEntity : ViewModelBase
+    class GameEntity : ViewModelBase
     {
         private int _entityID = ID.INVALID_ID;
         public int EntityID
@@ -172,37 +173,42 @@ namespace EuropaEditor.Сomponents
             return false;
         }
 
-        public static float? GetMixedValue(List<GameEntity> entities, Func<GameEntity, float> getProperty)
+        //We use this function to create a list of components, that all the entities have.
+        public void MakeComponentList()
         {
-            var value = getProperty(entities.First());
-            foreach (var entity in entities.Skip(1))
+            _components.Clear();
+            var firstEntity = SelectedEntities.FirstOrDefault();
+            if (firstEntity == null)
+                return;
+
+            foreach (var component in firstEntity.Components)
             {
-                if (!value.IsTheSameAs(getProperty(entity)))
-                    return null;
+                var type = component.GetType();
+                if(!SelectedEntities.Skip(1).Any(entity => entity.GetComponent(type) == null))
+                {
+                    Debug.Assert(Components.FirstOrDefault(x => x.GetType() == type) == null);
+                    _components.Add(component.GetMultiselectionComponent(this));
+                }
+
             }
-            return value;
         }
 
-        public static bool? GetMixedValue(List<GameEntity> entities, Func<GameEntity, bool?> getProperty)
+        public static float? GetMixedValue<T>(List<T> objects, Func<T, float> getProperty)
         {
-            var value = getProperty(entities.First());
-            foreach (var entity in entities.Skip(1))
-            {
-                if (value != getProperty(entity))
-                    return null;
-            }
-            return value;
+            var value = getProperty(objects.First());
+            return objects.Skip(1).Any(c => !value.IsTheSameAs(getProperty(c))) ? (float?)null : value;
         }
 
-        public static string GetMixedValue(List<GameEntity> entities, Func<GameEntity, string> getProperty)
+        public static bool? GetMixedValue<T>(List<T> objects, Func<T, bool?> getProperty)
         {
-            var value = getProperty(entities.First());
-            foreach (var entity in entities.Skip(1))
-            {
-                if (!value.Equals(getProperty(entity)))
-                    return null;
-            }
-            return value;
+            var value = getProperty(objects.First());
+            return objects.Skip(1).Any(c => value != getProperty(c)) ? (bool?)null : value;
+        }
+
+        public static string GetMixedValue<T>(List<T> objects, Func<T, string> getProperty)
+        {
+            var value = getProperty(objects.First());
+            return objects.Skip(1).Any(c => value != getProperty(c)) ? null : value;
         }
 
         protected virtual bool UpdateMSGameEntity()
@@ -216,6 +222,7 @@ namespace EuropaEditor.Сomponents
         {
             _enableUpdates = false;
             UpdateMSGameEntity();
+            MakeComponentList();
             _enableUpdates = true;
         }
 
