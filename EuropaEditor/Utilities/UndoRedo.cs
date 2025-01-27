@@ -59,7 +59,7 @@ namespace EuropaEditor.Utilities
             _redoList.Clear();
         }
 
-        public void AddUndo(IUndoRedo cmd)
+        public void Add(IUndoRedo cmd)
         {
             if (_enableAdd)
             {

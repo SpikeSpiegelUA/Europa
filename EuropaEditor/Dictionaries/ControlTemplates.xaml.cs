@@ -67,11 +67,12 @@ namespace EuropaEditor.Dictionaries
         private void OnTextBoxRename_LostFocus(object sender, RoutedEventArgs e)
         {
             var textBox = sender as TextBox;
+            if (!textBox.IsVisible) 
+                return;
             var expression = textBox.GetBindingExpression(TextBox.TextProperty);
             if(expression != null)
             {
                 expression.UpdateTarget();
-                textBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
                 textBox.Visibility = Visibility.Collapsed;
             }
         }

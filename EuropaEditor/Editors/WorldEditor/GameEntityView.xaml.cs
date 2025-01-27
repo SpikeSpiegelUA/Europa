@@ -62,6 +62,7 @@ namespace EuropaEditor.Editors.WorldEditor
 
         private void OnName_TextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            _propertyName = string.Empty;
             _undoAction = GetRenameAction();
         }
 
@@ -69,7 +70,7 @@ namespace EuropaEditor.Editors.WorldEditor
         {
             if (_propertyName == nameof(MSEntity.Name) && _undoAction != null)
             {
-                Project.UndoRedoManager.AddUndo(new UndoRedoAction(_undoAction, GetRenameAction(), "Rename game entity"));
+                Project.UndoRedoManager.Add(new UndoRedoAction(_undoAction, GetRenameAction(), "Rename game entity"));
                 _propertyName = null;
             }
             _undoAction = null;
@@ -81,7 +82,7 @@ namespace EuropaEditor.Editors.WorldEditor
             var vm = DataContext as MSEntity;
             vm.IsEnabled = (sender as CheckBox).IsChecked == true;
             var redoAction = GetIsEnabledAction();
-            Project.UndoRedoManager.AddUndo(new UndoRedoAction(undoAction, redoAction,
+            Project.UndoRedoManager.Add(new UndoRedoAction(undoAction, redoAction,
                 vm.IsEnabled == true ? "Enable game entity" : "Disable game entity"));
         }
     }

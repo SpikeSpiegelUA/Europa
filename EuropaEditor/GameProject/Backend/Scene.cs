@@ -95,7 +95,7 @@ namespace EuropaEditor.GameProject.Backend
                 AddGameEntity(x);
                 int entityIndex = _gameEntities.Count - 1;
 
-                Project.UndoRedoManager.AddUndo(new UndoRedoAction(
+                Project.UndoRedoManager.Add(new UndoRedoAction(
                     () => RemoveGameEntity(x),
                     () => AddGameEntity(x, entityIndex),
                     $"Add {x.Name} to {Name}"));
@@ -107,7 +107,7 @@ namespace EuropaEditor.GameProject.Backend
                 int entityIndex = _gameEntities.Count - 1;
                 RemoveGameEntity(x);
 
-                Project.UndoRedoManager.AddUndo(new UndoRedoAction(
+                Project.UndoRedoManager.Add(new UndoRedoAction(
                     () => AddGameEntity(x, entityIndex),
                     () => RemoveGameEntity(x),
                     $"Remove {x.Name} from {Name}"));

@@ -42,7 +42,7 @@ namespace EuropaEditor.Editors.WorldEditor
             var newSelection = listBox.SelectedItems.Cast<GameEntity>().ToList();
             var previousSelection = newSelection.Except(e.AddedItems.Cast<GameEntity>()).Concat(e.RemovedItems.Cast<GameEntity>()).ToList();
 
-            Project.UndoRedoManager.AddUndo(new UndoRedoAction(
+            Project.UndoRedoManager.Add(new UndoRedoAction(
                 () => 
                 {
                     listBox.UnselectAll();

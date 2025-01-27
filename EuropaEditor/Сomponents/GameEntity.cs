@@ -45,9 +45,10 @@ namespace EuropaEditor.Сomponents
                         EntityID = EngineAPI.CreateGameEntity(this);
                         Debug.Assert(ID.IsValid(_entityID));
                     }
-                    else
+                    else if(ID.IsValid(EntityID))
                     {
                         EngineAPI.RemoveGameEntity(this);
+                        EntityID = ID.INVALID_ID;
                     }
                     OnPropertyChanged(nameof(IsActive));
                 }
@@ -158,6 +159,11 @@ namespace EuropaEditor.Сomponents
         public ReadOnlyObservableCollection<IMSComponent> Components { get; private set; }
 
         public List<GameEntity> SelectedEntities { get; }
+
+        public T GetMSComponent<T>() where T : IMSComponent
+        {
+            return (T)Components.FirstOrDefault(x => x.GetType() == typeof(T));
+        }
 
         protected virtual bool UpdateGameEntities(string propertyName)
         {

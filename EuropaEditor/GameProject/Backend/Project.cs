@@ -95,7 +95,7 @@ namespace EuropaEditor.GameProject.Backend
                 AddSceneInternal($"New Scene {_scenes.Count}");
                 var newScene = _scenes.Last();
                 var sceneIndex = _scenes.Count - 1;
-                UndoRedoManager.AddUndo(new UndoRedoAction(
+                UndoRedoManager.Add(new UndoRedoAction(
                     () => RemoveSceneInternal(newScene),
                     () => _scenes.Insert(sceneIndex, newScene),
                     $"Add {newScene.Name}"
@@ -107,7 +107,7 @@ namespace EuropaEditor.GameProject.Backend
                 var sceneIndex = _scenes.IndexOf(x);
                 RemoveSceneInternal(x);
 
-                UndoRedoManager.AddUndo(new UndoRedoAction(
+                UndoRedoManager.Add(new UndoRedoAction(
                     () => _scenes.Insert(sceneIndex, x),
                     () => RemoveSceneInternal(x),
                     $"Remove {x.Name}"
