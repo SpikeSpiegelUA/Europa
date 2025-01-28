@@ -8,8 +8,9 @@ namespace Europa::GameEntity {
 		Utilities::vector<ID::GenerationType> Generations;
 		Utilities::deque<EntityID> FreeIDs;
 		Utilities::vector<TransformComponent::Component> TransformComponents;
+		Utilities::vector<ScriptComponent::Component> ScriptComponents;
 	}
-	Entity CreateGameEntity(const EntityInfo& entityInfo)
+	Entity Create(const EntityInfo& entityInfo)
 	{
 		assert(entityInfo.Transform);//All game entities must have a transform component.
 		if (!entityInfo.Transform)
@@ -38,19 +39,19 @@ namespace Europa::GameEntity {
 
 		//Create transform component.
 		assert(!TransformComponents[Index].IsValid());
-		TransformComponents[Index] = TransformComponent::CreateTransform(*entityInfo.Transform, newEntity);
+		TransformComponents[Index] = TransformComponent::Create(*entityInfo.Transform, newEntity);
 		if (!TransformComponents[Index].IsValid())
 			return {};
 
 		return newEntity;
 	}
-	void RemoveGameEntity(Entity entity)
+	void Remove(Entity entity)
 	{
 		const EntityID  entityID{ entity.GetID() };
 		const ID::IDType index{ ID::Index(entityID) };
 		assert(IsAlive(entity));
 		if (IsAlive(entity)) {
-			TransformComponent::RemoveTransformComponent(TransformComponents[index]);
+			TransformComponent::Remove(TransformComponents[index]);
 			TransformComponents[index] = TransformComponent::Component{};
 			FreeIDs.push_back(entityID);
 		}

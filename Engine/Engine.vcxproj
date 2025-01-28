@@ -16,14 +16,17 @@
     <ClInclude Include="Common\PrimitiveTypes.h" />
     <ClInclude Include="Components\ComponentsCommon.h" />
     <ClInclude Include="Components\Entity.h" />
+    <ClInclude Include="Components\ScriptComponent.h" />
     <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="EngineAPI\GameEntityAPI.h" />
+    <ClInclude Include="EngineAPI\ScriptComponentAPI.h" />
     <ClInclude Include="EngineAPI\TransformComponentAPI.h" />
     <ClInclude Include="Utilities\MathTypes.h" />
     <ClInclude Include="Utilities\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\Entity.cpp" />
+    <ClCompile Include="Components\ScriptComponent.cpp" />
     <ClCompile Include="Components\TransformComponent.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

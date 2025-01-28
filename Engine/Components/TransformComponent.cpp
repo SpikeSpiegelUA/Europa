@@ -9,7 +9,7 @@ namespace Europa::TransformComponent {
 		Utilities::vector<Math::Vector3> scales;
 	} //Anonymouse namespace to give access only to this translation unit.
 
-	Component CreateTransform(const InitInfo& initInfo, GameEntity::Entity entity) {
+	Component Create(const InitInfo& initInfo, GameEntity::Entity entity) {
 		assert(entity.IsValid());
 		const ID::IDType entityIndex{ ID::Index(entity.GetID()) };
 		if (positions.size() > entityIndex) {
@@ -26,7 +26,7 @@ namespace Europa::TransformComponent {
 		return Component{ TransformID{entity.GetID()} };
 	}
 
-	void RemoveTransformComponent(Component componentToRemove) {
+	void Remove(Component componentToRemove) {
 		assert(componentToRemove.IsValid());
 	}
 

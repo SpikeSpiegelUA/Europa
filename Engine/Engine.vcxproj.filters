@@ -11,9 +11,12 @@
     <ClInclude Include="EngineAPI\GameEntityAPI.h" />
     <ClInclude Include="EngineAPI\TransformComponentAPI.h" />
     <ClInclude Include="Utilities\MathTypes.h" />
+    <ClInclude Include="EngineAPI\ScriptComponentAPI.h" />
+    <ClInclude Include="Components\ScriptComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\Entity.cpp" />
     <ClCompile Include="Components\TransformComponent.cpp" />
+    <ClCompile Include="Components\ScriptComponent.cpp" />
   </ItemGroup>
 </Project>

@@ -10,6 +10,6 @@ namespace Europa::TransformComponent {
 		float scale[3]{1.f, 1.f, 1.f};
 	};
 
-	Component CreateTransform(const InitInfo& initInfo, GameEntity::Entity entity);
-	void RemoveTransformComponent(Component componentToRemove);
+	Component Create(const InitInfo& initInfo, GameEntity::Entity entity);
+	void Remove(Component componentToRemove);
 }
