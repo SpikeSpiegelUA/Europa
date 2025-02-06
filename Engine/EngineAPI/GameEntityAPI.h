@@ -2,7 +2,7 @@
 
 #include "../Components/ComponentsCommon.h"
 #include "TransformComponentAPI.h"
-#include "ScriptComponentAPI.h"
+#include "ScriptAPI.h"
 #include <memory>
 
 namespace Europa {
@@ -18,6 +18,7 @@ namespace Europa {
 			constexpr bool IsValid() const { return ID::IsValid(ID); }
 
 			TransformComponent::Component GetTransform() const;
+			Script::Component GetScript() const;
 		private:
 			EntityID ID;
 		};

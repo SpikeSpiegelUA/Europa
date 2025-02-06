@@ -1,7 +1,7 @@
 #pragma once
 #include "../Components/ComponentsCommon.h"
 
-namespace Europa::ScriptComponent {
+namespace Europa::Script {
 	DEFINE_TYPED_ID(ScriptID);
 
 	class Component final {

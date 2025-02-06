@@ -1,13 +1,14 @@
 #pragma once
 #include "CommonHeaders.h"
 #include "ComponentsCommon.h"
+#include "Script.h"
 
 namespace Europa {
 
 	#define INIT_INFO(component) namespace component { struct InitInfo; }
 
 	INIT_INFO(TransformComponent);
-	INIT_INFO(ScriptComponent)
+	INIT_INFO(Script)
 
 	#undef INIT_INFO
 
@@ -15,14 +16,14 @@ namespace Europa {
 	namespace GameEntity {
 		struct EntityInfo {
 			TransformComponent::InitInfo* Transform{nullptr};
-			ScriptComponent::InitInfo* Script{nullptr};
+			Script::InitInfo* Script{nullptr};
 		};
 
 		//Create a new game entity in the project.
 		Entity Create(const EntityInfo& entityInfo);
 		//Remove a game entity from the project.
-		void Remove(Entity entity);
+		void Remove(EntityID entityID);
 		//Check, if an Entity is Valid and was not destroyed.
-		bool IsAlive(Entity entity);
+		bool IsAlive(EntityID entityID);
 	}
 }

@@ -8,7 +8,7 @@ namespace Europa::GameEntity {
 		Utilities::vector<ID::GenerationType> Generations;
 		Utilities::deque<EntityID> FreeIDs;
 		Utilities::vector<TransformComponent::Component> TransformComponents;
-		Utilities::vector<ScriptComponent::Component> ScriptComponents;
+		Utilities::vector<Script::Component> Scripts;
 	}
 	Entity Create(const EntityInfo& entityInfo)
 	{
@@ -18,7 +18,7 @@ namespace Europa::GameEntity {
 		EntityID newID{};
 		if (FreeIDs.size() > ID::MinDeletedElements) {
 			newID = FreeIDs.front();
-			assert(!IsAlive(Entity{ newID }));
+			assert(!IsAlive(newID));
 			FreeIDs.pop_front();
 			newID = EntityID{ ID::NewGeneration(newID) };
 			++Generations[ID::Index(newID)];
@@ -35,31 +35,34 @@ namespace Europa::GameEntity {
 		}
 
 		const Entity newEntity{ newID };
-		const ID::IDType Index{ ID::Index(newID) };
+		const ID::IDType index{ ID::Index(newID) };
 
 		//Create transform component.
-		assert(!TransformComponents[Index].IsValid());
-		TransformComponents[Index] = TransformComponent::Create(*entityInfo.Transform, newEntity);
-		if (!TransformComponents[Index].IsValid())
+		assert(!TransformComponents[index].IsValid());
+		TransformComponents[index] = TransformComponent::Create(*entityInfo.Transform, newEntity);
+		if (!TransformComponents[index].IsValid())
 			return {};
+
+		//Create script component.
+		if (entityInfo.Script && entityInfo.Script->ScriptCreator) {
+			assert(!Scripts[index].IsValid());
+			Scripts[index] = Script::Create(*entityInfo.Script, newEntity);
+			assert(Scripts[index].IsValid());
+		}
 
 		return newEntity;
 	}
-	void Remove(Entity entity)
+	void Remove(EntityID entityID)
 	{
-		const EntityID  entityID{ entity.GetID() };
 		const ID::IDType index{ ID::Index(entityID) };
-		assert(IsAlive(entity));
-		if (IsAlive(entity)) {
-			TransformComponent::Remove(TransformComponents[index]);
-			TransformComponents[index] = TransformComponent::Component{};
-			FreeIDs.push_back(entityID);
-		}
+		assert(ID::IsValid(entityID));
+		TransformComponent::Remove(TransformComponents[index]);
+		TransformComponents[index] = TransformComponent::Component{};
+		FreeIDs.push_back(entityID);
 	}
-	bool IsAlive(Entity entity)
+	bool IsAlive(EntityID entityID)
 	{
-		assert(entity.IsValid());
-		const EntityID entityID{ entity.GetID() };
+		assert(ID::IsValid(entityID));
 		const ID::IDType index{ ID::Index(entityID) };
 		assert(index < Generations.size());
 		assert(Generations[index] == ID::Generation(entityID));
@@ -67,8 +70,14 @@ namespace Europa::GameEntity {
 	}
 
 	TransformComponent::Component Entity::GetTransform() const {
-		assert(IsAlive(*this));
+		assert(IsAlive(ID));
 		const ID::IDType index{ ID::Index(ID) };
 		return TransformComponents[index];
+	}
+	Script::Component Entity::GetScript() const
+	{
+		assert(IsAlive(ID));
+		const ID::IDType index{ ID::Index(ID) };
+		return Scripts[index];
 	}
 }

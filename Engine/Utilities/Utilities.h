@@ -5,6 +5,7 @@
 
 #if USE_STL_VECTOR
 #include <vector>
+#include <algorithm>
 namespace Europa::Utilities {
 	template<typename T>
 	using vector = typename std::vector<T>;
@@ -16,6 +17,17 @@ namespace Europa::Utilities {
 namespace Europa::Utilities {
 	template<typename T>
 	using deque = typename std::deque<T>;
+
+	template<typename T>
+	void EraseUnordered(std::vector<T>& vector, size_t index) {
+		if (vector.size() > 1) {
+			std::iter_swap(vector.begin() + index, vector.end() - 1);
+			vector.pop_back();
+		}
+		else {
+			vector.clear();
+		}
+	}
 }
 #endif
 

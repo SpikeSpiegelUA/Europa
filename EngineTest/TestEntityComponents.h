@@ -38,10 +38,10 @@ private:
 		};
 		while (count > 0) {
 			++Added;
-			Europa::GameEntity::Entity entity{ Europa::GameEntity::CreateGameEntity(entityInfo) };
+			Europa::GameEntity::Entity entity{ Europa::GameEntity::Create(entityInfo) };
 			assert(entity.IsValid() && Europa::ID::IsValid(entity.GetID()));
 			Entities.push_back(entity);
-			assert(Europa::GameEntity::IsAlive(entity));
+			assert(Europa::GameEntity::IsAlive(entity.GetID()));
 			--count;
 		}
 	}
@@ -55,9 +55,9 @@ private:
 			const Europa::GameEntity::Entity entity{ Entities[index] };
 			assert(entity.IsValid() && Europa::ID::IsValid(entity.GetID()));
 			if (entity.IsValid()) {
-				Europa::GameEntity::RemoveGameEntity(entity);
+				Europa::GameEntity::Remove(entity.GetID());
 				Entities.erase(Entities.begin() + index);
-				assert(!Europa::GameEntity::IsAlive(entity));
+				assert(!Europa::GameEntity::IsAlive(entity.GetID()));
 				++Removed;
 			}
 			--count;
