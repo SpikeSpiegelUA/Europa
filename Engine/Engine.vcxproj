@@ -28,6 +28,7 @@
     <ClCompile Include="Components\Entity.cpp" />
     <ClCompile Include="Components\Script.cpp" />
     <ClCompile Include="Components\TransformComponent.cpp" />
+    <ClCompile Include="Core\Main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -78,7 +79,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Common;EngineAPI</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>GameEntityAPI.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -106,6 +108,8 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <CallingConvention>FastCall</CallingConvention>
+      <ForcedIncludeFiles>GameEntityAPI.h</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>;EngineAPI</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

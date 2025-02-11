@@ -3,7 +3,6 @@
 #include "../Components/ComponentsCommon.h"
 #include "TransformComponentAPI.h"
 #include "ScriptAPI.h"
-#include <memory>
 
 namespace Europa {
 	namespace GameEntity {
@@ -37,11 +36,21 @@ namespace Europa {
 		namespace Internal {
 			using ScriptPointer = std::unique_ptr<EntityScript>;
 			using ScriptCreator = ScriptPointer(*)(GameEntity::Entity entity);
+			using StringHash = std::hash<std::string>;
+
+			uint8 RegisterScript(size_t, ScriptCreator);
 
 			template<class ScriptClass>
 			ScriptPointer CreateScript(GameEntity::Entity entity) {
 				assert(entity.IsValid());
 				return std::make_unique<ScriptClass>(entity);
+			}
+
+			#define REGISTER_SCRIPT(TYPE)                                                                                     \
+			class TYPE;                                                                                                       \
+			namespace {                                                                                                       \
+				static uint8 Reg##TYPE{ Europa::Script::Internal::RegisterScript                                              \
+				(Europa::Script::Internal::StringHash()(#TYPE), &Europa::Script::Internal::CreateScript<TYPE>) };             \
 			}
 		}
 	}

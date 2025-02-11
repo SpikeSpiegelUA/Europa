@@ -8,6 +8,15 @@ namespace Europa::Script {
 		Utilities::vector<ID::GenerationType> Generations;
 		Utilities::vector<ScriptID> FreeIDs;
 
+		using ScriptRegistery = std::unordered_map<size_t, Internal::ScriptCreator>;
+
+		ScriptRegistery& Registery() {
+			//We put this variable in a function because of a static data initialization order.
+			//This way we can be sure, that the order will be correct.
+			static ScriptRegistery registery;
+			return registery;
+		}
+
 		bool Exists(ScriptID id) {
 			ID::IsValid(id);
 			const ID::IDType index{ ID::Index(id) };
@@ -15,7 +24,14 @@ namespace Europa::Script {
 			assert(Generations[index] == ID::Generation(id));
 			return (Generations[index] == ID::Generation(id) && EntityScripts[IDMapping[index]] && EntityScripts[IDMapping[index]]->IsValid());
 		}
+	}
 
+	namespace Internal {
+		uint8 RegisterScript(size_t tag, ScriptCreator func) {
+			bool result{ Registery().insert(ScriptRegistery::value_type{tag,func}).second };
+			assert(result);
+			return result;
+		}
 	}
 	Component Europa::Script::Create(const InitInfo& initInfo, GameEntity::Entity entity)
 	{
