@@ -49,7 +49,7 @@ namespace Europa {
 			#define REGISTER_SCRIPT(TYPE)                                                                                     \
 			class TYPE;                                                                                                       \
 			namespace {                                                                                                       \
-				static uint8 Reg##TYPE{ Europa::Script::Internal::RegisterScript                                              \
+				const uint8 Reg##TYPE{ Europa::Script::Internal::RegisterScript                                               \
 				(Europa::Script::Internal::StringHash()(#TYPE), &Europa::Script::Internal::CreateScript<TYPE>) };             \
 			}
 		}

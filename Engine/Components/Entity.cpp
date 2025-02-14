@@ -32,6 +32,7 @@ namespace Europa::GameEntity {
 			//and we won't to reserve more memory for future elements.
 
 			TransformComponents.emplace_back();
+			Scripts.emplace_back();
 		}
 
 		const Entity newEntity{ newID };
@@ -56,6 +57,12 @@ namespace Europa::GameEntity {
 	{
 		const ID::IDType index{ ID::Index(entityID) };
 		assert(ID::IsValid(entityID));
+
+		if (Scripts[index].IsValid()) {
+			Script::Remove(Scripts[index]);
+			Scripts[index] = {};
+		}
+
 		TransformComponent::Remove(TransformComponents[index]);
 		TransformComponents[index] = TransformComponent::Component{};
 		FreeIDs.push_back(entityID);
