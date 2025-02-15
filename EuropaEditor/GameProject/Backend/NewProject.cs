@@ -28,6 +28,7 @@ namespace EuropaEditor.GameProject.Backend
         public string IconFilePath { get; set; }
         public string ScreenshotFilePath { get; set; }
         public string ProjectFilePath { get; set; }
+        public string TemplatePath { get; internal set; }
     }
 
     internal class NewProject : ViewModelBase
@@ -166,6 +167,7 @@ namespace EuropaEditor.GameProject.Backend
                 projectData.Screenshot = projectTemplate.Screenshot;
                 projectData.DateAndTime = DateTime.Now;
                 OpenProject.AddNewProject(projectData);
+                CreateMSVCSolution(projectTemplate, path);
                 return path;
             }
             catch (Exception ex)
@@ -174,6 +176,12 @@ namespace EuropaEditor.GameProject.Backend
                 Logger.Log(MessageType.Error, $"Failed to create {ProjectName} project");
                 throw;
             }
+        }
+
+        private void CreateMSVCSolution(ProjectTemplate projectTemplate, string path)
+        {
+            Debug.Assert(File.Exists(Path.Combine(projectTemplate.TemplatePath, "MSVCSolution")));
+            Debug.Assert(File.Exists(Path.Combine(projectTemplate.TemplatePath, "MSVCProject")));
         }
 
         public NewProject()
@@ -191,6 +199,7 @@ namespace EuropaEditor.GameProject.Backend
                     template.ScreenshotFilePath = Path.Combine(Path.GetDirectoryName(file), "Screenshot.png");
                     template.Screenshot = File.ReadAllBytes(template.ScreenshotFilePath);
                     template.ProjectFilePath = Path.Combine(Path.GetDirectoryName(file), template.ProjectFile);
+                    template.TemplatePath = Path.GetDirectoryName(file);
                     _projectTemplates.Add(template);
                 }
                 ValidateProjectPath();
