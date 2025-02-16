@@ -86,7 +86,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-	  <RuntimeTypeInfo>false</RuntimeTypeInfo>
+	  <RuntimeTypeInfo>false<RuntimeTypeInfo>
       <AdditionalIncludeDirectories>$(Europa_IncludePath)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>GameEntityAPI.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -104,7 +104,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;USE_WITH_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-	  <RuntimeTypeInfo>false</RuntimeTypeInfo>
+	  <RuntimeTypeInfo>false<RuntimeTypeInfo>
       <AdditionalIncludeDirectories>$(Europa_IncludePath)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>GameEntityAPI.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -124,7 +124,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-	  <RuntimeTypeInfo>false</RuntimeTypeInfo>
+	  <RuntimeTypeInfo>false<RuntimeTypeInfo>
       <AdditionalIncludeDirectories>$(Europa_IncludePath)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>GameEntityAPI.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -147,7 +147,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;USE_WITH_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-	  <RuntimeTypeInfo>false</RuntimeTypeInfo>
+	  <RuntimeTypeInfo>false<RuntimeTypeInfo>
       <AdditionalIncludeDirectories>$(Europa_IncludePath)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>GameEntityAPI.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>

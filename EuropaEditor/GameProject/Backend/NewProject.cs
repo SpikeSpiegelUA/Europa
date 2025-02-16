@@ -180,8 +180,29 @@ namespace EuropaEditor.GameProject.Backend
 
         private void CreateMSVCSolution(ProjectTemplate projectTemplate, string path)
         {
-            Debug.Assert(File.Exists(Path.Combine(projectTemplate.TemplatePath, "MSVCSolution")));
-            Debug.Assert(File.Exists(Path.Combine(projectTemplate.TemplatePath, "MSVCProject")));
+            Debug.Assert(File.Exists(Path.Combine(projectTemplate.TemplatePath, "MSVCSolution.xml")));
+            Debug.Assert(File.Exists(Path.Combine(projectTemplate.TemplatePath, "MSVCProject.xml")));
+
+            string engineAPIPath = Path.Combine(MainWindow.EuropaPath, @"Engine\EngineAPI\");
+            Debug.Assert(Directory.Exists(engineAPIPath));
+
+            string solutionZeroParameter = ProjectName;
+            string solutionFirstParameter = '{' + Guid.NewGuid().ToString().ToUpper() + '}';
+            string solutionSecondParameter = '{' + Guid.NewGuid().ToString().ToUpper() + '}';
+
+            string solution = File.ReadAllText(Path.Combine(projectTemplate.TemplatePath, "MSVCSolution.xml"));
+            solution = string.Format(solution, solutionZeroParameter, solutionFirstParameter, solutionSecondParameter);
+            File.WriteAllText(Path.GetFullPath(Path.Combine(path, $"{solutionZeroParameter}.sln")), solution);
+
+            string projectZeroParameter = ProjectName;
+            string projectFirstParameter = '{' + Guid.NewGuid().ToString().ToUpper() + '}';
+            string projectSecondParameter = engineAPIPath;
+            string projectThirdParameter = MainWindow.EuropaPath;
+
+
+            string project = File.ReadAllText(Path.Combine(projectTemplate.TemplatePath, "MSVCProject.xml"));
+            project = string.Format(project, projectZeroParameter, projectFirstParameter, projectSecondParameter, projectThirdParameter);
+            File.WriteAllText(Path.GetFullPath(Path.Combine(path, $@"GameCode\{projectZeroParameter}.vcxproj")), project);
         }
 
         public NewProject()

@@ -1,6 +1,7 @@
 ﻿using EuropaEditor.GameProject.Backend;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace EuropaEditor
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static string EuropaPath = @"D:\Visual Studio Projects\Europa";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -37,7 +40,21 @@ namespace EuropaEditor
         private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= OnMainWindowLoaded;
+            GetEnginePath();
             ProjectBrowserDialogueControl();
+        }
+
+        private void GetEnginePath()
+        {
+            string europaPath = Environment.GetEnvironmentVariable("EUROPA_ENGINE", EnvironmentVariableTarget.User);
+            if (europaPath == null || !Directory.Exists(System.IO.Path.Combine(europaPath, @"Engine\EngineAPI")))
+            {
+
+            }
+            else
+            {
+                EuropaPath = europaPath;
+            }
         }
 
         private void ProjectBrowserDialogueControl()
