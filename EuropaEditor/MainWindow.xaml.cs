@@ -49,7 +49,16 @@ namespace EuropaEditor
             string europaPath = Environment.GetEnvironmentVariable("EUROPA_ENGINE", EnvironmentVariableTarget.User);
             if (europaPath == null || !Directory.Exists(System.IO.Path.Combine(europaPath, @"Engine\EngineAPI")))
             {
-
+                var enginePathDialog = new EnginePathDialog();
+                if (enginePathDialog.ShowDialog() == true)
+                {
+                    EuropaPath = enginePathDialog.EuropaPath;
+                    Environment.SetEnvironmentVariable("EUROPA_ENGINE", EuropaPath.ToUpper(), EnvironmentVariableTarget.User);
+                }
+                else
+                {
+                    Application.Current.Shutdown();
+                }
             }
             else
             {
