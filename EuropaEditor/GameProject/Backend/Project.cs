@@ -16,12 +16,47 @@ namespace EuropaEditor.GameProject.Backend
     [DataContract(Name = "Game")]
     internal class Project : ViewModelBase
     {
+        public enum BuildConfiguration
+        {
+            Debug,
+            DebugEditor,
+            Release,
+            ReleaseEditor,
+        }
+
         public static string Extension = ".europa";
         [DataMember]
         public string Name { get; private set; } = "New Project";
         [DataMember]
         public string Path { get; private set; }
         public string FullPath => $@"{Path}{Name}\{Name}{Extension}";
+        public string Solution => $@"{Path}{Name}.sln";
+
+        private static readonly string[] _buildConfigurationNames = new string[]
+        {
+            "Debug",
+            "DebugEditor",
+            "Release",
+            "ReleaseEditor"
+        };
+
+        private int _buildConfig;
+        public int BuildConfig
+        {
+            get => _buildConfig;
+            set
+            {
+                if (_buildConfig != value)
+                {
+                    _buildConfig = value;
+                    OnPropertyChanged(nameof(BuildConfig));
+                }
+            }
+        }
+
+        public BuildConfiguration StandAloneBuildConfig => BuildConfig == 0 ? BuildConfiguration.Debug : BuildConfiguration.Release;
+        public BuildConfiguration DLLBuildConfig => BuildConfig == 0 ? BuildConfiguration.DebugEditor : BuildConfiguration.ReleaseEditor;
+
 
         [DataMember(Name = "Scenes")]
         private ObservableCollection<Scene> _scenes = new ObservableCollection<Scene>();
@@ -34,6 +69,8 @@ namespace EuropaEditor.GameProject.Backend
         public ICommand UndoCommand { get; set; }
         public ICommand RedoCommand { get; set; }
         public ICommand SaveCommand { get; set; }
+        public ICommand BuildCommand { get; private set; }
+        private static string GetConfigurationName(BuildConfiguration config) => _buildConfigurationNames[(int)config];
 
         private void AddSceneInternal(in string sceneName){
             Debug.Assert(!string.IsNullOrEmpty(sceneName.Trim()));
@@ -74,6 +111,34 @@ namespace EuropaEditor.GameProject.Backend
         {
             Serializer.ToFile(projectToSave, projectToSave.FullPath);
             Logger.Log(MessageType.Info, $"Project saved to {projectToSave.FullPath}");
+        }
+
+        private void BuildGameCodeDLL()
+        {
+            try
+            {
+                UnloadGameCodeDLL();
+                VisualStudio.BuildSolution(this, GetConfigurationName(DLLBuildConfig);
+                if (VisualStudio.BuildSucceeded)
+                {
+                    LoadGameCodeDLL();
+                }
+                LoadGameCodeDLL();
+            }
+            catch (Exception e) {
+                Debug.WriteLine(e.Message);
+                throw;
+            }
+        }
+
+        private void LoadGameCodeDLL()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void UnloadGameCodeDLL()
+        {
+            throw new NotImplementedException();
         }
 
         public void Unload()
@@ -118,7 +183,7 @@ namespace EuropaEditor.GameProject.Backend
 
             UndoCommand = new RelayCommand<object>(x => UndoRedoManager.Undo(), x => UndoRedoManager.UndoList.Any());
             RedoCommand = new RelayCommand<object>(x => UndoRedoManager.Redo(), x => UndoRedoManager.RedoList.Any());
-
+            BuildCommand = new RelayCommand<object>(x => BuildGameCodeDLL());
             SaveCommand = new RelayCommand<object>(x => Save(this));
         }
 
