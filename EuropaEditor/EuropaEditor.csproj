@@ -85,6 +85,9 @@
     <Compile Include="EnginePathDialog.xaml.cs">
       <DependentUpon>EnginePathDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GameDev\NewScriptDialog.xaml.cs">
+      <DependentUpon>NewScriptDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GameDev\VisualStudio.cs" />
     <Compile Include="GameProject\Backend\OpenProject.cs" />
     <Compile Include="GameProject\Backend\Project.cs" />
@@ -134,6 +137,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnginePathDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GameDev\NewScriptDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
