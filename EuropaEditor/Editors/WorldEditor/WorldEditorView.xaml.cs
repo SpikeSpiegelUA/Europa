@@ -1,4 +1,5 @@
-﻿using EuropaEditor.GameProject.Backend;
+﻿using EuropaEditor.GameDev;
+using EuropaEditor.GameProject.Backend;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -32,6 +33,11 @@ namespace EuropaEditor.Editors.WorldEditor
         {
             Loaded -= OnWorldEditor_Loaded;
             Focus();
+        }
+
+        private void OnNewScript_Button_Click(object sender, RoutedEventArgs e)
+        {
+            new NewScriptDialog().ShowDialog();
         }
     }
 }

@@ -14,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using EuropaProject = EuropaEditor.GameProject.Backend.Project;
 
@@ -26,36 +27,47 @@ namespace EuropaEditor.GameDev
     {
         //Templates for new script files.
         private static readonly string _cppCode =
-        @"#include ""{0}.h""
-        namespace {1}
-        {{
-            REGISTER_SCRIPT({0});
-            void {0}::BeginPlay(float deltaTime)
-            {{
+@"#include ""{0}.h""
+namespace {1}
+{{
+    REGISTER_SCRIPT({0});
+    void {0}::BeginPlay()
+    {{
 
-            }}
+    }}
 
-            void {0}::Update(float deltaTime)
-            {{
+    void {0}::Update(float deltaTime)
+    {{
 
-            }}
-        }} // namespace {1}";
+    }}
+}} // namespace {1}";
 
         private static readonly string _hCode =
-        @"namespace {1} {{
-	        class {0} : public Europa::Script::EntityScript {{
-	            public:
-		        constexpr explicit {0}(Europa::GameEntity::Entity entity) : Europa::Script::EntityScript(entity){{}}
-                void BeginPlay() override
-		        void Update(float deltaTime) override;
-                private:
+@"namespace {1} {{
+	class {0} : public Europa::Script::EntityScript {{
+	    public:
+		constexpr explicit {0}(Europa::GameEntity::Entity entity) : Europa::Script::EntityScript(entity){{}}
+        void BeginPlay() override;
+		void Update(float deltaTime) override;
+        private:
 
-	        }};
-        }}";
+	}};
+}}";
 
-    public NewScriptDialog()
+        private static readonly string _namespace = GetNamespaceFromProjectName();
+
+        private static string GetNamespaceFromProjectName()
+        {
+            var projectName = GameProject.Backend.Project.CurrentProject.Name;
+            projectName = projectName.Replace(' ', '_');
+            return projectName;
+        }
+
+        public NewScriptDialog()
         {
             InitializeComponent();
+            Owner = Application.Current.MainWindow;
+            scriptPathTextBox.Text = @"GameCode\";
         }
 
         bool Validate()
@@ -68,17 +80,17 @@ namespace EuropaEditor.GameDev
             {
                 errorMsg = "Type in a script name.";
             }
-            else if(name.IndexOfAny(Path.GetInvalidPathChars()) != -1 || name.Any(x => char.IsWhiteSpace(x)))
+            else if(name.IndexOfAny(Path.GetInvalidFileNameChars()) != -1 || name.Any(x => char.IsWhiteSpace(x)))
             {
                 errorMsg = "Invalid character(s) used in script name.";
             }
-            if (string.IsNullOrEmpty(path))
+            else if (string.IsNullOrEmpty(path))
             {
                 errorMsg = "Select a valid script folder.";
             }
-            else if (path.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
+            else if (path.IndexOfAny(Path.GetInvalidPathChars()) != -1)
             {
-                errorMsg = "Invalid character(s) used in script name.";
+                errorMsg = "Invalid character(s) used in script path.";
             }
             else if (!Path.GetFullPath(Path.Combine(EuropaProject.CurrentProject.Path, path)).Contains(Path.Combine(EuropaProject.CurrentProject.Path, @"GameCode\")))
             {
@@ -114,24 +126,47 @@ namespace EuropaEditor.GameDev
             messageTextBlock.Text = $"{name}.h and {name}.cpp will be added to {EuropaProject.CurrentProject.Name}";
         }
 
-        private void OnCreate_Button_Click(object sender, RoutedEventArgs e)
+        private void OnScriptName_TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            Validate();
+            if (!Validate())
+                return;
+            var name = scriptNameTextBox.Text.Trim();
+            var path = scriptPathTextBox.Text.Trim();
+            messageTextBlock.Text = $@"{name}.h and {name}.cpp will be added to {path}\{EuropaProject.CurrentProject.Name}";
         }
 
-        private async void OnScriptName_TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void OnCreate_Button_Click(object sender, RoutedEventArgs e)
         {
             if (!Validate())
                 return;
             IsEnabled = false;
+            busyAnimation.Opacity = 0;
+            busyAnimation.Visibility = Visibility.Visible;
+            DoubleAnimation fadeIn = new DoubleAnimation(0,1, new Duration(TimeSpan.FromMilliseconds(500)));
+            busyAnimation.BeginAnimation(OpacityProperty, fadeIn);
             try
             {
+                var name = scriptNameTextBox.Text.Trim();
+                var path = Path.GetFullPath(Path.Combine(GameProject.Backend.Project.CurrentProject.Path, scriptPathTextBox.Text.Trim()));
+                var solution = GameProject.Backend.Project.CurrentProject.Solution;
+                var projectName = GameProject.Backend.Project.CurrentProject.Name;
                 await Task.Run(() => CreateScript(name, path, solution, projectName));
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
                 Logger.Log(MessageType.Error, $"Failed to create a script {scriptNameTextBox.Text}");
+            }
+            finally
+            {
+                DoubleAnimation fadeOut = new DoubleAnimation(1, 0, new Duration(TimeSpan.FromMilliseconds(500)));
+                fadeOut.Completed += (s, b) =>
+                { 
+                    busyAnimation.Opacity = 0;
+                    busyAnimation.Visibility = Visibility.Hidden;
+                    Close();
+                };
+                busyAnimation.BeginAnimation(OpacityProperty, fadeOut);
             }
         }
 
@@ -145,13 +180,24 @@ namespace EuropaEditor.GameDev
 
             using (var sw = File.CreateText(cpp))
             {
-
+                sw.Write(string.Format(_cppCode, name, _namespace));
             }
 
             using (var sw = File.CreateText(h))
             {
-
+                sw.Write(string.Format(_hCode, name, _namespace));
             }
+
+            string[] files = new string[] { cpp, h };
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (!VisualStudio.AddFilesToSolution(solution, projectName, files))
+                    System.Threading.Thread.Sleep(1000);
+                else
+                    break;
+            }
+            
         }
     }
 }

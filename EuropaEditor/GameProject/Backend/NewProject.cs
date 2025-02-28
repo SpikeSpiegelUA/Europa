@@ -156,7 +156,7 @@ namespace EuropaEditor.GameProject.Backend
                 File.Copy(projectTemplate.ScreenshotFilePath, Path.GetFullPath(Path.Combine(EuropaDirectoryInfo.FullName, "Screenshot.png")));
 
                 var projectXML = File.ReadAllText(projectTemplate.ProjectFilePath);
-                projectXML = string.Format(projectXML, ProjectName, ProjectPath);
+                projectXML = string.Format(projectXML, ProjectName, path);
                 var projectPath = Path.GetFullPath(Path.Combine(path, $"{ProjectName}{Project.Extension}"));
                 File.WriteAllText(projectPath, projectXML);
           
@@ -215,12 +215,12 @@ namespace EuropaEditor.GameProject.Backend
                 foreach(var file in templatesFiles)
                 {
                     var template = Serializer.FromFile<ProjectTemplate>(file);
-                    template.IconFilePath = Path.Combine(Path.GetDirectoryName(file), "Icon.png");
-                    template.Icon = File.ReadAllBytes(template.IconFilePath);
-                    template.ScreenshotFilePath = Path.Combine(Path.GetDirectoryName(file), "Screenshot.png");
-                    template.Screenshot = File.ReadAllBytes(template.ScreenshotFilePath);
-                    template.ProjectFilePath = Path.Combine(Path.GetDirectoryName(file), template.ProjectFile);
                     template.TemplatePath = Path.GetDirectoryName(file);
+                    template.IconFilePath = Path.Combine(template.TemplatePath, "Icon.png");
+                    template.Icon = File.ReadAllBytes(template.IconFilePath);
+                    template.ScreenshotFilePath = Path.Combine(template.TemplatePath, "Screenshot.png");
+                    template.Screenshot = File.ReadAllBytes(template.ScreenshotFilePath);
+                    template.ProjectFilePath = Path.Combine(template.TemplatePath, template.ProjectFile);
                     _projectTemplates.Add(template);
                 }
                 ValidateProjectPath();

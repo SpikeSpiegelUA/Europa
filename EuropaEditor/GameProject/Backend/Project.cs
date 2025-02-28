@@ -1,4 +1,5 @@
-﻿using EuropaEditor.Utilities;
+﻿using EuropaEditor.GameDev;
+using EuropaEditor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,7 +30,7 @@ namespace EuropaEditor.GameProject.Backend
         public string Name { get; private set; } = "New Project";
         [DataMember]
         public string Path { get; private set; }
-        public string FullPath => $@"{Path}{Name}\{Name}{Extension}";
+        public string FullPath => $@"{Path}{Name}{Extension}";
         public string Solution => $@"{Path}{Name}.sln";
 
         private static readonly string[] _buildConfigurationNames = new string[]
@@ -118,11 +119,11 @@ namespace EuropaEditor.GameProject.Backend
             try
             {
                 UnloadGameCodeDLL();
-                VisualStudio.BuildSolution(this, GetConfigurationName(DLLBuildConfig);
-                if (VisualStudio.BuildSucceeded)
-                {
-                    LoadGameCodeDLL();
-                }
+               // VisualStudio.BuildSolution(this, GetConfigurationName(DLLBuildConfig));
+               // if (VisualStudio.BuildSucceeded)
+               // {
+               //     LoadGameCodeDLL();
+               // }
                 LoadGameCodeDLL();
             }
             catch (Exception e) {
@@ -143,6 +144,7 @@ namespace EuropaEditor.GameProject.Backend
 
         public void Unload()
         {
+            VisualStudio.CloseVisualStudio();
             UndoRedoManager.Reset();
         }
 
