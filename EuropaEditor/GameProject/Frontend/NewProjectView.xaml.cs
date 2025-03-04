@@ -39,7 +39,7 @@ namespace EuropaEditor.GameProject
                 OpenProject.Open(new ProjectData() { ProjectName = newProject.ProjectName, ProjectPath = projectPath });
             }
             window.DialogResult = dialogResult;
-            Project project = new Project(newProject.ProjectName, newProject.ProjectPath);
+            Project project = new Project(newProject.ProjectName, projectPath);
             window.DataContext = project;
             window.Close();
         }

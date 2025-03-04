@@ -42,6 +42,7 @@ namespace EuropaEditor.GameProject.Backend
         };
 
         private int _buildConfig;
+        [DataMember]
         public int BuildConfig
         {
             get => _buildConfig;
@@ -114,16 +115,16 @@ namespace EuropaEditor.GameProject.Backend
             Logger.Log(MessageType.Info, $"Project saved to {projectToSave.FullPath}");
         }
 
-        private void BuildGameCodeDLL()
+        private void BuildGameCodeDLL(bool showWindow = true)
         {
             try
             {
                 UnloadGameCodeDLL();
-               // VisualStudio.BuildSolution(this, GetConfigurationName(DLLBuildConfig));
-               // if (VisualStudio.BuildSucceeded)
-               // {
-               //     LoadGameCodeDLL();
-               // }
+                VisualStudio.BuildSolution(this, GetConfigurationName(DLLBuildConfig), showWindow);
+                if (VisualStudio.BuildSucceeded)
+                {
+                    LoadGameCodeDLL();
+                }
                 LoadGameCodeDLL();
             }
             catch (Exception e) {
@@ -134,12 +135,12 @@ namespace EuropaEditor.GameProject.Backend
 
         private void LoadGameCodeDLL()
         {
-            throw new NotImplementedException();
+
         }
 
         private void UnloadGameCodeDLL()
         {
-            throw new NotImplementedException();
+
         }
 
         public void Unload()
@@ -185,7 +186,7 @@ namespace EuropaEditor.GameProject.Backend
 
             UndoCommand = new RelayCommand<object>(x => UndoRedoManager.Undo(), x => UndoRedoManager.UndoList.Any());
             RedoCommand = new RelayCommand<object>(x => UndoRedoManager.Redo(), x => UndoRedoManager.RedoList.Any());
-            BuildCommand = new RelayCommand<object>(x => BuildGameCodeDLL());
+            BuildCommand = new RelayCommand<bool>(x => BuildGameCodeDLL(x), x => !VisualStudio.IsDebugging() && VisualStudio.BuildDone);
             SaveCommand = new RelayCommand<object>(x => Save(this));
         }
 
