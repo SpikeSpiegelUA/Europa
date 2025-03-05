@@ -31,32 +31,38 @@ namespace EuropaEditor.DLLWrapper
 {
     static class EngineAPI
     {
-        private const string _dllName = "EngineDLL.dll";
-
-        [DllImport(_dllName)]
-        private static extern int CreateGameEntity(EngineAPIStructs.GameEntityDescriptor gameEntityDescriptor);
-
-        public static int CreateGameEntity(GameEntity gameEntity)
+        private const string _engineDLL = "EngineDLL.dll";
+        [DllImport(_engineDLL, CharSet = CharSet.Ansi)]
+        public static extern int LoadGameCodeDLL(string dllPath);
+        [DllImport(_engineDLL)]
+        public static extern int UnloadGameCodeDLL();
+        internal static class EntityAPI
         {
-            GameEntityDescriptor gameEntityDescriptor = new GameEntityDescriptor();
+            [DllImport(_engineDLL)]
+            private static extern int CreateGameEntity(EngineAPIStructs.GameEntityDescriptor gameEntityDescriptor);
 
-            //Fill a transform component.
-            { 
-                var entityTransform = gameEntity.GetComponent<TransformComponent>();
-                gameEntityDescriptor.TransformComponent.Position = entityTransform.Position;
-                gameEntityDescriptor.TransformComponent.Rotation = entityTransform.Rotation;
-                gameEntityDescriptor.TransformComponent.Scale = entityTransform.Scale;
+            public static int CreateGameEntity(GameEntity gameEntity)
+            {
+                GameEntityDescriptor gameEntityDescriptor = new GameEntityDescriptor();
+
+                //Fill a transform component.
+                {
+                    var entityTransform = gameEntity.GetComponent<TransformComponent>();
+                    gameEntityDescriptor.TransformComponent.Position = entityTransform.Position;
+                    gameEntityDescriptor.TransformComponent.Rotation = entityTransform.Rotation;
+                    gameEntityDescriptor.TransformComponent.Scale = entityTransform.Scale;
+                }
+
+                return CreateGameEntity(gameEntityDescriptor);
             }
-            
-            return CreateGameEntity(gameEntityDescriptor);
-        }
 
-        [DllImport(_dllName)]
-        private static extern void RemoveGameEntity(int id);
+            [DllImport(_engineDLL)]
+            private static extern void RemoveGameEntity(int id);
 
-        public static void RemoveGameEntity(GameEntity gameEntity)
-        {
-            RemoveGameEntity(gameEntity.EntityID);
+            public static void RemoveGameEntity(GameEntity gameEntity)
+            {
+                RemoveGameEntity(gameEntity.EntityID);
+            }
         }
     }
 }

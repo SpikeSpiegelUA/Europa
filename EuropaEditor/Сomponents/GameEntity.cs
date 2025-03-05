@@ -42,12 +42,12 @@ namespace EuropaEditor.Сomponents
                     _isActive = value;
                     if (_isActive)
                     {
-                        EntityID = EngineAPI.CreateGameEntity(this);
+                        EntityID = EngineAPI.EntityAPI.CreateGameEntity(this);
                         Debug.Assert(ID.IsValid(_entityID));
                     }
                     else if(ID.IsValid(EntityID))
                     {
-                        EngineAPI.RemoveGameEntity(this);
+                        EngineAPI.EntityAPI.RemoveGameEntity(this);
                         EntityID = ID.INVALID_ID;
                     }
                     OnPropertyChanged(nameof(IsActive));

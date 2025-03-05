@@ -34,7 +34,7 @@ namespace EuropaEditor.GameProject.Backend
     internal class NewProject : ViewModelBase
     {
         //TODO: get the path from the installation location.
-        private readonly string _templatePath = @"..\..\..\ProjectTemplates\";
+        private readonly string _templatePath = @"..\..\EuropaEditor\ProjectTemplates\";
         private string _projectName = "New project";
         public string ProjectName
         {

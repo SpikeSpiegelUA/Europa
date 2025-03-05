@@ -185,7 +185,6 @@ namespace EuropaEditor.GameDev
 
             OpenVisualStudio(project.Solution);
             BuildDone = BuildSucceeded = false;
-            BuildDone = false;
             for (int i = 0; i < 3; ++i)
             {
                 try

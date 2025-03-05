@@ -1,4 +1,5 @@
-﻿using EuropaEditor.GameDev;
+﻿using EuropaEditor.DLLWrapper;
+using EuropaEditor.GameDev;
 using EuropaEditor.Utilities;
 using System;
 using System.Collections.Generic;
@@ -125,7 +126,6 @@ namespace EuropaEditor.GameProject.Backend
                 {
                     LoadGameCodeDLL();
                 }
-                LoadGameCodeDLL();
             }
             catch (Exception e) {
                 Debug.WriteLine(e.Message);
@@ -135,12 +135,24 @@ namespace EuropaEditor.GameProject.Backend
 
         private void LoadGameCodeDLL()
         {
-
+            var configName = GetConfigurationName(DLLBuildConfig);
+            var dll = $@"{Path}x64\{configName}\{Name}.dll";
+            if(File.Exists(dll) && EngineAPI.LoadGameCodeDLL(dll) != 0)
+            {
+                Logger.Log(MessageType.Info, "The game code DLL loaded successfully");
+            }
+            else
+            {
+                Logger.Log(MessageType.Warning, "The game code DLL failed to load. Try to build the project first.");
+            }
         }
 
         private void UnloadGameCodeDLL()
         {
-
+            if (EngineAPI.UnloadGameCodeDLL() != 0)
+            {
+                Logger.Log(MessageType.Info, "The game code DLL unloaded successfully.");
+            }
         }
 
         public void Unload()
@@ -158,6 +170,9 @@ namespace EuropaEditor.GameProject.Backend
                 OnPropertyChanged(nameof(Scenes));
             }
             ActiveScene = Scenes.FirstOrDefault(x => x.IsActive);
+
+            BuildGameCodeDLL(false);
+
             AddScene = new RelayCommand<object>(x =>
             {
                 AddSceneInternal($"New Scene {_scenes.Count}");
