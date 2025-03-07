@@ -60,7 +60,7 @@ namespace EuropaEditor.Editors
         private Action GetRotationAction() => GetAction(x => (x, x.Rotation), (x) => x.transform.Rotation = x.Item2);
         private Action GetScaleAction() => GetAction(x => (x, x.Scale), (x) => x.transform.Scale = x.Item2);
 
-        private void RecordAction(Action redoAction, string name)
+        private void RecordActions(Action redoAction, string name)
         {
             if (_propertyChanged)
             {
@@ -78,7 +78,7 @@ namespace EuropaEditor.Editors
 
         private void OnPosition_VectorBox_PreviewMouseLBU(object sender, MouseButtonEventArgs e)
         {
-            RecordAction(GetPositionAction(), "Position changed");
+            RecordActions(GetPositionAction(), "Position changed");
         }
 
         private void OnRotation_VectorBox_PreviewMouseLBD(object sender, MouseButtonEventArgs e)
@@ -89,7 +89,7 @@ namespace EuropaEditor.Editors
 
         private void OnRotation_VectorBox_PreviewMouseLBU(object sender, MouseButtonEventArgs e)
         {
-            RecordAction(GetRotationAction(), "Rotation changed");
+            RecordActions(GetRotationAction(), "Rotation changed");
         }
 
         private void OnScale_VectorBox_PreviewMouseLBD(object sender, MouseButtonEventArgs e)
@@ -100,7 +100,7 @@ namespace EuropaEditor.Editors
 
         private void OnScale_VectorBox_PreviewMouseLBU(object sender, MouseButtonEventArgs e)
         {
-            RecordAction(GetScaleAction(), "Scale changed");
+            RecordActions(GetScaleAction(), "Scale changed");
         }
 
         private void OnPosition_VectorBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)

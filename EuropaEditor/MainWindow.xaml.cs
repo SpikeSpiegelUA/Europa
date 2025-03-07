@@ -22,7 +22,7 @@ namespace EuropaEditor
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static string EuropaPath = @"D:\Visual Studio Projects\Europa";
+        public static string EuropaPath;
 
         public MainWindow()
         {

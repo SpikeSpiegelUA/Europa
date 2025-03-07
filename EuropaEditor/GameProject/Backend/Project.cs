@@ -73,6 +73,48 @@ namespace EuropaEditor.GameProject.Backend
         public ICommand RedoCommand { get; set; }
         public ICommand SaveCommand { get; set; }
         public ICommand BuildCommand { get; private set; }
+
+        private void SetCommands()
+        {
+            AddScene = new RelayCommand<object>(x =>
+            {
+                AddSceneInternal($"New Scene {_scenes.Count}");
+                var newScene = _scenes.Last();
+                var sceneIndex = _scenes.Count - 1;
+                UndoRedoManager.Add(new UndoRedoAction(
+                    () => RemoveSceneInternal(newScene),
+                    () => _scenes.Insert(sceneIndex, newScene),
+                    $"Add {newScene.Name}"
+                    ));
+            });
+
+            RemoveScene = new RelayCommand<Scene>(x =>
+            {
+                var sceneIndex = _scenes.IndexOf(x);
+                RemoveSceneInternal(x);
+
+                UndoRedoManager.Add(new UndoRedoAction(
+                    () => _scenes.Insert(sceneIndex, x),
+                    () => RemoveSceneInternal(x),
+                    $"Remove {x.Name}"
+                    ));
+            },
+            x => !x.IsActive
+            );
+
+            UndoCommand = new RelayCommand<object>(x => UndoRedoManager.Undo(), x => UndoRedoManager.UndoList.Any());
+            RedoCommand = new RelayCommand<object>(x => UndoRedoManager.Redo(), x => UndoRedoManager.RedoList.Any());
+            BuildCommand = new RelayCommand<bool>(async x => await BuildGameCodeDLL(x), x => !VisualStudio.IsDebugging() && VisualStudio.BuildDone);
+            SaveCommand = new RelayCommand<object>(x => Save(this));
+
+            OnPropertyChanged(nameof(AddScene));
+            OnPropertyChanged(nameof(RemoveScene));
+            OnPropertyChanged(nameof(UndoCommand));
+            OnPropertyChanged(nameof(RedoCommand));
+            OnPropertyChanged(nameof(BuildCommand));
+            OnPropertyChanged(nameof(SaveCommand));
+        }
+
         private static string GetConfigurationName(BuildConfiguration config) => _buildConfigurationNames[(int)config];
 
         private void AddSceneInternal(in string sceneName){
@@ -116,12 +158,12 @@ namespace EuropaEditor.GameProject.Backend
             Logger.Log(MessageType.Info, $"Project saved to {projectToSave.FullPath}");
         }
 
-        private void BuildGameCodeDLL(bool showWindow = true)
+        private async Task BuildGameCodeDLL(bool showWindow = true)
         {
             try
             {
                 UnloadGameCodeDLL();
-                VisualStudio.BuildSolution(this, GetConfigurationName(DLLBuildConfig), showWindow);
+                await Task.Run(() => VisualStudio.BuildSolution(this, GetConfigurationName(DLLBuildConfig), showWindow));
                 if (VisualStudio.BuildSucceeded)
                 {
                     LoadGameCodeDLL();
@@ -162,7 +204,7 @@ namespace EuropaEditor.GameProject.Backend
         }
 
         [OnDeserialized]
-        private void OnDeserialized(StreamingContext streamingContext)
+        private async void OnDeserialized(StreamingContext streamingContext)
         {
             if(_scenes != null)
             {
@@ -171,38 +213,9 @@ namespace EuropaEditor.GameProject.Backend
             }
             ActiveScene = Scenes.FirstOrDefault(x => x.IsActive);
 
-            BuildGameCodeDLL(false);
+            await BuildGameCodeDLL(false);
 
-            AddScene = new RelayCommand<object>(x =>
-            {
-                AddSceneInternal($"New Scene {_scenes.Count}");
-                var newScene = _scenes.Last();
-                var sceneIndex = _scenes.Count - 1;
-                UndoRedoManager.Add(new UndoRedoAction(
-                    () => RemoveSceneInternal(newScene),
-                    () => _scenes.Insert(sceneIndex, newScene),
-                    $"Add {newScene.Name}"
-                    ));
-            });
-
-            RemoveScene = new RelayCommand<Scene>(x =>
-            {
-                var sceneIndex = _scenes.IndexOf(x);
-                RemoveSceneInternal(x);
-
-                UndoRedoManager.Add(new UndoRedoAction(
-                    () => _scenes.Insert(sceneIndex, x),
-                    () => RemoveSceneInternal(x),
-                    $"Remove {x.Name}"
-                    ));
-            }, 
-            x => !x.IsActive
-            );
-
-            UndoCommand = new RelayCommand<object>(x => UndoRedoManager.Undo(), x => UndoRedoManager.UndoList.Any());
-            RedoCommand = new RelayCommand<object>(x => UndoRedoManager.Redo(), x => UndoRedoManager.RedoList.Any());
-            BuildCommand = new RelayCommand<bool>(x => BuildGameCodeDLL(x), x => !VisualStudio.IsDebugging() && VisualStudio.BuildDone);
-            SaveCommand = new RelayCommand<object>(x => Save(this));
+            SetCommands();
         }
 
         public Project(string name, string path)

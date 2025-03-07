@@ -142,7 +142,6 @@ namespace EuropaEditor.GameDev
 
         private static void OnBuildSolutionDone(string project, string projectConfig, string platform, string solutionConfig, bool success)
         {
-            Logger.Log(MessageType.Info, $"Event fired");
             if (BuildDone)
                 return;
             if (success)
@@ -196,6 +195,17 @@ namespace EuropaEditor.GameDev
                     _vsInstance.Events.BuildEvents.OnBuildProjConfigBegin += OnBuildSolutionBegin;
                     _vsInstance.Events.BuildEvents.OnBuildProjConfigDone += OnBuildSolutionDone;
 
+                    try
+                    {
+                        foreach (var pdbFile in Directory.GetFiles(Path.Combine($"{project.Path}", $@"x64\{configName}"), ".pdb"))
+                        {
+                            File.Delete(pdbFile);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
                     _vsInstance.Solution.SolutionBuild.SolutionConfigurations.Item(configName).Activate();
                     _vsInstance.ExecuteCommand("Build.BuildSolution");
                 }

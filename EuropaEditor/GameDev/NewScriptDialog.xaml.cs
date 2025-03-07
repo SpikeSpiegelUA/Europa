@@ -70,7 +70,7 @@ namespace {1}
             scriptPathTextBox.Text = @"GameCode\";
         }
 
-        bool Validate()
+        private bool Validate()
         {
             bool isValid = false;
             var name = scriptNameTextBox.Text.Trim();
