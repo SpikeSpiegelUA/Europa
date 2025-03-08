@@ -39,6 +39,7 @@ namespace Europa {
 			using StringHash = std::hash<std::string>;
 
 			uint8 RegisterScript(size_t, ScriptCreator);
+			ScriptCreator GetScriptCreator(size_t tag);
 
 			template<class ScriptClass>
 			ScriptPointer CreateScript(GameEntity::Entity entity) {
@@ -46,12 +47,22 @@ namespace Europa {
 				return std::make_unique<ScriptClass>(entity);
 			}
 
-			#define REGISTER_SCRIPT(TYPE)                                                                                     \
-			class TYPE;                                                                                                       \
+#ifdef USE_WITH_EDITOR
+			uint8 AddScriptName(const char* name);
+#define REGISTER_SCRIPT(TYPE)                                                                                                 \                                                                                                  \
+			namespace {                                                                                                       \
+				const uint8 Reg##TYPE{ Europa::Script::Internal::RegisterScript                                               \
+				(Europa::Script::Internal::StringHash()(#TYPE), &Europa::Script::Internal::CreateScript<TYPE>) };             \
+			}																												  \
+			const uint8 Name##TYPE {Europa::Script::Internal::AddScriptName(#TYPE)};                                          \
+		    }																												  
+			#else																											  
+			#define REGISTER_SCRIPT(TYPE)                                                                                     \                                                                                                  \
 			namespace {                                                                                                       \
 				const uint8 Reg##TYPE{ Europa::Script::Internal::RegisterScript                                               \
 				(Europa::Script::Internal::StringHash()(#TYPE), &Europa::Script::Internal::CreateScript<TYPE>) };             \
 			}
+			#endif
 		}
 	}
 }
