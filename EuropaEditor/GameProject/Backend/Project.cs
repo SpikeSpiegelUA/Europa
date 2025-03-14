@@ -60,6 +60,19 @@ namespace EuropaEditor.GameProject.Backend
         public BuildConfiguration StandAloneBuildConfig => BuildConfig == 0 ? BuildConfiguration.Debug : BuildConfiguration.Release;
         public BuildConfiguration DLLBuildConfig => BuildConfig == 0 ? BuildConfiguration.DebugEditor : BuildConfiguration.ReleaseEditor;
 
+        private string[] _availableScripts;
+        public string[] AvailableScripts{
+            get => _availableScripts;
+            set
+            {
+                if(_availableScripts != value)
+                {
+                    _availableScripts = value;
+                    OnPropertyChanged(nameof(AvailableScripts));
+                }
+            }
+        }
+
 
         [DataMember(Name = "Scenes")]
         private ObservableCollection<Scene> _scenes = new ObservableCollection<Scene>();
@@ -179,8 +192,10 @@ namespace EuropaEditor.GameProject.Backend
         {
             var configName = GetConfigurationName(DLLBuildConfig);
             var dll = $@"{Path}x64\{configName}\{Name}.dll";
+            AvailableScripts = null;
             if(File.Exists(dll) && EngineAPI.LoadGameCodeDLL(dll) != 0)
             {
+                AvailableScripts = EngineAPI.GetScriptNames();
                 Logger.Log(MessageType.Info, "The game code DLL loaded successfully");
             }
             else
@@ -194,6 +209,7 @@ namespace EuropaEditor.GameProject.Backend
             if (EngineAPI.UnloadGameCodeDLL() != 0)
             {
                 Logger.Log(MessageType.Info, "The game code DLL unloaded successfully.");
+                AvailableScripts = null;
             }
         }
 

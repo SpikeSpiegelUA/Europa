@@ -17,6 +17,7 @@ namespace EuropaEditor.Сomponents
 {
     [DataContract]
     [KnownType(typeof(TransformComponent))]
+    [KnownType(typeof(ScriptComponent))]
     class GameEntity : ViewModelBase
     {
         private int _entityID = ID.INVALID_ID;
@@ -93,6 +94,33 @@ namespace EuropaEditor.Сomponents
 
         public Component GetComponent(Type type) => Components.FirstOrDefault(c => c.GetType() == type);
         public T GetComponent<T>() where T : Component => GetComponent(typeof(T)) as T;
+
+        public bool AddComponent(Component component)
+        {
+            Debug.Assert(component != null);
+            if (!Components.Any(x => x.GetType() == component.GetType()))
+            {
+                IsActive = false;
+                _components.Add(component);
+                IsActive = true;
+            }
+            Logger.Log(MessageType.Warning, $"Entity {Name} already has a {component.GetType().Name} component");
+            return false;
+        }
+
+        public void RemoveComponent(Component component)
+        {
+            Debug.Assert(component != null);
+            //Transform component can't be removed.
+            if (component is TransformComponent)
+                return;
+            if (_components.Contains(component))
+            {
+                IsActive = false;
+                _components.Remove(component);
+                IsActive = true;
+            }
+        }
 
         [DataMember]
         public Scene ParentScene { get; set; }

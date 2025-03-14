@@ -97,6 +97,9 @@
     <Compile Include="Editors\WorldEditor\ProjectLayoutView.xaml.cs">
       <DependentUpon>ProjectLayoutView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Editors\WorldEditor\ScriptComponentView.xaml.cs">
+      <DependentUpon>ScriptComponentView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\WorldEditor\TransformComponentView.xaml.cs">
       <DependentUpon>TransformComponentView.xaml</DependentUpon>
     </Compile>
@@ -128,6 +131,7 @@
     </Compile>
     <Compile Include="Сomponents\Component.cs" />
     <Compile Include="Сomponents\GameEntity.cs" />
+    <Compile Include="Сomponents\ScriptComponent.cs" />
     <Compile Include="Сomponents\TransformComponent.cs" />
     <Page Include="Dictionaries\ControlTemplates.xaml">
       <SubType>Designer</SubType>
@@ -146,6 +150,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Editors\WorldEditor\ProjectLayoutView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\WorldEditor\ScriptComponentView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

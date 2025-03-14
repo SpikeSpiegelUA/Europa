@@ -20,9 +20,16 @@ namespace EuropaEditor.EngineAPIStructs
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    class ScriptComponent
+    {
+        public IntPtr ScriptCreator;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     class GameEntityDescriptor
     {
         public APITransformComponent TransformComponent = new APITransformComponent();
+        public ScriptComponent Script = new ScriptComponent();
     }
 }
 
@@ -36,6 +43,11 @@ namespace EuropaEditor.DLLWrapper
         public static extern int LoadGameCodeDLL(string dllPath);
         [DllImport(_engineDLL)]
         public static extern int UnloadGameCodeDLL();
+        [DllImport(_engineDLL)]
+        public static extern IntPtr GetScriptCreator(string name);
+        [DllImport(_engineDLL)]
+        [return: MarshalAs(UnmanagedType.SafeArray)]
+        public static extern string[] GetScriptNames();
         internal static class EntityAPI
         {
             [DllImport(_engineDLL)]
@@ -52,7 +64,10 @@ namespace EuropaEditor.DLLWrapper
                     gameEntityDescriptor.TransformComponent.Rotation = entityTransform.Rotation;
                     gameEntityDescriptor.TransformComponent.Scale = entityTransform.Scale;
                 }
-
+                //Fill a script component.
+                {
+                    //var c = gameEntity.GetComponent<Script>();
+                }
                 return CreateGameEntity(gameEntityDescriptor);
             }
 

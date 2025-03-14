@@ -39,6 +39,9 @@ namespace Europa {
 			using StringHash = std::hash<std::string>;
 
 			uint8 RegisterScript(size_t, ScriptCreator);
+			#ifdef USE_WITH_EDITOR
+			extern "C" __declspec(dllexport)
+			#endif
 			ScriptCreator GetScriptCreator(size_t tag);
 
 			template<class ScriptClass>
