@@ -85,5 +85,15 @@ namespace EuropaEditor.Editors.WorldEditor
             Project.UndoRedoManager.Add(new UndoRedoAction(undoAction, redoAction,
                 vm.IsEnabled == true ? "Enable game entity" : "Disable game entity"));
         }
+
+        private void OnAddComponent_Button_PreviewMouse_LBD(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void OnAddScriptComponent(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -275,6 +275,10 @@ namespace EuropaEditor.Сomponents
 
     class MSGameEntity : MSEntity
     {
+        public MSGameEntity() : base(null)
+        {
+
+        }
         public MSGameEntity(List<GameEntity> entities) : base(entities)
         {
             Refresh();
