@@ -195,7 +195,7 @@ namespace EuropaEditor.GameProject.Backend
             AvailableScripts = null;
             if(File.Exists(dll) && EngineAPI.LoadGameCodeDLL(dll) != 0)
             {
-                AvailableScripts = EngineAPI.GetScriptNames();
+                AvailableScripts = EngineAPI.EngineDLL_GetScriptNames();
                 Logger.Log(MessageType.Info, "The game code DLL loaded successfully");
             }
             else

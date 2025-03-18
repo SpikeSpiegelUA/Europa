@@ -133,6 +133,7 @@
     <Compile Include="Сomponents\GameEntity.cs" />
     <Compile Include="Сomponents\ScriptComponent.cs" />
     <Compile Include="Сomponents\TransformComponent.cs" />
+    <Compile Include="Сomponents\СomponentFactory.cs" />
     <Page Include="Dictionaries\ControlTemplates.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

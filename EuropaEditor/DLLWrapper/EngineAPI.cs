@@ -44,10 +44,10 @@ namespace EuropaEditor.DLLWrapper
         [DllImport(_engineDLL)]
         public static extern int UnloadGameCodeDLL();
         [DllImport(_engineDLL)]
-        public static extern IntPtr GetScriptCreator(string name);
+        public static extern IntPtr EngineDLL_GetScriptCreator(string name);
         [DllImport(_engineDLL)]
         [return: MarshalAs(UnmanagedType.SafeArray)]
-        public static extern string[] GetScriptNames();
+        public static extern string[] EngineDLL_GetScriptNames();
         internal static class EntityAPI
         {
             [DllImport(_engineDLL)]

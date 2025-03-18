@@ -52,20 +52,19 @@ namespace Europa {
 
 #ifdef USE_WITH_EDITOR
 			uint8 AddScriptName(const char* name);
-#define REGISTER_SCRIPT(TYPE)                                                                                                 \                                                                                                  \
+#define REGISTER_SCRIPT(TYPE)                                                                                                                                                                                                \
 			namespace {                                                                                                       \
 				const uint8 Reg##TYPE{ Europa::Script::Internal::RegisterScript                                               \
-				(Europa::Script::Internal::StringHash()(#TYPE), &Europa::Script::Internal::CreateScript<TYPE>) };             \
-			}																												  \
-			const uint8 Name##TYPE {Europa::Script::Internal::AddScriptName(#TYPE)};                                          \
+				(Europa::Script::Internal::StringHash()(#TYPE), &Europa::Script::Internal::CreateScript<TYPE>) };             																									  \
+				const uint8 Name##TYPE {Europa::Script::Internal::AddScriptName(#TYPE)};                                      \
 		    }																												  
-			#else																											  
-			#define REGISTER_SCRIPT(TYPE)                                                                                     \                                                                                                  \
+#else																											  
+#define REGISTER_SCRIPT(TYPE)                                                                                                                                                                                                 \
 			namespace {                                                                                                       \
 				const uint8 Reg##TYPE{ Europa::Script::Internal::RegisterScript                                               \
 				(Europa::Script::Internal::StringHash()(#TYPE), &Europa::Script::Internal::CreateScript<TYPE>) };             \
 			}
-			#endif
+#endif
 		}
 	}
 }
