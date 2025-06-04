@@ -59,7 +59,6 @@ namespace EuropaEditor.Editors.WorldEditor
             if (newSelection.Any())
                 msGameEntity = new MSGameEntity(newSelection);
             GameEntityView.Instance.DataContext = msGameEntity;
-
         }
     }
 }

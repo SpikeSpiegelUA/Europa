@@ -103,9 +103,13 @@ namespace EuropaEditor.Сomponents
                 IsActive = false;
                 _components.Add(component);
                 IsActive = true;
+                return true;
             }
-            Logger.Log(MessageType.Warning, $"Entity {Name} already has a {component.GetType().Name} component");
-            return false;
+            else
+            {
+                Logger.Log(MessageType.Warning, $"Entity {Name} already has a {component.GetType().Name} component");
+                return false;
+            }
         }
 
         public void RemoveComponent(Component component)

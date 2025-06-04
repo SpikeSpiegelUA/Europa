@@ -6,6 +6,7 @@
 #include "ID.h"
 #include "../Engine/Components/Entity.h"
 #include "../Engine/Components/TransformComponent.h"
+#include "../Engine/Components/Script.h"
 
 using namespace Europa;
 
@@ -30,8 +31,19 @@ namespace {
 		}
 	};
 
+	struct APIScriptComponent {
+		Script::Internal::ScriptCreator scriptCreator;
+
+		Script::InitInfo ConvertToInitInfo() {
+			Script::InitInfo info{};
+			info.ScriptCreator = scriptCreator;
+			return info;
+		}
+	};
+
 	struct GameEntityDescriptor {
 		APITransformComponent editorTransformComponent;
+		APIScriptComponent editorScriptComponent;
 	};
 
 	GameEntity::Entity CreateGameEntityFromID(ID::IDType id) {
@@ -44,9 +56,10 @@ ID::IDType CreateGameEntity(GameEntityDescriptor* entityDescriptor) {
 	assert(entityDescriptor);
 	GameEntityDescriptor& descriptor{ *entityDescriptor };
 	TransformComponent::InitInfo transformComponentInitInfo{ descriptor.editorTransformComponent.ConvertToInitInfo() };
+	Script::InitInfo scriptComponentInitInfo{ descriptor.editorScriptComponent.ConvertToInitInfo() };
 	GameEntity::EntityInfo gameEntityInfo{
 		&transformComponentInitInfo,
-
+		&scriptComponentInitInfo
 	};
 	return GameEntity::Create(gameEntityInfo).GetID();
 }

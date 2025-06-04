@@ -32,7 +32,7 @@ namespace EuropaEditor.GameProject.Backend
         }
 
         [DataMember]
-        internal Project Project { get; private set; }
+        public Project Project { get; private set; }
 
         private bool _isActive = false;
         [DataMember]

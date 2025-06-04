@@ -161,15 +161,19 @@ namespace EuropaEditor.GameDev
         public static bool IsDebugging()
         {
             bool result = false;
-            try
+            bool tryAgain = true;
+            for (int i = 0; i < 3 && tryAgain; ++i)
             {
-                result = _vsInstance != null && (_vsInstance.Debugger.CurrentProgram != null || _vsInstance.Debugger.CurrentMode == EnvDTE.dbgDebugMode.dbgRunMode);
-            }
-            catch(Exception ex)
-            {
-                Debug.Write(ex.Message);
-                if (!result)
-                    System.Threading.Thread.Sleep(1000);
+                try
+                {
+                    result = _vsInstance != null && (_vsInstance.Debugger.CurrentProgram != null || _vsInstance.Debugger.CurrentMode == EnvDTE.dbgDebugMode.dbgRunMode);
+                    tryAgain = false;
+                }
+                catch (Exception ex)
+                {
+                    Debug.Write(ex.Message);
+                    System.Threading.Thread.Sleep(10);
+                }
             }
             return result;
         }
@@ -184,7 +188,7 @@ namespace EuropaEditor.GameDev
 
             OpenVisualStudio(project.Solution);
             BuildDone = BuildSucceeded = false;
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3 && !BuildDone; ++i)
             {
                 try
                 {

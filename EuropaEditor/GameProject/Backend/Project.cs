@@ -196,6 +196,7 @@ namespace EuropaEditor.GameProject.Backend
             if(File.Exists(dll) && EngineAPI.LoadGameCodeDLL(dll) != 0)
             {
                 AvailableScripts = EngineAPI.EngineDLL_GetScriptNames();
+                ActiveScene.GameEntities.Where(x => x.GetComponent<Сomponents.ScriptComponent>() != null).ToList().ForEach(x => x.IsActive = true);
                 Logger.Log(MessageType.Info, "The game code DLL loaded successfully");
             }
             else
@@ -206,6 +207,7 @@ namespace EuropaEditor.GameProject.Backend
 
         private void UnloadGameCodeDLL()
         {
+            ActiveScene.GameEntities.Where(x => x.GetComponent<Сomponents.ScriptComponent>() != null).ToList().ForEach(x => x.IsActive = false);
             if (EngineAPI.UnloadGameCodeDLL() != 0)
             {
                 Logger.Log(MessageType.Info, "The game code DLL unloaded successfully.");
@@ -215,6 +217,7 @@ namespace EuropaEditor.GameProject.Backend
 
         public void Unload()
         {
+            UnloadGameCodeDLL();
             VisualStudio.CloseVisualStudio();
             UndoRedoManager.Reset();
         }
@@ -228,6 +231,7 @@ namespace EuropaEditor.GameProject.Backend
                 OnPropertyChanged(nameof(Scenes));
             }
             ActiveScene = Scenes.FirstOrDefault(x => x.IsActive);
+            Debug.Assert(ActiveScene != null);
 
             await BuildGameCodeDLL(false);
 

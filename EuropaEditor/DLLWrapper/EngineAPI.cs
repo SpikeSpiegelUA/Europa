@@ -1,4 +1,6 @@
 ﻿using EuropaEditor.EngineAPIStructs;
+using EuropaEditor.GameProject.Backend;
+using EuropaEditor.Utilities;
 using EuropaEditor.Сomponents;
 using System;
 using System.Collections.Generic;
@@ -20,7 +22,7 @@ namespace EuropaEditor.EngineAPIStructs
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    class ScriptComponent
+    class DLLScriptComponent
     {
         public IntPtr ScriptCreator;
     }
@@ -29,7 +31,7 @@ namespace EuropaEditor.EngineAPIStructs
     class GameEntityDescriptor
     {
         public APITransformComponent TransformComponent = new APITransformComponent();
-        public ScriptComponent Script = new ScriptComponent();
+        public DLLScriptComponent Script = new DLLScriptComponent();
     }
 }
 
@@ -66,7 +68,20 @@ namespace EuropaEditor.DLLWrapper
                 }
                 //Fill a script component.
                 {
-                    //var c = gameEntity.GetComponent<Script>();
+                    //Here we check if the current project is not null, to see, if the game code DLL has been loaded.
+                    //If not, then it is deferred until the game code DLL has been loaded.
+                    var c = gameEntity.GetComponent<ScriptComponent>();
+                    if (c != null && Project.CurrentProject != null)
+                    {
+                        if (Project.CurrentProject.AvailableScripts.Contains(c.Name))
+                        {
+                            gameEntityDescriptor.Script.ScriptCreator = EngineDLL_GetScriptCreator(c.Name);
+                        }
+                        else
+                        {
+                            Logger.Log(MessageType.Error, $"Unable to find a script with the name {c.Name}. Game entity will be created without script component!");
+                        }
+                    }
                 }
                 return CreateGameEntity(gameEntityDescriptor);
             }

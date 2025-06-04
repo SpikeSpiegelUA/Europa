@@ -3,18 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:EuropaEditor.Editors"
+             xmlns:local="clr-namespace:EuropaEditor.Editors.WorldEditor"
+             xmlns:editors="clr-namespace:EuropaEditor.Editors"
              xmlns:components="clr-namespace:EuropaEditor.Сomponents"
              mc:Ignorable="d" 
              Background="{StaticResource Editor.Window.GrayBrush3}"
              d:DataContext="{d:DesignInstance Type=components:MSGameEntity, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <local:NullableBoolToBoolConverter x:Key="nullableBoolToBoolConverter"/>
         <DataTemplate DataType="{x:Type components:MSTransformComponent}">
-            <local:TransformComponentView/>
+            <editors:TransformComponentView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type components:MSScriptComponent}">
-            <local:TransformComponentView/>
+            <editors:ScriptComponentView/>
         </DataTemplate>
 
         <ContextMenu x:Key="addComponentMenu"
@@ -55,11 +57,11 @@
                 </Style.Triggers>
             </Style>
         </ScrollViewer.Style>
-        <StackPanel Background="{StaticResource Editor.Window.GrayBrush4}">
+        <StackPanel Background="{StaticResource Editor.Window.GrayBrush4}" VerticalAlignment="Top">
             <Border Height="32" Background="{StaticResource Editor.Window.GrayBrush3}">
                 <ToggleButton x:Name="addComponent_ToggleButton" VerticalAlignment="Center" ClickMode="Press" Focusable="False"
                               HorizontalAlignment="Left" Margin="5, 0, 0, 0"
-                              PreviewMouseLeftButtonDown="OnAddComponent_Button_PreviewMouse_LBD">
+                              PreviewMouseLeftButtonDown="OnAddComponent_Button_PreviewMouse_LBD" IsEnabled="{Binding IsEnabled, Converter={StaticResource nullableBoolToBoolConverter}}">
                     <ToggleButton.Content>
                         <DockPanel>
                             <TextBlock Text="Add Component" Margin="5, 0"/>
@@ -75,17 +77,19 @@
                     <ColumnDefinition/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Name" Grid.Column="0" Margin="5, 0, 0, 0"/>
+                <TextBlock Text="Name" Grid.Column="0" Margin="5, 0, 0, 0" Style="{StaticResource LightTextBlockStyle}"/>
                 <TextBox Text="{Binding Name, UpdateSourceTrigger=Explicit}" Grid.Column="1"
                          GotKeyboardFocus="OnName_TextBox_GotKeyboardFocus"
-                         LostKeyboardFocus="OnName_TextBox_LostKeyboardFocus"/>
+                         LostKeyboardFocus="OnName_TextBox_LostKeyboardFocus"
+                         IsEnabled="{Binding IsEnabled, Converter={StaticResource nullableBoolToBoolConverter}}"/>
                 <StackPanel Orientation="Horizontal" Grid.Column="2">
-                    <TextBlock Text="Enabled" Margin="5, 0, 0, 0"/>
+                    <TextBlock Text="Enabled" Margin="5, 0, 0, 0" Style="{StaticResource LightTextBlockStyle}"/>
                     <CheckBox IsChecked="{Binding IsEnabled, Mode=OneWay}" Margin="5, 0" VerticalAlignment="Center"
                               Click="OnIsEnabled_CheckBox_Click"/>
                 </StackPanel>
             </Grid>
-            <ItemsControl ItemsSource="{Binding Components}" Margin="5, 0, 0, 0">
+            <ItemsControl ItemsSource="{Binding Components}" Margin="5, 0, 0, 0" IsTabStop="False" SnapsToDevicePixels="True"
+                          IsEnabled="{Binding IsEnabled, Converter={StaticResource nullableBoolToBoolConverter}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel/>
