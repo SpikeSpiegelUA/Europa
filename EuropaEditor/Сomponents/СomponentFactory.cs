@@ -25,5 +25,14 @@ namespace EuropaEditor.Сomponents
             Debug.Assert((int)type < _function.Length);
             return _function[(int)type];
         }
+        public static ComponentType ToEnumType(this Component component)
+        {
+            return component switch
+            {
+                TransformComponent _ => ComponentType.Transform,
+                ScriptComponent _ => ComponentType.Script,
+                _ => throw new ArgumentException("Unknown component type"),
+            };
+        }
     }
 }

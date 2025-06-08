@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace EuropaEditor.Сomponents
 {
@@ -30,9 +28,16 @@ namespace EuropaEditor.Сomponents
         }
 
         public override IMSComponent GetMultiselectionComponent(MSEntity msEntity) => new MSScriptComponent(msEntity);
+
+        public override void WriteToBinary(BinaryWriter bw)
+        {
+            var nameBytes = Encoding.UTF8.GetBytes(Name);
+            bw.Write(nameBytes.Length);
+            bw.Write(nameBytes);
+        }
     }
 
-    sealed class  MSScriptComponent : MSComponent<ScriptComponent>
+    sealed class MSScriptComponent : MSComponent<ScriptComponent>
     {
         private string _name;
         public string Name

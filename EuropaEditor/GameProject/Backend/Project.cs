@@ -1,6 +1,7 @@
 ﻿using EuropaEditor.DLLWrapper;
 using EuropaEditor.GameDev;
 using EuropaEditor.Utilities;
+using EuropaEditor.Сomponents;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -86,6 +87,9 @@ namespace EuropaEditor.GameProject.Backend
         public ICommand RedoCommand { get; set; }
         public ICommand SaveCommand { get; set; }
         public ICommand BuildCommand { get; private set; }
+        public ICommand DebugStartCommand { get; private set; }
+        public ICommand DebugStartWithoutDebuggingCommand { get; private set; }
+        public ICommand DebugStopCommand { get; private set; }
 
         private void SetCommands()
         {
@@ -118,6 +122,9 @@ namespace EuropaEditor.GameProject.Backend
             UndoCommand = new RelayCommand<object>(x => UndoRedoManager.Undo(), x => UndoRedoManager.UndoList.Any());
             RedoCommand = new RelayCommand<object>(x => UndoRedoManager.Redo(), x => UndoRedoManager.RedoList.Any());
             BuildCommand = new RelayCommand<bool>(async x => await BuildGameCodeDLL(x), x => !VisualStudio.IsDebugging() && VisualStudio.BuildDone);
+            DebugStartCommand = new RelayCommand<object>(async x => await RunGame(true), x => !VisualStudio.IsDebugging() && VisualStudio.BuildDone);
+            DebugStartWithoutDebuggingCommand = new RelayCommand<object>(async x => await RunGame(false), x => !VisualStudio.IsDebugging() && VisualStudio.BuildDone);
+            DebugStopCommand = new RelayCommand<object>(async x => await StopGame(), x => VisualStudio.IsDebugging());
             SaveCommand = new RelayCommand<object>(x => Save(this));
 
             OnPropertyChanged(nameof(AddScene));
@@ -125,6 +132,9 @@ namespace EuropaEditor.GameProject.Backend
             OnPropertyChanged(nameof(UndoCommand));
             OnPropertyChanged(nameof(RedoCommand));
             OnPropertyChanged(nameof(BuildCommand));
+            OnPropertyChanged(nameof(DebugStartCommand));
+            OnPropertyChanged(nameof(DebugStartWithoutDebuggingCommand));
+            OnPropertyChanged(nameof(DebugStopCommand));
             OnPropertyChanged(nameof(SaveCommand));
         }
 
@@ -170,6 +180,40 @@ namespace EuropaEditor.GameProject.Backend
             Serializer.ToFile(projectToSave, projectToSave.FullPath);
             Logger.Log(MessageType.Info, $"Project saved to {projectToSave.FullPath}");
         }
+        
+        private void SaveToBinary()
+        {
+            var configName = GetConfigurationName(StandAloneBuildConfig);
+            var bin = $@"{Path}x64\{configName}\game.bin";
+
+            using (var bw = new BinaryWriter(File.Open(bin, FileMode.Create, FileAccess.Write)))
+            {
+                bw.Write(ActiveScene.GameEntities.Count);
+                foreach(var entity in ActiveScene.GameEntities)
+                {
+                    bw.Write(0);
+                    bw.Write(entity.Components.Count);
+                    foreach (var component in entity.Components)
+                    {
+                        bw.Write((int)component.ToEnumType());
+                        component.WriteToBinary(bw);
+                    }
+                }
+            }
+        }
+
+        private async Task RunGame(bool debug)
+        {
+            var configName = GetConfigurationName(StandAloneBuildConfig);
+            await Task.Run(() => VisualStudio.BuildSolution(this, configName, debug));
+            if (VisualStudio.BuildSucceeded)
+            {
+                SaveToBinary();
+                await Task.Run(() => VisualStudio.Run(this, configName, debug));
+            }
+        }
+
+        private async Task StopGame() => await Task.Run(() => VisualStudio.Stop());
 
         private async Task BuildGameCodeDLL(bool showWindow = true)
         {

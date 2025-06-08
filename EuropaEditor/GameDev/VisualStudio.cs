@@ -1,5 +1,6 @@
 ﻿using EnvDTE;
 using EnvDTE80;
+using EuropaEditor.GameProject.Backend;
 using EuropaEditor.Utilities;
 using System;
 using System.Collections.Generic;
@@ -47,7 +48,7 @@ namespace EuropaEditor.GameDev
                         throw new COMException($"CreateBindCtx() returned HRESULT: {hResult:X8}");
 
                     IMoniker[] currentMoniker = new IMoniker[1];
-                    while(monikerTable.Next(1, currentMoniker, IntPtr.Zero) == 0)
+                    while (monikerTable.Next(1, currentMoniker, IntPtr.Zero) == 0)
                     {
                         string name = string.Empty;
                         currentMoniker[0]?.GetDisplayName(bindingContext, null, out name);
@@ -58,21 +59,22 @@ namespace EuropaEditor.GameDev
                                 throw new COMException($"Running object table's GetObject() returned  HResult: {hResult:X8}");
                             EnvDTE80.DTE2 dte = obj as EnvDTE80.DTE2;
                             var solutionName = dte.Solution.FullName;
-                            if(solutionName == solutionPath)
+                            if (solutionName == solutionPath)
                             {
                                 _vsInstance = dte;
-                                break;                            
+                                break;
                             }
                         }
                     }
 
-                    if (_vsInstance == null) {
+                    if (_vsInstance == null)
+                    {
                         Type visualStudioType = Type.GetTypeFromProgID(_progID, true);
                         _vsInstance = Activator.CreateInstance(visualStudioType) as EnvDTE80.DTE2;
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
                 Logger.Log(MessageType.Error, "Failed to open the Visual Studio");
@@ -81,16 +83,16 @@ namespace EuropaEditor.GameDev
             {
                 if (monikerTable != null)
                     Marshal.ReleaseComObject(monikerTable);
-                if(runningObjectTable != null)
+                if (runningObjectTable != null)
                     Marshal.ReleaseComObject(runningObjectTable);
-                if(bindingContext != null)
+                if (bindingContext != null)
                     Marshal.ReleaseComObject(bindingContext);
             }
         }
 
         public static void CloseVisualStudio()
         {
-            if(_vsInstance?.Solution.IsOpen == true)
+            if (_vsInstance?.Solution.IsOpen == true)
             {
                 _vsInstance.ExecuteCommand("File.SaveAll");
                 _vsInstance.Solution.Close();
@@ -111,11 +113,11 @@ namespace EuropaEditor.GameDev
                     else
                         _vsInstance.ExecuteCommand("File.SaveAll");
 
-                    foreach(EnvDTE.Project project in _vsInstance.Solution.Projects)
+                    foreach (EnvDTE.Project project in _vsInstance.Solution.Projects)
                     {
                         if (project.UniqueName.Contains(projectName))
                         {
-                            foreach(var file in files)
+                            foreach (var file in files)
                             {
                                 project.ProjectItems.AddFromFile(file);
                             }
@@ -206,7 +208,7 @@ namespace EuropaEditor.GameDev
                             File.Delete(pdbFile);
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Debug.WriteLine(ex.Message);
                     }
@@ -219,6 +221,23 @@ namespace EuropaEditor.GameDev
                     Debug.WriteLine($"Attempt: failed to build {project.Name}");
                     System.Threading.Thread.Sleep(1000);
                 }
+            }
+        }
+
+        public static void Run(GameProject.Backend.Project project, string configName, bool debug)
+        {
+            if (_vsInstance != null && !IsDebugging() && BuildDone && BuildSucceeded)
+            {
+                _vsInstance.ExecuteCommand(debug ? "Debug.Start" : "Debug.StartWithoutDebugging");
+
+            }
+        }
+
+        public static void Stop()
+        {
+            if (_vsInstance != null && IsDebugging())
+            {
+                _vsInstance.ExecuteCommand("Debug.StopDebugging");
             }
         }
     }

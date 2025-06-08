@@ -1,6 +1,7 @@
 ﻿using EuropaEditor.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Serialization;
@@ -61,6 +62,19 @@ namespace EuropaEditor.Сomponents
         }
 
         public override IMSComponent GetMultiselectionComponent(MSEntity msEntity) => new MSTransformComponent(msEntity);
+
+        public override void WriteToBinary(BinaryWriter bw)
+        {
+            bw.Write(Position.X);
+            bw.Write(Position.Y);
+            bw.Write(Position.Z);
+            bw.Write(Rotation.X);
+            bw.Write(Rotation.Y);
+            bw.Write(Rotation.Z);
+            bw.Write(Scale.X);
+            bw.Write(Scale.Y);
+            bw.Write(Scale.Z);
+        }
     }
 
     sealed class MSTransformComponent : MSComponent<TransformComponent>
