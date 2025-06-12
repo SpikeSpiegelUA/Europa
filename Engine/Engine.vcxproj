@@ -26,6 +26,7 @@
     <ClInclude Include="Components\Entity.h" />
     <ClInclude Include="Components\Script.h" />
     <ClInclude Include="Components\TransformComponent.h" />
+    <ClInclude Include="Content\ContentLoader.h" />
     <ClInclude Include="EngineAPI\GameEntityAPI.h" />
     <ClInclude Include="EngineAPI\ScriptAPI.h" />
     <ClInclude Include="EngineAPI\TransformComponentAPI.h" />
@@ -36,6 +37,7 @@
     <ClCompile Include="Components\Entity.cpp" />
     <ClCompile Include="Components\Script.cpp" />
     <ClCompile Include="Components\TransformComponent.cpp" />
+    <ClCompile Include="Content\ContentLoader.cpp" />
     <ClCompile Include="Core\Engine.cpp" />
     <ClCompile Include="Core\Main.cpp" />
   </ItemGroup>
