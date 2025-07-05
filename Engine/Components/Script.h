@@ -11,4 +11,5 @@ namespace Europa::Script {
 
 	Component Create(const InitInfo& initInfo, GameEntity::Entity entity);
 	void Remove(Component componentToRemove);
+	void Update(float deltaTime);
 }

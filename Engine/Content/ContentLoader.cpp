@@ -1,10 +1,14 @@
 #include "ContentLoader.h"
 #include "../Components/Entity.h"
 #include "../Components/TransformComponent.h"
-#include "../Components/ScriptComponent.h"
-#include <fstream>
+#include "../Components/Script.h"
 
 #if !defined(SHIPPING)
+
+#include <fstream>
+#include <filesystem>
+#include <Windows.h>
+
 namespace Europa::Content {
 	namespace {
 		enum EComponentType {
@@ -13,7 +17,7 @@ namespace Europa::Content {
 			Count
 		};
 
-		Utilities::vector<GameEntity::Entity> entities;
+		Utilities::Vector<GameEntity::Entity> entities;
 		TransformComponent::InitInfo TransformInfo{};
 		Script::InitInfo ScriptInfo{};
 
@@ -61,8 +65,16 @@ namespace Europa::Content {
 	}
 	bool LoadGame()
 	{
+		//Set the working directory for the executable path.
+		wchar_t path[MAX_PATH];
+		const uint32 length{ GetModuleFileName(0, &path[0], MAX_PATH) };
+		if (!length || GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+			return false;
+		std::filesystem::path p{ path };
+		SetCurrentDirectory(p.parent_path().wstring().c_str());
+		//Read game.bin file and create the entities from it.
 		std::ifstream game("game.bin", std::ios::in | std::ios::binary);
-		Europa::Utilities::vector<uint8> buffer(std::istreambuf_iterator<char>(game), {});
+		Europa::Utilities::Vector<uint8> buffer(std::istreambuf_iterator<char>(game), {});
 		assert(buffer.size());
 		const uint8* at{ buffer.data() };
 		constexpr uint32 suint32{ sizeof(uint32) };
@@ -104,5 +116,5 @@ namespace Europa::Content {
 		for (auto entity : entities)
 			GameEntity::Remove(entity.GetID());
 	}
-#endif
+#endif //!defined(SHIPPING)
 }

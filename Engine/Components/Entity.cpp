@@ -5,10 +5,10 @@
 namespace Europa::GameEntity {
 	//Anonymous namespace, to make these functions and variables inaccessible outside this translation unit.
 	namespace {
-		Utilities::vector<ID::GenerationType> Generations;
+		Utilities::Vector<ID::GenerationType> Generations;
 		Utilities::deque<EntityID> FreeIDs;
-		Utilities::vector<TransformComponent::Component> TransformComponents;
-		Utilities::vector<Script::Component> Scripts;
+		Utilities::Vector<TransformComponent::Component> TransformComponents;
+		Utilities::Vector<Script::Component> Scripts;
 	}
 	Entity Create(const EntityInfo& entityInfo)
 	{
@@ -72,7 +72,6 @@ namespace Europa::GameEntity {
 		assert(ID::IsValid(entityID));
 		const ID::IDType index{ ID::Index(entityID) };
 		assert(index < Generations.size());
-		assert(Generations[index] == ID::Generation(entityID));
 		return (Generations[index] == ID::Generation(entityID) && TransformComponents[index].IsValid());
 	}
 

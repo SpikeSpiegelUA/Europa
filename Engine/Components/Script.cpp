@@ -2,11 +2,11 @@
 
 namespace Europa::Script {
 	namespace {
-		Utilities::vector <Internal::ScriptPointer> EntityScripts;
-		Utilities::vector<ID::IDType> IDMapping;
+		Utilities::Vector <Internal::ScriptPointer> EntityScripts;
+		Utilities::Vector<ID::IDType> IDMapping;
 
-		Utilities::vector<ID::GenerationType> Generations;
-		Utilities::vector<ScriptID> FreeIDs;
+		Utilities::Vector<ID::GenerationType> Generations;
+		Utilities::deque<ScriptID> FreeIDs;
 
 		using ScriptRegistry = std::unordered_map<size_t, Internal::ScriptCreator>;
 
@@ -18,10 +18,10 @@ namespace Europa::Script {
 		}
 
 		#ifdef USE_WITH_EDITOR
-		Utilities::vector<std::string>& ScriptNames() {
+		Utilities::Vector<std::string>& ScriptNames() {
 			//We put this variable in a function because of a static data initialization order.
 			//This way we can be sure, that the order will be correct.
-			static Utilities::vector<std::string> names;
+			static Utilities::Vector<std::string> names;
 			return names;
 		}
 		#endif
@@ -70,7 +70,7 @@ namespace Europa::Script {
 		if (FreeIDs.size() > ID::MinDeletedElements) {
 			id = FreeIDs.front();
 			assert(!Exists(id));
-			FreeIDs.pop_back();
+			FreeIDs.pop_front();
 			id = ScriptID{ ID::NewGeneration(id) };
 			++Generations[ID::Index(id)];
 		}
@@ -98,6 +98,12 @@ namespace Europa::Script {
 		Utilities::EraseUnordered(EntityScripts, index);
 		IDMapping[ID::Index(lastID)] = index;
 		IDMapping[ID::Index(id)] = ID::InvalidID;
+	}
+
+	void Europa::Script::Update(float deltaTime) {
+		for (auto& ptr : EntityScripts) {
+			ptr->Update(deltaTime);
+		}
 	}
 }
 

@@ -4,9 +4,9 @@
 namespace Europa::TransformComponent {
 
 	namespace {
-		Utilities::vector<Math::Vector3> positions;
-		Utilities::vector<Math::Vector4> rotations;
-		Utilities::vector<Math::Vector3> scales;
+		Utilities::Vector<Math::Vector3> positions;
+		Utilities::Vector<Math::Vector4> rotations;
+		Utilities::Vector<Math::Vector3> scales;
 	} //Anonymouse namespace to give access only to this translation unit.
 
 	Component Create(const InitInfo& initInfo, GameEntity::Entity entity) {

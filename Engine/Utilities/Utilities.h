@@ -8,7 +8,7 @@
 #include <algorithm>
 namespace Europa::Utilities {
 	template<typename T>
-	using vector = typename std::vector<T>;
+	using Vector = typename std::vector<T>;
 }
 #endif
 
