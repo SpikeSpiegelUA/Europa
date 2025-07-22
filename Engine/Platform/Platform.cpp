@@ -55,6 +55,26 @@ namespace Europa::Platform {
 				case WM_DESTROY:
 					GetWindowInfoFromHandle(hwnd).IsClosed = true;
 					break;
+				case WM_EXITSIZEMOVE:
+					info = &GetWindowInfoFromHandle(hwnd);
+					break;
+				case WM_SIZE:
+					if (wparam == SIZE_MAXIMIZED) {
+						info = &GetWindowInfoFromHandle(hwnd);
+					}
+					break;
+				case WM_SYSCOMMAND:
+					if (wparam == SC_RESTORE) {
+						info = &GetWindowInfoFromHandle(hwnd);
+					}
+					break;
+				default:
+					break;
+			}
+
+			if (info) {
+				assert(info->HWND);
+				GetClientRect(info->HWND, info->IsFullscreen ? &info->FullscreenArea : &info->ClientArea);
 			}
 
 			LONG_PTR longPtr{ GetWindowLongPtr(hwnd, 0) };
@@ -136,7 +156,7 @@ namespace Europa::Platform {
 	Window EngineCreateWindow(const WindowInitInfo* const initInfo)
 	{
 		WindowProc callback{initInfo ? initInfo->Callback : nullptr };
-		WindowHandle parent{ initInfo ? initInfo->Parent : nullptr };
+		WindowHandle parent{initInfo ? initInfo->Parent : nullptr };
 
 		//Create the window class.
 		WNDCLASSEX wc;
@@ -164,11 +184,11 @@ namespace Europa::Platform {
 		//Adjust the window size according to the style of the window.
 		AdjustWindowRect(&rc, info.Style, FALSE);
 
-		const wchar_t* caption{ initInfo->Caption ? initInfo->Caption : L"Europa Game" };
-		const int32 left{ initInfo->Left ? initInfo->Left : info.ClientArea.left };
-		const int32 top{ initInfo->Top ? initInfo->Top : info.ClientArea.top };
-		const int32 width{ initInfo->Width ? initInfo->Width : rc.right - rc.left };
-		const int32 height{ initInfo->Height ? initInfo->Height : rc.bottom - rc.top};
+		const wchar_t* caption{initInfo && initInfo->Caption ? initInfo->Caption : L"Europa Game" };
+		const int32 left{initInfo && initInfo->Left ? initInfo->Left : info.ClientArea.left };
+		const int32 top{initInfo && initInfo->Top ? initInfo->Top : info.ClientArea.top };
+		const int32 width{initInfo && initInfo->Width ? initInfo->Width : rc.right - rc.left };
+		const int32 height{initInfo && initInfo->Height ? initInfo->Height : rc.bottom - rc.top};
 
 		info.Style |= parent ? WS_CHILDWINDOW : WS_OVERLAPPEDWINDOW;
 
@@ -189,6 +209,7 @@ namespace Europa::Platform {
 		);
 		
 		if (info.HWND) {
+			SetLastError(0);
 			const WindowID id{ AddToWindows(info) };
 			SetWindowLongPtr(info.HWND, GWLP_USERDATA, (LONG_PTR)id);
 			//Set in the "extra" bytes  the pointer to the window callback function which handles messages for the window.

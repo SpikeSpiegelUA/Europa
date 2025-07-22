@@ -1,4 +1,5 @@
 #pragma once
+#include <thread>
 
 class Test {
 	virtual bool Initialize() = 0;

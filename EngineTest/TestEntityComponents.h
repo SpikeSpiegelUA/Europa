@@ -70,7 +70,7 @@ private:
 		std::cout << "Total amount of entities: " << NumberOfEntities << '\n';
 	}
 
-	Europa::Utilities::vector<Europa::GameEntity::Entity> Entities;
+	Europa::Utilities::Vector<Europa::GameEntity::Entity> Entities;
 
 	uint32 Added{ 0 };
 	uint32 Removed{ 0 };
