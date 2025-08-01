@@ -127,6 +127,10 @@
       <DependentUpon>LoggerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utilities\Logger.cs" />
+    <Compile Include="Utilities\RenderSurface\RenderSurfaceHost.cs" />
+    <Compile Include="Utilities\RenderSurface\RenderSurfaceView.xaml.cs">
+      <DependentUpon>RenderSurfaceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utilities\Utilities.cs" />
     <Compile Include="Utilities\Serializer.cs" />
     <Compile Include="Utilities\UndoRedo.cs" />
@@ -213,6 +217,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="GameProject\Frontend\ProjectBrowserDialogue.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Utilities\RenderSurface\RenderSurfaceView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -18,3 +18,9 @@
 #include "..\Utilities\Utilities.h"
 #include "..\Utilities\MathTypes.h"
 
+//Define Macro that will remove code from Non-Debug builds.
+#ifdef _DEBUG
+#define DEBUG_OP(x) x
+#else
+#define DEBUG_OP(x) (void(0));
+#endif

@@ -50,6 +50,12 @@ namespace EuropaEditor.DLLWrapper
         [DllImport(_engineDLL)]
         [return: MarshalAs(UnmanagedType.SafeArray)]
         public static extern string[] EngineDLL_GetScriptNames();
+        [DllImport(_engineDLL)]
+        public static extern int CreateRenderSurface(IntPtr host, int width, int height);
+        [DllImport(_engineDLL)]
+        public static extern void RemoveRenderSurface(int surfaceID);
+        [DllImport(_engineDLL)]
+        public static extern IntPtr GetWindowHandle(int surfaceID);
         internal static class EntityAPI
         {
             [DllImport(_engineDLL)]

@@ -118,7 +118,7 @@ namespace Europa::Platform {
 
 		const Math::UInt32Vector4 GetWindowSize(WindowID id) {
 			WindowInfo& windowInfo{ GetWindowInfoFromID(id) };
-			RECT area{ windowInfo.IsFullscreen ? windowInfo.FullscreenArea : windowInfo.ClientArea };
+			RECT& area{ windowInfo.IsFullscreen ? windowInfo.FullscreenArea : windowInfo.ClientArea };
 			return { (uint32)area.left, (uint32)area.top, (uint32)area.right, (uint32)area.bottom };
 		}
 
@@ -138,8 +138,7 @@ namespace Europa::Platform {
 					GetWindowRect(windowInfo.HWND, &rect);
 					windowInfo.TopLeft.x = rect.left;
 					windowInfo.TopLeft.y = rect.top;
-					windowInfo.Style = 0;
-					SetWindowLongPtr(windowInfo.HWND, GWL_STYLE, windowInfo.Style);
+					SetWindowLongPtr(windowInfo.HWND, GWL_STYLE, 0);
 					ShowWindow(windowInfo.HWND, SW_MAXIMIZE);
 				}
 				else {
@@ -179,19 +178,20 @@ namespace Europa::Platform {
 
 		//Create the window.
 		WindowInfo info{};
-		RECT rc{ info.ClientArea };
-
-		//Adjust the window size according to the style of the window.
-		AdjustWindowRect(&rc, info.Style, FALSE);
-
-		const wchar_t* caption{initInfo && initInfo->Caption ? initInfo->Caption : L"Europa Game" };
-		const int32 left{initInfo && initInfo->Left ? initInfo->Left : info.ClientArea.left };
-		const int32 top{initInfo && initInfo->Top ? initInfo->Top : info.ClientArea.top };
-		const int32 width{initInfo && initInfo->Width ? initInfo->Width : rc.right - rc.left };
-		const int32 height{initInfo && initInfo->Height ? initInfo->Height : rc.bottom - rc.top};
-
+		info.ClientArea.right = (initInfo && initInfo->Width) ? info.ClientArea.left + initInfo->Width : info.ClientArea.right;
+		info.ClientArea.bottom = (initInfo && initInfo->Height) ? info.ClientArea.top + initInfo->Height : info.ClientArea.bottom;
 		info.Style |= parent ? WS_CHILDWINDOW : WS_OVERLAPPEDWINDOW;
 
+		RECT rect{ info.ClientArea };
+
+		//Adjust the window size according to the style of the window.
+		AdjustWindowRect(&rect, info.Style, FALSE);
+
+		const wchar_t* caption{initInfo && initInfo->Caption ? initInfo->Caption : L"Europa Game" };
+		const int32 left{initInfo ? initInfo->Left : info.ClientArea.left };
+		const int32 top{initInfo ? initInfo->Top : info.ClientArea.top };
+		const int32 width{rect.right - rect.left};
+		const int32 height{rect.bottom - rect.top};
 
 		info.HWND = CreateWindowEx(
 			/* [in]           DWORD     dwExStyle,       */ 0,                   //Extended style.
@@ -209,7 +209,7 @@ namespace Europa::Platform {
 		);
 		
 		if (info.HWND) {
-			SetLastError(0);
+			DEBUG_OP(SetLastError(0));
 			const WindowID id{ AddToWindows(info) };
 			SetWindowLongPtr(info.HWND, GWLP_USERDATA, (LONG_PTR)id);
 			//Set in the "extra" bytes  the pointer to the window callback function which handles messages for the window.
@@ -229,7 +229,9 @@ namespace Europa::Platform {
 		DestroyWindow(info.HWND);
 		RemoveFromWindows(id);
 	}
-#elif
+#elif LINUX
+
+#else
 #error "One has to implement at least one platform."
 #endif
 
