@@ -1,5 +1,5 @@
 #pragma once
-#include "CommonHeaders.h"
+#include "../Common/CommonHeaders.h"
 #include "..\Platform\Window.h"
 
 namespace Europa::Graphics {

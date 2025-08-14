@@ -56,6 +56,10 @@ namespace EuropaEditor.DLLWrapper
         public static extern void RemoveRenderSurface(int surfaceID);
         [DllImport(_engineDLL)]
         public static extern IntPtr GetWindowHandle(int surfaceID);
+        [DllImport(_engineDLL)]
+        public static extern void ResizeRenderSurface(int surfaceID);
+
+
         internal static class EntityAPI
         {
             [DllImport(_engineDLL)]

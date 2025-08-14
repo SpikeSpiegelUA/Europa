@@ -95,12 +95,17 @@ namespace Europa::Platform {
 		void ResizeWindow(const WindowID windowID, const int32 width, const int32 height) {
 			WindowInfo& windowInfo{ GetWindowInfoFromID(windowID) };
 
-			//NOTE: We also support a case, when the user changes the resolution in the fullscreen mode.
-			RECT& area{ windowInfo.IsFullscreen ? windowInfo.FullscreenArea : windowInfo.ClientArea };
-			area.bottom = area.top + height;
-			area.right = area.left + width;
+			if (windowInfo.Style & WS_CHILD) {
+				GetClientRect(windowInfo.HWND, &windowInfo.ClientArea);
+			}
+			else {
+				//NOTE: We also support a case, when the user changes the resolution in the fullscreen mode.
+				RECT& area{ windowInfo.IsFullscreen ? windowInfo.FullscreenArea : windowInfo.ClientArea };
+				area.bottom = area.top + height;
+				area.right = area.left + width;
 
-			ResizeWindow(windowInfo, area);
+				ResizeWindow(windowInfo, area);
+			}
 		}
 
 		bool IsWindowFullscreen(WindowID id) {

@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineTest", "EngineTest\En
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineDLL", "EngineDLL\EngineDLL.vcxproj", "{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ContentToolsDLL", "ContentToolsDLL\ContentToolsDLL.vcxproj", "{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -18,12 +20,12 @@ Global
 		ReleaseEditor|x64 = ReleaseEditor|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4185015F-079F-40E5-B245-23780ED7A9CF}.Debug|x64.ActiveCfg = Debug|x64
-		{4185015F-079F-40E5-B245-23780ED7A9CF}.Debug|x64.Build.0 = Debug|x64
+		{4185015F-079F-40E5-B245-23780ED7A9CF}.Debug|x64.ActiveCfg = DebugEditor|x64
+		{4185015F-079F-40E5-B245-23780ED7A9CF}.Debug|x64.Build.0 = DebugEditor|x64
 		{4185015F-079F-40E5-B245-23780ED7A9CF}.DebugEditor|x64.ActiveCfg = DebugEditor|x64
 		{4185015F-079F-40E5-B245-23780ED7A9CF}.DebugEditor|x64.Build.0 = DebugEditor|x64
-		{4185015F-079F-40E5-B245-23780ED7A9CF}.Release|x64.ActiveCfg = Release|x64
-		{4185015F-079F-40E5-B245-23780ED7A9CF}.Release|x64.Build.0 = Release|x64
+		{4185015F-079F-40E5-B245-23780ED7A9CF}.Release|x64.ActiveCfg = ReleaseEditor|x64
+		{4185015F-079F-40E5-B245-23780ED7A9CF}.Release|x64.Build.0 = ReleaseEditor|x64
 		{4185015F-079F-40E5-B245-23780ED7A9CF}.ReleaseEditor|x64.ActiveCfg = ReleaseEditor|x64
 		{4185015F-079F-40E5-B245-23780ED7A9CF}.ReleaseEditor|x64.Build.0 = ReleaseEditor|x64
 		{DF7E0BF4-8EB2-476E-9D03-7EF58A71E750}.Debug|x64.ActiveCfg = Debug|x64
@@ -42,16 +44,27 @@ Global
 		{EF77A944-A576-48F9-A120-FA9734D4D6D2}.Release|x64.Build.0 = Release|x64
 		{EF77A944-A576-48F9-A120-FA9734D4D6D2}.ReleaseEditor|x64.ActiveCfg = ReleaseEditor|x64
 		{EF77A944-A576-48F9-A120-FA9734D4D6D2}.ReleaseEditor|x64.Build.0 = ReleaseEditor|x64
-		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Debug|x64.ActiveCfg = Debug|x64
-		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Debug|x64.Build.0 = Debug|x64
-		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.DebugEditor|x64.ActiveCfg = DebugEditor|x64
-		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.DebugEditor|x64.Build.0 = DebugEditor|x64
-		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Release|x64.ActiveCfg = Release|x64
-		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Release|x64.Build.0 = Release|x64
+		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Debug|x64.ActiveCfg = DebugEditor|x64
+		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Debug|x64.Build.0 = DebugEditor|x64
+		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.DebugEditor|x64.ActiveCfg = ReleaseEditor|x64
+		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.DebugEditor|x64.Build.0 = ReleaseEditor|x64
+		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Release|x64.ActiveCfg = ReleaseEditor|x64
+		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Release|x64.Build.0 = ReleaseEditor|x64
 		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.ReleaseEditor|x64.ActiveCfg = ReleaseEditor|x64
 		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.ReleaseEditor|x64.Build.0 = ReleaseEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.Debug|x64.ActiveCfg = DebugEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.Debug|x64.Build.0 = DebugEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.DebugEditor|x64.ActiveCfg = ReleaseEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.DebugEditor|x64.Build.0 = ReleaseEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.Release|x64.ActiveCfg = ReleaseEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.Release|x64.Build.0 = ReleaseEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.ReleaseEditor|x64.ActiveCfg = ReleaseEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.ReleaseEditor|x64.Build.0 = ReleaseEditor|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5E302375-6F57-4465-AD82-F62A27FB9802}
 	EndGlobalSection
 EndGlobal
