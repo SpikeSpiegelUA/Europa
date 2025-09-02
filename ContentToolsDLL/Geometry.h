@@ -4,13 +4,25 @@
 
 namespace Europa::Tools {
 
+	struct Vertex {
+		Math::Vector3 Position;
+		Math::Vector3 Normal;
+		Math::Vector4 Tangent;
+		Math::Vector2 UV;
+	};
+
 	struct Mesh {
+		//Initial data.
 		Utilities::Vector<Math::Vector3> Positions;
 		Utilities::Vector<Math::Vector3> Normals;
 		Utilities::Vector<Math::Vector4> Tangents;
 		Utilities::Vector<Utilities::Vector<Math::Vector2>> UVSets;
 
 		Utilities::Vector<uint32> RawIndices;
+
+		//Intermediate data.
+		Utilities::Vector<Vertex> Vertices;
+		Utilities::Vector<uint32> Indices;
 	};
 
 	struct LODGroup {
@@ -37,5 +49,8 @@ namespace Europa::Tools {
 		uint32 BufferSize;
 		GeometryImportSettings Settings;
 	};
+
+	void ProcessScene(Scene& scene, const GeometryImportSettings& settings);
+	void PackData(const Scene& scene, SceneData& data);
 
 }

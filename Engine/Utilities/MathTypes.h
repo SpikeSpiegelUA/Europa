@@ -3,7 +3,7 @@
 
 namespace Europa::Math {
 	constexpr float PI = 3.141592653589793238462643383279502884197f;
-	constexpr float Epsilot = 1e-5f;
+	constexpr float Epsilon = 1e-5f;
 #if defined (_WIN64)
 	using Vector2 = DirectX::XMFLOAT2;
 	using Vector2A = DirectX::XMFLOAT2A;
