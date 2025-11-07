@@ -14,9 +14,9 @@ namespace Europa::ID {
 		//Index part is just an index of a game entity in the game entities array.
 		constexpr uint32 IndexBits{ sizeof(IDType) * 8 - GenerationBits };
 
-		//Mask for the index part of the ID. Internally it subtracts 1 to flip the bits.
+		//Mask for the index part of the ID. Subtract 1 to flip the bits.
 		constexpr IDType IndexMask{ (IDType{1} << IndexBits) - 1 };
-		//Mask for the generation part of the ID. Internally it subtracts 1 to flip the bits.
+		//Mask for the generation part of the ID. Subtract 1 to flip the bits.
 		constexpr IDType GenerationMask{ (IDType{1} << GenerationBits) - 1 };
 	}
 	constexpr IDType InvalidID{ IDType(-1) };

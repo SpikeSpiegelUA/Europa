@@ -88,6 +88,8 @@ namespace Europa::Tools {
 			const uint32 numIndices{ 3 * 2 * horizontalCount * verticalCount };
 			assert(mesh.RawIndices.size() == numIndices);
 
+			mesh.UVSets.resize(1);
+
 			for (uint32 i{ 0 }; i < numIndices; ++i) {
 				mesh.UVSets[0].emplace_back(uvs[mesh.RawIndices[i]]);
 			}

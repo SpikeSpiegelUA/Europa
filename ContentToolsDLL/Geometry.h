@@ -4,6 +4,17 @@
 
 namespace Europa::Tools {
 
+	namespace PackedVertex {
+		struct VertexStatic {
+			Math::Vector3 Position;
+			uint8 Reserved[3];
+			uint8 TSign;
+			uint16 Normal[2];
+			uint16 Tangent[2];
+			Math::Vector2 UV;
+		};
+	}
+
 	struct Vertex {
 		Math::Vector3 Position;
 		Math::Vector3 Normal;
@@ -23,6 +34,12 @@ namespace Europa::Tools {
 		//Intermediate data.
 		Utilities::Vector<Vertex> Vertices;
 		Utilities::Vector<uint32> Indices;
+
+		//Output data
+		std::string Name;
+		Utilities::Vector<PackedVertex::VertexStatic> PackedVerticesStatic;
+		float32 LODThreshold{ -1.f };
+		uint32 LODID{ uint32_invalid_id };
 	};
 
 	struct LODGroup {
