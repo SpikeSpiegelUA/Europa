@@ -17,7 +17,7 @@ namespace EuropaEditor.GameDev
     static class VisualStudio
     {
         private static EnvDTE80.DTE2 _vsInstance = null;
-        private static readonly string _progID = "VisualStudio.DTE.17.0";
+        private static readonly string _progID = "VisualStudio.DTE.18.0";
 
         public static bool BuildSucceeded { get; private set; } = true;
         public static bool BuildDone { get; private set; } = true;

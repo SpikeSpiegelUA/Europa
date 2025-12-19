@@ -20,6 +20,14 @@ namespace EuropaEditor.Utilities.Controls
         private double _multiplier;
         private bool _valueChanged = false;
 
+        public event RoutedEventHandler ValueChanged
+        {
+            add => AddHandler(ValueChangedEvent, value);
+            remove => RemoveHandler(ValueChangedEvent, value);
+        }
+
+        public static readonly RoutedEvent ValueChangedEvent = EventManager.RegisterRoutedEvent(nameof(ValueChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(NumberBox));
+
         public double Multiplier
         {
             get => (double)GetValue(MultiplierProperty);
@@ -34,7 +42,13 @@ namespace EuropaEditor.Utilities.Controls
             set => SetValue(ValueProperty, value);
         }
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(nameof(Value), typeof(string),
-            typeof(NumberBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+            typeof(NumberBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault),
+            new PropertyChangedCallback(OnValueChanged));
+
+        private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            (d as NumberBox).RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
+        }
 
         public override void OnApplyTemplate()
         {

@@ -93,6 +93,8 @@ namespace Europa::Tools {
 			for (uint32 i{ 0 }; i < numIndices; ++i) {
 				mesh.UVSets[0].emplace_back(uvs[mesh.RawIndices[i]]);
 			}
+
+			return mesh;
 		}
 
 		void CreatePlane(Scene& scene, const PrimitiveInitInfo& info) {

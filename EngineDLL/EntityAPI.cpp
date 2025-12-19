@@ -1,4 +1,3 @@
-
 #pragma comment (lib, "Engine.lib")
 
 #include "Common.h"
@@ -26,7 +25,7 @@ namespace {
 			XMVECTOR quaternion{ XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&xmRotation)) };
 			XMFLOAT4A rotationQuaternion{};
 			XMStoreFloat4A(&rotationQuaternion, quaternion);
-			memcpy(&initInfo.rotation[0], &rotationQuaternion.x, sizeof(float) * _countof(initInfo.rotation));
+			memcpy(&initInfo.rotation[0], &rotationQuaternion.x, sizeof(initInfo.rotation));
 			return initInfo;
 		}
 	};

@@ -301,6 +301,8 @@ namespace Europa::Tools {
 				PackMeshData(mesh, buffer, at);
 			}
 		}
+
+		assert(sceneSize == at);
 	}
 
 }

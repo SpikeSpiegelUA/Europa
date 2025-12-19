@@ -69,10 +69,15 @@
     </ApplicationDefinition>
     <Compile Include="Common\Helpers.cs" />
     <Compile Include="Common\RelayCommand.cs" />
+    <Compile Include="Content\Asset.cs" />
+    <Compile Include="Content\Geometry.cs" />
     <Compile Include="Dictionaries\ControlTemplates.xaml.cs">
       <DependentUpon>ControlTemplates.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DLLWrapper\ContentToolsAPI.cs" />
     <Compile Include="DLLWrapper\EngineAPI.cs" />
+    <Compile Include="Editors\GeometryEditor\GeometryEditor.cs" />
+    <Compile Include="Editors\IAssetEditor.cs" />
     <Compile Include="Editors\WorldEditor\ComponentView.xaml.cs">
       <DependentUpon>ComponentView.xaml</DependentUpon>
     </Compile>
@@ -117,6 +122,9 @@
     <Compile Include="Utilities\UndoRedo.cs" />
     <Compile Include="Utilities\UndoRedoView.xaml.cs">
       <DependentUpon>UndoRedoView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\PrimitiveMeshDialogue.xaml.cs">
+      <DependentUpon>PrimitiveMeshDialogue.xaml</DependentUpon>
     </Compile>
     <Compile Include="Сomponents\Component.cs" />
     <Compile Include="Сomponents\GameEntity.cs" />
@@ -209,6 +217,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Windows\PrimitiveMeshDialogue.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameProject\Frontend\ProjectBrowserDialogue.xaml.cs">
@@ -269,5 +281,6 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

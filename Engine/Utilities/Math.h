@@ -20,7 +20,7 @@ namespace Europa::Math {
 	constexpr float32 UnpackToUnitFloat(uint32 i) {
 		static_assert(bits <= sizeof(uint32) * 8);
 		assert(i < ((uint32)(1) << bits));
-		constexpr float32 intervals{ (float32)((uint32)(1) << bits) - 1) };
+		constexpr float32 intervals{ (float32)(((uint32)(1) << bits) - 1) };
 		return (float32)i / intervals;
 	}
 

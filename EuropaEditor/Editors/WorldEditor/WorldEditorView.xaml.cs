@@ -1,5 +1,6 @@
 ﻿using EuropaEditor.GameDev;
 using EuropaEditor.GameProject.Backend;
+using EuropaEditor.Windows;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -38,6 +39,12 @@ namespace EuropaEditor.Editors.WorldEditor
         private void OnNewScript_Button_Click(object sender, RoutedEventArgs e)
         {
             new NewScriptDialog().ShowDialog();
+        }
+
+        private void OnCreatePrimitiveMesh_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var dialogueWindow = new PrimitiveMeshDialogue();
+            dialogueWindow.ShowDialog();
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +27,22 @@ namespace EuropaEditor
                 parent = VisualTreeHelper.GetParent(parent);
             }
             return null;
+        }
+    }
+
+    public static class ContentHelper
+    {
+        public static string GetRandomString(int length = 8)
+        {
+            Debug.Assert(length > 0);
+            var n = length / 11;
+            var sb = new StringBuilder();
+            for(int i = 0; i <= n; ++i)
+            {
+                sb.Append(Path.GetRandomFileName().Replace(".", ""));
+            }
+
+            return sb.ToString(0, length);
         }
     }
 }

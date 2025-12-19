@@ -1,14 +1,20 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35521.163
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EuropaEditor", "EuropaEditor\EuropaEditor.csproj", "{4185015F-079F-40E5-B245-23780ED7A9CF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{DF7E0BF4-8EB2-476E-9D03-7EF58A71E750}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineTest", "EngineTest\EngineTest.vcxproj", "{EF77A944-A576-48F9-A120-FA9734D4D6D2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DF7E0BF4-8EB2-476E-9D03-7EF58A71E750} = {DF7E0BF4-8EB2-476E-9D03-7EF58A71E750}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineDLL", "EngineDLL\EngineDLL.vcxproj", "{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DF7E0BF4-8EB2-476E-9D03-7EF58A71E750} = {DF7E0BF4-8EB2-476E-9D03-7EF58A71E750}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ContentToolsDLL", "ContentToolsDLL\ContentToolsDLL.vcxproj", "{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}"
 EndProject
