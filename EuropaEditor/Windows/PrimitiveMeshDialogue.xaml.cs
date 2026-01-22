@@ -5,6 +5,7 @@ using EuropaEditor.Editors;
 using EuropaEditor.Utilities.Controls;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,10 +25,37 @@ namespace EuropaEditor.Windows
     /// </summary>
     public partial class PrimitiveMeshDialogue : Window
     {
+
+        private static readonly List<ImageBrush> _textures = new List<ImageBrush>();
+        static PrimitiveMeshDialogue()
+        {
+            LoadTextures();
+        }
+
         public PrimitiveMeshDialogue()
         {
             InitializeComponent();
             Loaded += (s, e) => UpdatePrimitive();
+        }
+
+        private static void LoadTextures()
+        {
+            var uris = new List<Uri>
+            {
+                new Uri("pack://application:,,,/Resources/PrimitiveMeshView/PlaneTexture.png")
+            };
+
+            _textures.Clear();
+            foreach(var uri in uris)
+            {
+                var resource = Application.GetResourceStream(uri);
+                using var reader = new BinaryReader(resource.Stream);
+                var data = reader.ReadBytes((int)resource.Stream.Length);
+                var imageSource = (BitmapSource)new ImageSourceConverter().ConvertFrom(data);
+                imageSource.Freeze();
+                var brush = new ImageBrush(imageSource);
+                brush.Transform = new ScaleTransform(1, -1, 0.5, 0.5));
+            }
         }
 
         private void OnPrimitiveType_ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdatePrimitive();

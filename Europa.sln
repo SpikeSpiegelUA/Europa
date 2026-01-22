@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EuropaEditor", "EuropaEditor\EuropaEditor.csproj", "{4185015F-079F-40E5-B245-23780ED7A9CF}"
 EndProject
@@ -52,16 +52,16 @@ Global
 		{EF77A944-A576-48F9-A120-FA9734D4D6D2}.ReleaseEditor|x64.Build.0 = ReleaseEditor|x64
 		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Debug|x64.ActiveCfg = DebugEditor|x64
 		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Debug|x64.Build.0 = DebugEditor|x64
-		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.DebugEditor|x64.ActiveCfg = ReleaseEditor|x64
-		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.DebugEditor|x64.Build.0 = ReleaseEditor|x64
+		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.DebugEditor|x64.ActiveCfg = DebugEditor|x64
+		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.DebugEditor|x64.Build.0 = DebugEditor|x64
 		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Release|x64.ActiveCfg = ReleaseEditor|x64
 		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.Release|x64.Build.0 = ReleaseEditor|x64
 		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.ReleaseEditor|x64.ActiveCfg = ReleaseEditor|x64
 		{0A164647-88C6-49FC-A6BF-FA96F2DD5B63}.ReleaseEditor|x64.Build.0 = ReleaseEditor|x64
 		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.Debug|x64.ActiveCfg = DebugEditor|x64
 		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.Debug|x64.Build.0 = DebugEditor|x64
-		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.DebugEditor|x64.ActiveCfg = ReleaseEditor|x64
-		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.DebugEditor|x64.Build.0 = ReleaseEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.DebugEditor|x64.ActiveCfg = DebugEditor|x64
+		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.DebugEditor|x64.Build.0 = DebugEditor|x64
 		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.Release|x64.ActiveCfg = ReleaseEditor|x64
 		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.Release|x64.Build.0 = ReleaseEditor|x64
 		{3F7F60E2-C9DB-4C79-A11E-ACFEE8A1EEC7}.ReleaseEditor|x64.ActiveCfg = ReleaseEditor|x64

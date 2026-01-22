@@ -58,7 +58,7 @@ namespace EuropaEditor.DLLWrapper
 {
     static class ContentToolsAPI
     {
-        private const string _toolsDLL = "ContentTools.dll";
+        private const string _toolsDLL = "ContentToolsDLL.dll";
 
         [DllImport(_toolsDLL)]
         private static extern void CreatePrimitiveMesh([In, Out] SceneData data, PrimitiveInitInfo info);
@@ -71,7 +71,7 @@ namespace EuropaEditor.DLLWrapper
                 CreatePrimitiveMesh(sceneData, info);
                 Debug.Assert(sceneData.Data != IntPtr.Zero && sceneData.DataSize > 0);
                 var data = new byte[sceneData.DataSize];
-                Marshal.Copy(data, 0, sceneData.Data, (int)sceneData.DataSize);
+                Marshal.Copy(sceneData.Data, data, 0, (int)sceneData.DataSize);
                 geometry.FromRawData(data);
             }
             catch (Exception ex)

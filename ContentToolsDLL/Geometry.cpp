@@ -8,7 +8,7 @@ namespace Europa::Tools {
 
 		void RecalculateNormals(Mesh& m) {
 			const uint32 numIndices{ (uint32)m.RawIndices.size() };
-			m.Normals.reserve(numIndices);
+			m.Normals.resize(numIndices);
 
 			for (uint32 i{ 0 }; i < numIndices; ++i) {
 				const uint32 i0{ m.RawIndices[i] };
@@ -93,7 +93,7 @@ namespace Europa::Tools {
 			for (uint32 i{ 0 }; i < numIndices; ++i)
 				idxRef[oldIndices[i]].emplace_back(i);
 
-			for (uint32 i{ 0 }; i < numIndices; ++i) {
+			for (uint32 i{ 0 }; i < numVertices; ++i) {
 				auto& refs{ idxRef[i] };
 				uint32 numRefs{ (uint32)refs.size() };
 				for (uint32 j{ 0 }; j < numRefs; ++j) {
