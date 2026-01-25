@@ -48,13 +48,16 @@ namespace EuropaEditor.Windows
             _textures.Clear();
             foreach(var uri in uris)
             {
-                var resource = Application.GetResourceStream(uri);
+                шєvar resource = Application.GetResourceStream(uri);
                 using var reader = new BinaryReader(resource.Stream);
                 var data = reader.ReadBytes((int)resource.Stream.Length);
                 var imageSource = (BitmapSource)new ImageSourceConverter().ConvertFrom(data);
                 imageSource.Freeze();
                 var brush = new ImageBrush(imageSource);
                 brush.Transform = new ScaleTransform(1, -1, 0.5, 0.5);
+                brush.ViewportUnits = BrushMappingMode.Absolute;
+                brush.Freeze();
+                _textures.Add(brush);
             }
         }
 
@@ -87,21 +90,37 @@ namespace EuropaEditor.Windows
                         break;
                     }
                 case PrimitiveMeshType.Cube:
-                    break;
+                    return;                
                 case PrimitiveMeshType.UVSphere:
-                    break;
+                    return;                  
                 case PrimitiveMeshType.IcoSphere:
-                    break;
+                    return;
                 case PrimitiveMeshType.Cylinder:
-                    break;
+                    return;
                 case PrimitiveMeshType.Capsule:
-                    break;
+                    return;
                 default:
                     break;
             }
             var geometry = new Content.Geometry();
             ContentToolsAPI.CreatePrimitiveMesh(geometry, info);
             (DataContext as GeometryEditor).SetAsset(geometry);
+            OnTexture_CheckBox_Click(textureCheckBox, null);
+        }
+
+        private void OnTexture_CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            Brush brush = Brushes.White;
+            if((sender as CheckBox).IsChecked == true)
+            {
+                brush = _textures[(int)PrimTypeComboBox.SelectedItem];
+            }
+
+            var vm = DataContext as GeometryEditor;
+            foreach(var mesh in vm.MeshRenderer.Meshes)
+            {
+                mesh.Diffuse = brush;
+            }
         }
     }
 }
