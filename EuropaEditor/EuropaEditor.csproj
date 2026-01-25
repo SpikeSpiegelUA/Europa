@@ -5,6 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4185015F-079F-40E5-B245-23780ED7A9CF}</ProjectGuid>
+    <XamlDebuggingInformation>True</XamlDebuggingInformation>
     <OutputType>WinExe</OutputType>
     <RootNamespace>EuropaEditor</RootNamespace>
     <AssemblyName>EuropaEditor</AssemblyName>

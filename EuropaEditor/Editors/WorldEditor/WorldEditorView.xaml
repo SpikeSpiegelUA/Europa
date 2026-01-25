@@ -6,8 +6,9 @@
              xmlns:local="clr-namespace:EuropaEditor.Editors.WorldEditor"
              xmlns:utilities="clr-namespace:EuropaEditor.Utilities"
              xmlns:controls="clr-namespace:EuropaEditor.Utilities.Controls"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    mc:Ignorable="d" Focusable="True"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:backend="clr-namespace:EuropaEditor.GameProject.Backend" 
+             d:DataContext="{d:DesignInstance Type=backend:Project}"
+             mc:Ignorable="d" Focusable="True"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <sys:Boolean x:Key="True">True</sys:Boolean>

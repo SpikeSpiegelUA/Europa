@@ -19,6 +19,15 @@ namespace EuropaEditor.GameProject.Backend
     [DataContract(Name = "Game")]
     internal class Project : ViewModelBase
     {
+        public Project(string name, string path)
+        {
+            Name = name;
+            Path = path;
+
+            _scenes.Add(new Scene(this, "Default Scene") { IsActive = true });
+            OnDeserialized(new StreamingContext());
+        }
+
         public enum BuildConfiguration
         {
             Debug,
@@ -281,19 +290,5 @@ namespace EuropaEditor.GameProject.Backend
 
             SetCommands();
         }
-
-        public Project(string name, string path)
-        {
-            Name = name;
-            Path = path;
-
-            _scenes.Add(new Scene(this, "Default Scene") { IsActive = true });
-            OnDeserialized(new StreamingContext());
-        }
-
-        public Project(){
-
-        }
-
     }
 }

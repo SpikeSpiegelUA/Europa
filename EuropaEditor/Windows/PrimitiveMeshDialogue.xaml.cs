@@ -54,7 +54,7 @@ namespace EuropaEditor.Windows
                 var imageSource = (BitmapSource)new ImageSourceConverter().ConvertFrom(data);
                 imageSource.Freeze();
                 var brush = new ImageBrush(imageSource);
-                brush.Transform = new ScaleTransform(1, -1, 0.5, 0.5));
+                brush.Transform = new ScaleTransform(1, -1, 0.5, 0.5);
             }
         }
 
