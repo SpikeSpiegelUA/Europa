@@ -5,6 +5,7 @@ namespace Europa::Tools {
 	namespace {
 
 		using namespace Math;
+		using namespace DirectX;
 		using PrimitiveMeshCreator = void(*)(Scene&, const PrimitiveInitInfo& info);
 
 		void CreatePlane(Scene&, const PrimitiveInitInfo& info);
@@ -109,7 +110,35 @@ namespace Europa::Tools {
 		}
 
 		void CreateUVSphere(Scene& scene, const PrimitiveInitInfo& info) {
+			const uint32 phi_count{ Clamp(info.Segments[Axis::X], 3u, 64u) };
+			const uint32 theta_count{ Clamp(info.Segments[Axis::Y], 2u, 64u) };
+			const float32 theta_step{ PI / theta_count };
+			const float32 phi_step{ TwoPI / phi_count };
+			const uint32 num_vertices{ 2 * phi_count * (theta_count - 1) };
 
+			Mesh m;
+			m.Name = "UVSphere";
+			m.Positions.resize(num_vertices);
+
+			//Add the top vertex.
+			uint32 c{ 0 };
+			m.Positions[c++] = { 0.f, info.Size.y, 0.f };
+
+			for (uint32 i{ 1 }; i <= (theta_count - 1); ++i) {
+				const float32 theta{ i * theta_step };
+				for (uint32 j{ 0 }; j < phi_count; ++j) {
+					const uint32 phi{ j * phi_step };
+					m.Positions[c++] = {
+						info.Size.x * XMScalarSin(theta) * XMScalarCos(phi),
+						info.Size.y * XMScalarCos(theta),
+						-info.Size.z * XMScalarSin(theta) * XMScalarSin(phi)
+					};
+				}
+			}
+
+			//Add the bottom vertex.
+			m.Positions[c++] = { 0.f, -info.Size.y, 0.f };
+			assert(c == num_vertices);
 		}
 
 		void CreateIcosphere(Scene& scene, const PrimitiveInitInfo& info) {

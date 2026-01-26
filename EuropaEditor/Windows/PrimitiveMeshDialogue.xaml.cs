@@ -48,7 +48,7 @@ namespace EuropaEditor.Windows
             _textures.Clear();
             foreach(var uri in uris)
             {
-                шєvar resource = Application.GetResourceStream(uri);
+                var resource = Application.GetResourceStream(uri);
                 using var reader = new BinaryReader(resource.Stream);
                 var data = reader.ReadBytes((int)resource.Stream.Length);
                 var imageSource = (BitmapSource)new ImageSourceConverter().ConvertFrom(data);
