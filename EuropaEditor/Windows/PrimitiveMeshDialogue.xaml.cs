@@ -42,6 +42,9 @@ namespace EuropaEditor.Windows
         {
             var uris = new List<Uri>
             {
+                new Uri("pack://application:,,,/Resources/PrimitiveMeshView/PlaneTexture.png"),
+                new Uri("pack://application:,,,/Resources/PrimitiveMeshView/PlaneTexture.png"),
+                new Uri("pack://application:,,,/Resources/PrimitiveMeshView/PlaneTexture.png"),
                 new Uri("pack://application:,,,/Resources/PrimitiveMeshView/PlaneTexture.png")
             };
 
@@ -87,12 +90,19 @@ namespace EuropaEditor.Windows
                         info.SegmentZ = (int)ZSliderPlane.Value;
                         info.Size.X = Value(WidthScalarBoxPlane, 0.001f);
                         info.Size.Z = Value(LengthScalarBoxPlane, 0.001f);
-                        break;
                     }
+                    break;
                 case PrimitiveMeshType.Cube:
                     return;                
                 case PrimitiveMeshType.UVSphere:
-                    return;                  
+                    {
+                        info.SegmentX = (int)XSliderUVSphere.Value;
+                        info.SegmentY = (int)YSliderUVSphere.Value;
+                        info.Size.X = Value(XScalarBoxUVSphere, 0.001f);
+                        info.Size.Y = Value(YScalarBoxUVSphere, 0.001f);
+                        info.Size.Z = Value(ZScalarBoxUVSphere, 0.001f);
+                    }
+                    break;
                 case PrimitiveMeshType.IcoSphere:
                     return;
                 case PrimitiveMeshType.Cylinder:

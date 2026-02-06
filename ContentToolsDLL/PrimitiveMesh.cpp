@@ -98,23 +98,13 @@ namespace Europa::Tools {
 			return mesh;
 		}
 
-		void CreatePlane(Scene& scene, const PrimitiveInitInfo& info) {
-			LODGroup lodGroup;
-			lodGroup.Name = "Plane";
-			lodGroup.Meshes.emplace_back(CreatePlane(info));
-			scene.LODGroups.emplace_back(lodGroup);
-		}
-
-		void CreateCube(Scene& scene, const PrimitiveInitInfo& info) {
-
-		}
-
-		void CreateUVSphere(Scene& scene, const PrimitiveInitInfo& info) {
+		Mesh CreateUVSphere(const PrimitiveInitInfo& info) {
 			const uint32 phi_count{ Clamp(info.Segments[Axis::X], 3u, 64u) };
 			const uint32 theta_count{ Clamp(info.Segments[Axis::Y], 2u, 64u) };
 			const float32 theta_step{ PI / theta_count };
 			const float32 phi_step{ TwoPI / phi_count };
-			const uint32 num_vertices{ 2 * phi_count * (theta_count - 1) };
+			const uint32 num_indices{ 2 * 3 * phi_count + 2 * 3 * phi_count * (theta_count - 2) };
+			const uint32 num_vertices{ 2 + phi_count * (theta_count - 1) };
 
 			Mesh m;
 			m.Name = "UVSphere";
@@ -127,7 +117,7 @@ namespace Europa::Tools {
 			for (uint32 i{ 1 }; i <= (theta_count - 1); ++i) {
 				const float32 theta{ i * theta_step };
 				for (uint32 j{ 0 }; j < phi_count; ++j) {
-					const uint32 phi{ j * phi_step };
+					const float32 phi{ j * phi_step };
 					m.Positions[c++] = {
 						info.Size.x * XMScalarSin(theta) * XMScalarCos(phi),
 						info.Size.y * XMScalarCos(theta),
@@ -139,6 +129,90 @@ namespace Europa::Tools {
 			//Add the bottom vertex.
 			m.Positions[c++] = { 0.f, -info.Size.y, 0.f };
 			assert(c == num_vertices);
+
+			c = 0;
+			m.RawIndices.resize(num_indices);
+
+			//Indices for the first cap, connecting the north pole to the first ring
+			for (uint32 i{ 0 }; i < phi_count - 1; i++) {
+				m.RawIndices[c++] = 0;
+				m.RawIndices[c++] = i + 1;
+				m.RawIndices[c++] = i + 2;
+			}
+
+			m.RawIndices[c++] = 0;
+			m.RawIndices[c++] = phi_count;
+			m.RawIndices[c++] = 1;
+
+			//Indices for the section between the top and bottom rings
+			for (uint32 i{ 0 }; i < theta_count; i++) {
+				for (uint32 j{ 0 }; j < phi_count; j++) {
+					const uint32 index[4]{
+						1 + i + j * phi_count,
+						1 + i + (j + 1) * phi_count,
+						1 + (i + 1) + (j + 1) * phi_count,
+						1 + (i + 1) + j * phi_count
+					};
+
+					m.RawIndices[c++] = index[0];
+					m.RawIndices[c++] = index[1];
+					m.RawIndices[c++] = index[2];
+
+					m.RawIndices[c++] = index[0];
+					m.RawIndices[c++] = index[2];
+					m.RawIndices[c++] = index[3];
+				}
+
+				const uint32 index[4]{
+					phi_count + i * phi_count,
+					phi_count + (i + 1) * phi_count,
+					1 + (i + 1) * phi_count,
+					1 + i * phi_count
+				};
+
+				m.RawIndices[c++] = index[0];
+				m.RawIndices[c++] = index[1];
+				m.RawIndices[c++] = index[2];
+
+				m.RawIndices[c++] = index[0];
+				m.RawIndices[c++] = index[2];
+				m.RawIndices[c++] = index[3];
+			}
+
+			//Indices for the bottom cap, connecting the south pole to the last ring.
+			const uint32 south_pole_index{ (uint32)m.Positions.size() - 1 };
+			for (uint32 i{ 0 }; i < (phi_count - 1); i++) {
+				m.RawIndices[c++] = south_pole_index;
+				m.RawIndices[c++] = south_pole_index - phi_count + i + 1;
+				m.RawIndices[c++] = south_pole_index - phi_count + i;
+			}
+
+			m.RawIndices[c++] = south_pole_index;
+			m.RawIndices[c++] = south_pole_index - phi_count;
+			m.RawIndices[c++] = south_pole_index - 1;
+
+			m.UVSets.resize(1);
+			m.UVSets[0].resize(m.RawIndices.size());
+
+			return m;
+		}
+
+		void CreatePlane(Scene& scene, const PrimitiveInitInfo& info) {
+			LODGroup lodGroup;
+			lodGroup.Name = "Plane";
+			lodGroup.Meshes.emplace_back(CreatePlane(info));
+			scene.LODGroups.emplace_back(lodGroup);
+		}
+
+		void CreateCube(Scene& scene, const PrimitiveInitInfo& info) {
+
+		}
+
+		void CreateUVSphere(Scene& scene, const PrimitiveInitInfo& info) {
+			LODGroup lodGroup;
+			lodGroup.Name = "UVSphere";
+			lodGroup.Meshes.emplace_back(CreateUVSphere(info));
+			scene.LODGroups.emplace_back(lodGroup);
 		}
 
 		void CreateIcosphere(Scene& scene, const PrimitiveInitInfo& info) {
