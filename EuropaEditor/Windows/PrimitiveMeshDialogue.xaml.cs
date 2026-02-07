@@ -81,6 +81,7 @@ namespace EuropaEditor.Windows
 
             var primitiveType = (PrimitiveMeshType)PrimTypeComboBox.SelectedItem;
             var info = new PrimitiveInitInfo { Type = primitiveType };
+            var smoothingAngle = 0;
 
             switch (primitiveType)
             {
@@ -101,6 +102,7 @@ namespace EuropaEditor.Windows
                         info.Size.X = Value(XScalarBoxUVSphere, 0.001f);
                         info.Size.Y = Value(YScalarBoxUVSphere, 0.001f);
                         info.Size.Z = Value(ZScalarBoxUVSphere, 0.001f);
+                        smoothingAngle = (int)AngleSliderUVSphere.Value;
                     }
                     break;
                 case PrimitiveMeshType.IcoSphere:
@@ -113,6 +115,7 @@ namespace EuropaEditor.Windows
                     break;
             }
             var geometry = new Content.Geometry();
+            geometry.ImportSettings.SmoothingAngle = smoothingAngle;
             ContentToolsAPI.CreatePrimitiveMesh(geometry, info);
             (DataContext as GeometryEditor).SetAsset(geometry);
             OnTexture_CheckBox_Click(textureCheckBox, null);
