@@ -132,16 +132,25 @@ namespace Europa::Tools {
 
 			c = 0;
 			m.RawIndices.resize(num_indices);
+			Utilities::Vector<Vector2> uvs(num_indices);
+			const float32 inv_theta_count{ 1.f / theta_count };
+			const float32 inv_phi_count{ 1.f / phi_count };
 
 			//Indices for the first cap, connecting the north pole to the first ring
 			for (uint32 i{ 0 }; i < phi_count - 1; i++) {
+				uvs[c] = { (2 * i + 1) * 0.5f * inv_phi_count, 1.f };
 				m.RawIndices[c++] = 0;
+				uvs[c] = { i * inv_phi_count, 1.f - inv_theta_count };
 				m.RawIndices[c++] = i + 1;
+				uvs[c] = { (i + 1) * inv_phi_count, 1.f - inv_theta_count };
 				m.RawIndices[c++] = i + 2;
 			}
 
+			uvs[c] = { 1.f - 0.5 * inv_phi_count, 1.f };
 			m.RawIndices[c++] = 0;
+			uvs[c] = { 1.f - inv_phi_count, 1.f - inv_theta_count };
 			m.RawIndices[c++] = phi_count;
+			uvs[c] = { 1.f, 1.f - inv_theta_count };
 			m.RawIndices[c++] = 1;
 
 			//Indices for the section between the top and bottom rings
@@ -154,12 +163,18 @@ namespace Europa::Tools {
 						1 + (i + 1) + j * phi_count
 					};
 
+					uvs[c] = { j * inv_phi_count, 1.f - (i + 1) * inv_theta_count };
 					m.RawIndices[c++] = index[0];
+					uvs[c] = { j * inv_phi_count, 1.f - (i + 2) * inv_theta_count };
 					m.RawIndices[c++] = index[1];
+					uvs[c] = { (j + 1) * inv_phi_count, 1.f - (i + 2) * inv_theta_count };
 					m.RawIndices[c++] = index[2];
 
+					uvs[c] = { j * inv_phi_count, 1.f - (i + 1) * inv_theta_count };
 					m.RawIndices[c++] = index[0];
+					uvs[c] = { (j + 1) * inv_phi_count, 1.f - (i + 2) * inv_theta_count };
 					m.RawIndices[c++] = index[2];
+					uvs[c] = { (j + 1) * inv_phi_count, 1.f - (i + 1) * inv_theta_count };
 					m.RawIndices[c++] = index[3];
 				}
 
@@ -170,29 +185,42 @@ namespace Europa::Tools {
 					1 + i * phi_count
 				};
 
+				uvs[c] = { 1.f - inv_phi_count, 1.f - (i + 1) * inv_theta_count };
 				m.RawIndices[c++] = index[0];
+				uvs[c] = { 1.f - inv_phi_count, 1.f - (i + 2) * inv_theta_count };
 				m.RawIndices[c++] = index[1];
+				uvs[c] = { 1.f, 1.f - (i + 2) * inv_theta_count };
 				m.RawIndices[c++] = index[2];
 
+				uvs[c] = { 1.f - inv_phi_count, 1.f - (i + 1) * inv_theta_count };
 				m.RawIndices[c++] = index[0];
+				uvs[c] = { 1.f, 1.f - (i + 2) * inv_theta_count };
 				m.RawIndices[c++] = index[2];
+				uvs[c] = { 1.f , 1.f - (i + 1) * inv_theta_count };
 				m.RawIndices[c++] = index[3];
 			}
 
 			//Indices for the bottom cap, connecting the south pole to the last ring.
 			const uint32 south_pole_index{ (uint32)m.Positions.size() - 1 };
 			for (uint32 i{ 0 }; i < (phi_count - 1); i++) {
+				uvs[c] = { (2 * i + 1) * 0.5f * inv_phi_count, 0.f };
 				m.RawIndices[c++] = south_pole_index;
+				uvs[c] = { (i + 1) * inv_phi_count, inv_theta_count };
 				m.RawIndices[c++] = south_pole_index - phi_count + i + 1;
+				uvs[c] = { 1.f * inv_phi_count, inv_theta_count };
 				m.RawIndices[c++] = south_pole_index - phi_count + i;
 			}
 
+			uvs[c] = { 1.f - 0.5f * inv_phi_count, 0.f };
 			m.RawIndices[c++] = south_pole_index;
+			uvs[c] = { 1.f, inv_theta_count };
 			m.RawIndices[c++] = south_pole_index - phi_count;
+			uvs[c] = { 1.f - inv_phi_count, inv_theta_count };
 			m.RawIndices[c++] = south_pole_index - 1;
 
-			m.UVSets.resize(1);
-			m.UVSets[0].resize(m.RawIndices.size());
+			assert(c == num_indices);
+
+			m.UVSets.emplace_back(uvs);
 
 			return m;
 		}
