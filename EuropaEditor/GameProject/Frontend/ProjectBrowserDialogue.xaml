@@ -95,7 +95,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1" Name="projectActionsStackPanel">
             <myns:OpenProjectView x:Name="openProjectView"/>
-            <myns:NewProjectView x:Name="newProjectView" Margin="800,0,0,0"/>
+            <myns:NewProjectView x:Name="newProjectView" Margin="800,0,0,0" IsEnabled="False"/>
         </StackPanel>
     </Grid>
 </Window>
