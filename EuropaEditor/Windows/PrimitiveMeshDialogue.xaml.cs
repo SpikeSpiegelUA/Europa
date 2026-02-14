@@ -2,7 +2,9 @@
 using EuropaEditor.ContentToolsAPIStructs;
 using EuropaEditor.DLLWrapper;
 using EuropaEditor.Editors;
+using EuropaEditor.GameProject.Backend;
 using EuropaEditor.Utilities.Controls;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -133,6 +135,15 @@ namespace EuropaEditor.Windows
             foreach(var mesh in vm.MeshRenderer.Meshes)
             {
                 mesh.Diffuse = brush;
+            }
+        }
+
+        private void OnSave_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog()
+            {
+                InitialDirectory = Project.Current.ContentPath,
+                Filter = "Asset file (*.asset)|*.asset"
             }
         }
     }
