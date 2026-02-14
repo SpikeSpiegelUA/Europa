@@ -21,6 +21,10 @@ namespace EuropaEditor.Content
     abstract class Asset : ViewModelBase
     {
         public AssetType Type { get; private set; }
+        public byte[] Icon { get; protected set; }
+        public string SourcePath { get; protected set; }
+        public Guid Guid { get; protected set; } = Guid.NewGuid();
+        public abstract IEnumerable<string> Save(string file);
 
         public Asset(AssetType type)
         {

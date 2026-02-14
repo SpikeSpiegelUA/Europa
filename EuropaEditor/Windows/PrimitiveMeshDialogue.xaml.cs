@@ -7,6 +7,7 @@ using EuropaEditor.Utilities.Controls;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -140,10 +141,19 @@ namespace EuropaEditor.Windows
 
         private void OnSave_Button_Click(object sender, RoutedEventArgs e)
         {
+            //TODO: Create proprietary browser dialogue.
             var dlg = new SaveFileDialog()
             {
-                InitialDirectory = Project.Current.ContentPath,
+                InitialDirectory = Project.CurrentProject.ContentPath,
                 Filter = "Asset file (*.asset)|*.asset"
+            };
+
+            if(dlg.ShowDialog() == true)
+            {
+                Debug.Assert(!string.IsNullOrEmpty(dlg.FileName));
+                var asset = (DataContext as IAssetEditor).Asset;
+                Debug.Assert(asset != null);
+                asset.Save(dlb.FileName);
             }
         }
     }
