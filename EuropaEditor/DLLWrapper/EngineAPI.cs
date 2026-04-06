@@ -40,7 +40,7 @@ namespace EuropaEditor.DLLWrapper
 {
     static class EngineAPI
     {
-        private const string _engineDLL = "EngineDLL.dll";
+        private const string _engineDLL = @"C:\Projects\Europa\x64\DebugEditor\EngineDLL.dll";
         [DllImport(_engineDLL, CharSet = CharSet.Ansi)]
         public static extern int LoadGameCodeDLL(string dllPath);
         [DllImport(_engineDLL)]

@@ -8,10 +8,28 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include <mutex>
 
 #if defined (_WIN64)
 #include "DirectXMath.h"
 #endif
+
+#ifndef DISABLE_COPY
+#define DISABLE_COPY(T)				     \
+		explicit T(const T&) = delete;   \
+		T& operator=(const T&) = delete;
+#endif
+
+#ifndef DISABLE_MOVE
+#define DISABLE_MOVE(T)					 \
+		explicit T(T&&) = delete;        \
+		T& operator=(T&&) = delete;
+#endif 
+
+#ifndef DISABLE_COPY_AND_MOVE
+#define DISABLE_COPY_AND_MOVE(T) DISABLE_COPY(T) DISABLE_MOVE(T)
+#endif
+
 //Common headers.
 #include "PrimitiveTypes.h"
 #include "Id.h"

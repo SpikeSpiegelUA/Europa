@@ -153,7 +153,7 @@ namespace EuropaEditor.Windows
                 Debug.Assert(!string.IsNullOrEmpty(dlg.FileName));
                 var asset = (DataContext as IAssetEditor).Asset;
                 Debug.Assert(asset != null);
-                asset.Save(dlb.FileName);
+                asset.Save(dlg.FileName);
             }
         }
     }

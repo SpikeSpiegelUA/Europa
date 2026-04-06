@@ -1,12 +1,12 @@
 #pragma comment(lib, "engine.lib")
-
-#define TEST_ENTITY_COMPONENTS 0
-#define TEST_WINDOW 1
+#include "Test.h"
 
 #if TEST_ENTITY_COMPONENTS
 #include "TestEntityComponents.h"
 #elif TEST_WINDOW
 #include "TestWindow.h"
+#elif TEST_RENDERER
+#include "TestRenderer.h"
 #else
 #error One of the tests needs to be enabled.
 #endif

@@ -15,7 +15,7 @@ using System.Windows.Media.TextFormatting;
 namespace EuropaEditor.Editors
 {
 
-    class MeshRendererVertexData : ViewModelBase
+    public class MeshRendererVertexData : ViewModelBase
     {
         private Brush _specular = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff111111"));
         public Brush Specular
@@ -51,7 +51,7 @@ namespace EuropaEditor.Editors
         public Int32Collection Indices { get; } = new Int32Collection();
     }
 
-    class MeshRenderer : ViewModelBase
+    public class MeshRenderer : ViewModelBase
     {
         public ObservableCollection<MeshRendererVertexData> Meshes { get; } = new ObservableCollection<MeshRendererVertexData>();
 

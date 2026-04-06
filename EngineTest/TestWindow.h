@@ -1,4 +1,6 @@
 #pragma once
+
+
 #include "Test.h"
 #include "..\Platform\Platform.h"
 #include "..\Platform\PlatformTypes.h"
@@ -13,7 +15,7 @@ LRESULT WinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 		{
 			bool allClosed{ true };
 			for (uint32 i = 0; i < _countof(Windows); i++) {
-				if (Windows[i].IsClosed()) {
+				if (!Windows[i].IsClosed()) {
 					allClosed = false;
 					break;
 				}

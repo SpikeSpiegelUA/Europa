@@ -146,7 +146,7 @@ namespace Europa::Tools {
 				m.RawIndices[c++] = i + 2;
 			}
 
-			uvs[c] = { 1.f - 0.5 * inv_phi_count, 1.f };
+			uvs[c] = { 1.f - 0.5f * inv_phi_count, 1.f };
 			m.RawIndices[c++] = 0;
 			uvs[c] = { 1.f - inv_phi_count, 1.f - inv_theta_count };
 			m.RawIndices[c++] = phi_count;
