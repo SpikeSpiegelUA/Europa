@@ -35,6 +35,8 @@ namespace Europa::Graphics::D3D12 {
 
 		for (uint32 i{ 0 }; i < capacity; i++)
 			freeHandles[i] = i;
+		DEBUG_OP(for (uint32 i{ 0 }; i < FrameBufferCount; ++i)
+			assert(deferredFreeIndices[i].empty()));
 
 		descriptorSize = device->GetDescriptorHandleIncrementSize(type);
 		cpuStart = heap->GetCPUDescriptorHandleForHeapStart();
@@ -43,8 +45,24 @@ namespace Europa::Graphics::D3D12 {
 		return true;
 	}
 
-	void DescriptorHeap::Release() {
+	void DescriptorHeap::ProcessDeferredFree(uint32 frameIndex)
+	{
+		std::lock_guard lock{ mutex };
+		assert(frameIndex < FrameBufferCount);
 
+		Utilities::Vector<uint32>& indices{ deferredFreeIndices[frameIndex] };
+		if (!indices.empty()) {
+			for (auto index : indices) {
+				--size;
+				freeHandles[size] = index;
+			}
+			indices.clear();
+		}
+	}
+
+	void DescriptorHeap::Release() {
+		assert(!size);
+		Core::DeferredRelease(heap);
 	}
 
 	DescriptorHandle DescriptorHeap::Allocate() {

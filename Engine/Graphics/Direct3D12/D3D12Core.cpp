@@ -15,7 +15,7 @@ namespace Europa::Graphics::D3D12::Core {
 		public:
 			D3D12Command() = default;
 			DISABLE_COPY_AND_MOVE(D3D12Command);
-			explicit D3D12Command(ID3D12Device8 *const device, D3D12_COMMAND_LIST_TYPE type) {
+			explicit D3D12Command(ID3D12Device8* const device, D3D12_COMMAND_LIST_TYPE type) {
 				HRESULT hr{ S_OK };
 				D3D12_COMMAND_QUEUE_DESC desc{};
 				desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -27,13 +27,13 @@ namespace Europa::Graphics::D3D12::Core {
 					goto _error;
 				NAME_D3D12_OBJECT(cmdQueue, type == D3D12_COMMAND_LIST_TYPE_DIRECT ? L"GFX Command Queue" :
 					type == D3D12_COMMAND_LIST_TYPE_COMPUTE ? L"Compute Command Queue" : L"Command Queue");
-				for (uint32 i { 0 }; i < FrameBufferCount; ++i) {
+				for (uint32 i{ 0 }; i < FrameBufferCount; ++i) {
 					CommandFrame& frame{ commandFrames[i] };
 					DXCall(hr = device->CreateCommandAllocator(type, IID_PPV_ARGS(&frame.CMDAllocator)));
 					if (FAILED(hr)) goto _error;
 
 					NAME_D3D12_OBJECT_INDEXED(frame.CMDAllocator, i, type == D3D12_COMMAND_LIST_TYPE_DIRECT
-						? L"GFX Command Allocator" :type == D3D12_COMMAND_LIST_TYPE_COMPUTE ? 
+						? L"GFX Command Allocator" : type == D3D12_COMMAND_LIST_TYPE_COMPUTE ?
 						L"Compute Command Allocator" : L"Command Allocator");
 				}
 				DXCall(hr = device->CreateCommandList(0, type, commandFrames[0].CMDAllocator, nullptr, IID_PPV_ARGS(&cmdList)));
@@ -42,7 +42,7 @@ namespace Europa::Graphics::D3D12::Core {
 				NAME_D3D12_OBJECT(cmdList, type == D3D12_COMMAND_LIST_TYPE_DIRECT ? L"GFX Command List" :
 					type == D3D12_COMMAND_LIST_TYPE_COMPUTE ? L"Compute Command List" : L"Command List");
 				DXCall(hr = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-				if(FAILED(hr))
+				if (FAILED(hr))
 					goto _error;
 				NAME_D3D12_OBJECT(fence, L"D3D12 Fence");
 
@@ -110,12 +110,12 @@ namespace Europa::Graphics::D3D12::Core {
 			constexpr uint32 FrameIndex() const {
 				return frameIndex;
 			}
-		private: 
-			
+		private:
+
 			struct CommandFrame {
 				ID3D12CommandAllocator* CMDAllocator{ nullptr };
 				uint64 FenceValue{ 0 };
-				
+
 				void Wait(HANDLE fenceEvent, ID3D12Fence1* fence) {
 					assert(fence && fenceEvent);
 
@@ -127,6 +127,7 @@ namespace Europa::Graphics::D3D12::Core {
 
 				void Release() {
 					Core::Release(CMDAllocator);
+					FenceValue = 0;
 				}
 			};
 
@@ -142,53 +143,81 @@ namespace Europa::Graphics::D3D12::Core {
 		ID3D12Device14* MainDevice{ nullptr };
 		IDXGIFactory7* DXGIFactory{ nullptr };
 		D3D12Command GFXCommand;
-		uint32 DeferredReleasesFlag[FrameBufferCount] {};
-		std::mutex DeferredReleasesMutex{};
 		DescriptorHeap rtvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV };
 		DescriptorHeap dsvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV };
 		DescriptorHeap srvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
 		DescriptorHeap uavDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
-	}
 
-	IDXGIAdapter4* DetermineMainAdapter() {
-		IDXGIAdapter4* adapter{ nullptr };
+		Utilities::Vector<IUnknown*> DeferredReleases[FrameBufferCount]{};
+		uint32 DeferredReleasesFlag[FrameBufferCount]{};
+		std::mutex DeferredReleasesMutex{};
 
-		for (uint32 i{ 0 }; DXGIFactory->EnumAdapterByGpuPreference(i, 
-			DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)) != DXGI_ERROR_NOT_FOUND; ++i) 
-		{
-			if (SUCCEEDED(D3D12CreateDevice(adapter, MinimumFeatureLevel, __uuidof(ID3D12Device), nullptr))) {
-				return adapter;
+		void __declspec(noinline) ProcessDeferredReleases(uint32 frameIndex) {
+			std::lock_guard lock{ DeferredReleasesMutex };
+
+			//Note: we clear this flag in the beginning. If we'd clear it at the end. then it might
+			//overwrite some other thread that was trying to set it.
+			//It's fine if overwriting happens before processing the items.
+			DeferredReleasesFlag[frameIndex] = 0;
+
+			rtvDescriptorHeap.ProcessDeferredFree(frameIndex);
+			dsvDescriptorHeap.ProcessDeferredFree(frameIndex);
+			srvDescriptorHeap.ProcessDeferredFree(frameIndex);
+			uavDescriptorHeap.ProcessDeferredFree(frameIndex);
+
+			Utilities::Vector<IUnknown*>& resources{DeferredReleases[frameIndex]};
+			if (!resources.empty()) {
+				for (auto& resource : resources)
+					Release(resource);
+				resources.clear();
 			}
-
-			Release(adapter);
 		}
 
-		return nullptr;
+		IDXGIAdapter4* DetermineMainAdapter() {
+			IDXGIAdapter4* adapter{ nullptr };
 
-	}
+			for (uint32 i{ 0 }; DXGIFactory->EnumAdapterByGpuPreference(i,
+				DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)) != DXGI_ERROR_NOT_FOUND; ++i)
+			{
+				if (SUCCEEDED(D3D12CreateDevice(adapter, MinimumFeatureLevel, __uuidof(ID3D12Device), nullptr))) {
+					return adapter;
+				}
 
-	D3D_FEATURE_LEVEL GetMaxFeatureLevel(IDXGIAdapter4* adapter) {
-		constexpr D3D_FEATURE_LEVEL featureLevels[4]{
-			D3D_FEATURE_LEVEL_11_0,
-			D3D_FEATURE_LEVEL_11_1,
-			D3D_FEATURE_LEVEL_12_0,
-			D3D_FEATURE_LEVEL_12_1,
-		};
+				Release(adapter);
+			}
 
-		D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevelInfo{};
-		featureLevelInfo.NumFeatureLevels = _countof(featureLevels);
-		featureLevelInfo.pFeatureLevelsRequested = featureLevels;
+			return nullptr;
 
-		ComPtr<ID3D12Device> device;
-		DXCall(D3D12CreateDevice(adapter, MinimumFeatureLevel, IID_PPV_ARGS(&device)));
-		DXCall(device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevelInfo, sizeof(featureLevelInfo)));
-		return featureLevelInfo.MaxSupportedFeatureLevel;
-	}
+		}
 
-	void __declspec(noinline) ProcessDeferredReleases(uint32 frameIndex) {
-		std::lock_guard lock{ DeferredReleasesMutex };
-		DeferredReleasesFlag[frameIndex] = 0;
-	}
+		D3D_FEATURE_LEVEL GetMaxFeatureLevel(IDXGIAdapter4* adapter) {
+			constexpr D3D_FEATURE_LEVEL featureLevels[4]{
+				D3D_FEATURE_LEVEL_11_0,
+				D3D_FEATURE_LEVEL_11_1,
+				D3D_FEATURE_LEVEL_12_0,
+				D3D_FEATURE_LEVEL_12_1,
+			};
+
+			D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevelInfo{};
+			featureLevelInfo.NumFeatureLevels = _countof(featureLevels);
+			featureLevelInfo.pFeatureLevelsRequested = featureLevels;
+
+			ComPtr<ID3D12Device> device;
+			DXCall(D3D12CreateDevice(adapter, MinimumFeatureLevel, IID_PPV_ARGS(&device)));
+			DXCall(device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevelInfo, sizeof(featureLevelInfo)));
+			return featureLevelInfo.MaxSupportedFeatureLevel;
+		}
+	}//Anonymous namespace
+
+	namespace Details {
+		void DeferredRelease(IUnknown* resource)
+		{
+			const uint32 frameIndex{ CurrentFrameIndex() };
+			std::lock_guard lock{ DeferredReleasesMutex };
+			DeferredReleases[frameIndex].push_back(resource);
+			SetDeferredReleasesFlag();
+		}
+	}//Details namespace
 
 	bool Initialize() {
 		if (MainDevice)
@@ -197,8 +226,11 @@ namespace Europa::Graphics::D3D12::Core {
 #ifdef _DEBUG
 		{
 			ComPtr<ID3D12Debug3> debugInterface;
-			DXCall(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
-			debugInterface->EnableDebugLayer();
+			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface))))
+				debugInterface->EnableDebugLayer();
+			else
+				OutputDebugStringA("Warning: D3D12 Debug interface is not available. Verify that Graphics\
+					Tools optional feature is installed in this system.\n");
 			DXGIFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 		}
 #endif
@@ -222,6 +254,17 @@ namespace Europa::Graphics::D3D12::Core {
 		if (FAILED(hr))
 			return FailedInit();
 
+#ifdef _DEBUG
+		{
+			ComPtr<ID3D12InfoQueue> infoQueue;
+			DXCall(MainDevice->QueryInterface(IID_PPV_ARGS(&infoQueue)));
+
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+		}
+#endif
+
 		bool result{ true };
 		result &= rtvDescriptorHeap.Initialize(512, false);
 		result &= dsvDescriptorHeap.Initialize(512, false);
@@ -236,23 +279,32 @@ namespace Europa::Graphics::D3D12::Core {
 			return FailedInit();
 
 		NAME_D3D12_OBJECT(MainDevice, L"Main D3D12 Device");
+		NAME_D3D12_OBJECT(rtvDescriptorHeap.Heap(), L"RTV Descriptor Heap");
+		NAME_D3D12_OBJECT(dsvDescriptorHeap.Heap(), L"DSV Descriptor Heap");
+		NAME_D3D12_OBJECT(srvDescriptorHeap.Heap(), L"SRV Descriptor Heap");
+		NAME_D3D12_OBJECT(uavDescriptorHeap.Heap(), L"UAV Descriptor Heap");
 
-#ifdef _DEBUG
-		{
-			ComPtr<ID3D12InfoQueue> infoQueue;
-			DXCall(MainDevice->QueryInterface(IID_PPV_ARGS(&infoQueue)));
-
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-		}
-#endif
 		return true;
 	}
 
 	void Shutdown() {
 		GFXCommand.Release();
+
+		//Note: we don't call ProcessDeferredReleases at the end because some resouces
+		//(such as swap chains) can't be released before their depending resources are released.
+		for (uint32 i{ 0 }; i < FrameBufferCount; ++i)
+			ProcessDeferredReleases(i);
+
 		Release(DXGIFactory);
+
+		rtvDescriptorHeap.Release();
+		dsvDescriptorHeap.Release();
+		srvDescriptorHeap.Release();
+		uavDescriptorHeap.Release();
+
+		//Note: some types only use deferred release for their resources during shutdown/reset/clear.
+		//To finally release these resources we call ProcessDeferredReleases once more.
+		ProcessDeferredReleases(0);
 #ifdef _DEBUG
 		{
 			{
@@ -290,7 +342,7 @@ namespace Europa::Graphics::D3D12::Core {
 	}
 	uint32 CurrentFrameIndex()
 	{
-		GFXCommand.FrameIndex();
+		return GFXCommand.FrameIndex();
 	}
 	void SetDeferredReleasesFlag()
 	{

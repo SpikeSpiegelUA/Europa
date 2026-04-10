@@ -37,6 +37,7 @@ namespace Europa::Graphics::D3D12{
 		}
 
 		bool Initialize(uint32 capacity, bool isShaderVisible);
+		void ProcessDeferredFree(uint32 frameIndex);
 		void Release();
 
 		[[nodiscard]] DescriptorHandle Allocate();
