@@ -81,6 +81,7 @@ namespace Europa::Graphics::D3D12{
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuStart{};
 		std::unique_ptr<uint32[]> freeHandles{};
 		uint32 capacity{ 0 };
+		std::vector<uint32> deferredFreeIndices[FrameBufferCount];
 		std::mutex mutex;
 		uint32 size{ 0 };
 		uint32 descriptorSize{};

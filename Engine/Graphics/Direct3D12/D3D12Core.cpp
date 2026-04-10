@@ -1,5 +1,5 @@
 #include "D3D12Core.h"
-
+#include "D3D12Resources.h"
 using namespace Microsoft::WRL;
 
 namespace Europa::Graphics::D3D12::Core {
@@ -142,6 +142,12 @@ namespace Europa::Graphics::D3D12::Core {
 		ID3D12Device14* MainDevice{ nullptr };
 		IDXGIFactory7* DXGIFactory{ nullptr };
 		D3D12Command GFXCommand;
+		uint32 DeferredReleasesFlag[FrameBufferCount] {};
+		std::mutex DeferredReleasesMutex{};
+		DescriptorHeap rtvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV };
+		DescriptorHeap dsvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV };
+		DescriptorHeap srvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
+		DescriptorHeap uavDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
 	}
 
 	IDXGIAdapter4* DetermineMainAdapter() {
@@ -179,6 +185,11 @@ namespace Europa::Graphics::D3D12::Core {
 		return featureLevelInfo.MaxSupportedFeatureLevel;
 	}
 
+	void __declspec(noinline) ProcessDeferredReleases(uint32 frameIndex) {
+		std::lock_guard lock{ DeferredReleasesMutex };
+		DeferredReleasesFlag[frameIndex] = 0;
+	}
+
 	bool Initialize() {
 		if (MainDevice)
 			Shutdown();
@@ -209,6 +220,15 @@ namespace Europa::Graphics::D3D12::Core {
 
 		DXCall(hr = D3D12CreateDevice(mainAdapter.Get(), maxFeatureLevel, IID_PPV_ARGS(&MainDevice)));
 		if (FAILED(hr))
+			return FailedInit();
+
+		bool result{ true };
+		result &= rtvDescriptorHeap.Initialize(512, false);
+		result &= dsvDescriptorHeap.Initialize(512, false);
+		result &= srvDescriptorHeap.Initialize(4096, true);
+		result &= uavDescriptorHeap.Initialize(512, false);
+
+		if (!result)
 			return FailedInit();
 
 		new (&GFXCommand) D3D12Command(MainDevice, D3D12_COMMAND_LIST_TYPE_DIRECT);
@@ -257,11 +277,23 @@ namespace Europa::Graphics::D3D12::Core {
 	void Render() {
 		GFXCommand.BeginFrame();
 		ID3D12GraphicsCommandList* CMDList{GFXCommand.СommandList()};
+		const uint32 frameIndex{ CurrentFrameIndex() };
+		if (DeferredReleasesFlag[frameIndex]) {
+			ProcessDeferredReleases(frameIndex);
+		}
 		GFXCommand.EndFrame();
 	}
 
 	ID3D12Device* const Device()
 	{
 		return MainDevice;
+	}
+	uint32 CurrentFrameIndex()
+	{
+		GFXCommand.FrameIndex();
+	}
+	void SetDeferredReleasesFlag()
+	{
+		DeferredReleasesFlag[CurrentFrameIndex()] = 1;
 	}
 }
