@@ -8,8 +8,7 @@ namespace Europa::Platform {
 	class Window {
 	public:
 		constexpr explicit Window(WindowID id) : ID{ id } {}
-		//Creates an entity with an invalid index.
-		constexpr Window() : ID{ ID::InvalidID } {}
+		constexpr Window() = default;
 		constexpr WindowID GetID() const { return ID; }
 		constexpr bool IsValid() const { return ID::IsValid(ID); }
 

@@ -25,7 +25,41 @@ namespace Europa::Graphics {
 		GFX.Shutdown();
 	}
 
-	void Renderer() {
+	void Render() {
 		GFX.Render();
+	}
+
+	Surface CreateSurface(Platform::Window window)
+	{
+		return GFX.Surface.Create(window);
+	}
+
+	void RemoveSurface(SurfaceID id)
+	{
+		assert(ID::IsValid(id));
+		GFX.Surface.Remove(id);
+	}
+
+	void Surface::Resize(uint32 width, uint32 height) const
+	{
+		assert(IsValid());
+		GFX.Surface.Resize(ID, width, height);
+	}
+	const uint32 Surface::Width() const
+	{
+		assert(IsValid());
+		return GFX.Surface.Width(ID);
+	}
+
+	const uint32 Surface::Height() const
+	{
+		assert(IsValid());
+		return GFX.Surface.Height(ID);
+	}
+
+	void Surface::Render() const
+	{
+		assert(IsValid());
+		GFX.Surface.Render(ID);
 	}
 }
