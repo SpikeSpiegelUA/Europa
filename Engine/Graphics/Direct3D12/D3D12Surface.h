@@ -1,5 +1,6 @@
 #pragma once
 #include "D3D12CommonHeaders.h"
+#include "D3D12Resources.h"
 
 namespace Europa::Graphics::D3D12 {
 	class D3D12Surface {
@@ -21,9 +22,18 @@ namespace Europa::Graphics::D3D12 {
 
 	private:
 		void Release();
+		void Finalize();
+
+		struct RenderTargetData {
+			ID3D12Resource* Resource{ nullptr };
+			DescriptorHandle RTV;
+		};
 
 		IDXGISwapChain4* swapChain{ nullptr };
+		RenderTargetData renderTargetData[FrameBufferCount]{};
 		Platform::Window window{};
 		uint32 currentBackBufferIndex{};
+		D3D12_VIEWPORT viewport{};
+		D3D12_RECT scissorRectangle{};
 	};
 }

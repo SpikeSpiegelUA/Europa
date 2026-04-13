@@ -1,5 +1,6 @@
 #pragma once
 #include "D3D12CommonHeaders.h"
+#include "D3D12Resources.h"
 
 namespace Europa::Graphics::D3D12::Core {
 	bool Initialize();
@@ -27,6 +28,11 @@ namespace Europa::Graphics::D3D12::Core {
 	}
 
 	ID3D12Device* const Device();
+	DescriptorHeap& GetRTVHeap();
+	DescriptorHeap& GetDSVHeap();
+	DescriptorHeap& GetSRVHeap();
+	DescriptorHeap& GetUAVHeap();
 	uint32 CurrentFrameIndex();
+	DXGI_FORMAT GetDefaultRenderTargetFormat();
 	void SetDeferredReleasesFlag();
 }

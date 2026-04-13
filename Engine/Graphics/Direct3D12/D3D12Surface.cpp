@@ -37,5 +37,42 @@ namespace Europa::Graphics::D3D12 {
 		Core::Release(swapChain);
 
 		currentBackBufferIndex = this->swapChain->GetCurrentBackBufferIndex();
+
+		for (uint32 i{ 0 }; i < FrameBufferCount; i++) {
+			renderTargetData[i].RTV = Core::GetRTVHeap().Allocate();
+		}
+
+		Finalize();
+	}
+	void D3D12Surface::Finalize()
+	{
+		//Create RTVs for back-buffers.
+		for (uint32 i{ 0 }; i < FrameBufferCount; i++) {
+			RenderTargetData& data{ renderTargetData[i] };
+			assert(!data.Resource);
+			DXCall(swapChain->GetBuffer(i, IID_PPV_ARGS(&data.Resource)));
+			D3D12_RENDER_TARGET_VIEW_DESC desc{};
+			desc.Format = Core::GetDefaultRenderTargetFormat();
+			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+			Core::Device()->CreateRenderTargetView(data.Resource, &desc, data.RTV.CPU);
+		}
+
+		DXGI_SWAP_CHAIN_DESC desc{};
+		DXCall(swapChain->GetDesc(&desc));
+		const uint32 width{ desc.BufferDesc.Width };
+		const uint32 height{ desc.BufferDesc.Height };
+		assert(window.Width() == width && window.Height() == height);
+
+		//Set viewpoar and scissor rectangle.
+		viewport.TopLeftX = 0.f;
+		viewport.TopLeftY = 0.f;
+		viewport.Width = (float)width;
+		viewport.Height = (float)height;
+		viewport.MinDepth = 0.f;
+		viewport.MaxDepth = 1.f;
+
+		scissorRectangle = { 0, 0, (int32)width, (int32)height };
+
+
 	}
 }

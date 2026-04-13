@@ -4,8 +4,6 @@ using namespace Microsoft::WRL;
 
 namespace Europa::Graphics::D3D12::Core {
 	namespace {
-		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel{ D3D_FEATURE_LEVEL_11_0 };
-
 		bool FailedInit() {
 			Shutdown();
 			return false;
@@ -143,6 +141,7 @@ namespace Europa::Graphics::D3D12::Core {
 		ID3D12Device14* MainDevice{ nullptr };
 		IDXGIFactory7* DXGIFactory{ nullptr };
 		D3D12Command GFXCommand;
+
 		DescriptorHeap rtvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV };
 		DescriptorHeap dsvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV };
 		DescriptorHeap srvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
@@ -151,6 +150,9 @@ namespace Europa::Graphics::D3D12::Core {
 		Utilities::Vector<IUnknown*> DeferredReleases[FrameBufferCount]{};
 		uint32 DeferredReleasesFlag[FrameBufferCount]{};
 		std::mutex DeferredReleasesMutex{};
+
+		constexpr DXGI_FORMAT RenderTargetFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
+		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel{ D3D_FEATURE_LEVEL_11_0 };
 
 		void __declspec(noinline) ProcessDeferredReleases(uint32 frameIndex) {
 			std::lock_guard lock{ DeferredReleasesMutex };
@@ -340,9 +342,30 @@ namespace Europa::Graphics::D3D12::Core {
 	{
 		return MainDevice;
 	}
+	DescriptorHeap& GetRTVHeap()
+	{
+		return rtvDescriptorHeap;
+	}
+	DescriptorHeap& GetDSVHeap()
+	{
+		return dsvDescriptorHeap;
+	}
+	DescriptorHeap& GetSRVHeap()
+	{
+		return srvDescriptorHeap;
+	}
+	DescriptorHeap& GetUAVHeap()
+	{
+		return uavDescriptorHeap;
+	}
+
 	uint32 CurrentFrameIndex()
 	{
 		return GFXCommand.FrameIndex();
+	}
+	DXGI_FORMAT GetDefaultRenderTargetFormat()
+	{
+		return RenderTargetFormat;
 	}
 	void SetDeferredReleasesFlag()
 	{
