@@ -44,6 +44,29 @@ namespace Europa::Graphics::D3D12 {
 
 		Finalize();
 	}
+	void D3D12Surface::Present() const
+	{
+		assert(swapChain);
+		DXCall(swapChain->Present(0, 0));
+		currentBackBufferIndex = swapChain->GetCurrentBackBufferIndex();
+	}
+
+	void D3D12Surface::Release()
+	{
+		for (uint32 i{ 0 }; i < FrameBufferCount; i++) {
+			RenderTargetData& data{ renderTargetData[i] };
+			Core::Release(data.Resource);
+			Core::GetRTVHeap().Free(data.RTV);
+		}
+
+		Core::Release(swapChain);
+	}
+
+	void D3D12Surface::Resize() 
+	{
+
+	}
+
 	void D3D12Surface::Finalize()
 	{
 		//Create RTVs for back-buffers.

@@ -1,5 +1,6 @@
 #include "D3D12Core.h"
 #include "D3D12Resources.h"
+#include "D3D12Surface.h"
 using namespace Microsoft::WRL;
 
 namespace Europa::Graphics::D3D12::Core {
@@ -141,6 +142,7 @@ namespace Europa::Graphics::D3D12::Core {
 		ID3D12Device14* MainDevice{ nullptr };
 		IDXGIFactory7* DXGIFactory{ nullptr };
 		D3D12Command GFXCommand;
+		Utilities::Vector<D3D12Surface> Surfaces;
 
 		DescriptorHeap rtvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV };
 		DescriptorHeap dsvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV };
@@ -370,5 +372,32 @@ namespace Europa::Graphics::D3D12::Core {
 	void SetDeferredReleasesFlag()
 	{
 		DeferredReleasesFlag[CurrentFrameIndex()] = 1;
+	}
+	Surface CreateSurface(Platform::Window window)
+	{
+		Surfaces.emplace_back(window);
+		SurfaceID id{ Surfaces.size() - 1 };
+		Surfaces[id].CreateSwapChain(DXGIFactory, GFXCommand.CommandQueue(), RenderTargetFormat);
+		return Surface{ id };
+	}
+	void RemoveSurface(SurfaceID id)
+	{
+	
+	}
+	void ResizeSurface(SurfaceID id, uint32, uint32)
+	{
+	
+	}
+	uint32 SurfaceWidth(SurfaceID id)
+	{
+		return uint32();
+	}
+	uint32 SurfaceHeight(SurfaceID id)
+	{
+		return uint32();
+	}
+	void RenderSurface(SurfaceID id)
+	{
+
 	}
 }

@@ -17,8 +17,30 @@ namespace Europa::Graphics::D3D12 {
 		void Present() const;
 		void Resize();
 
-		uint32 Width() const {}
-		uint32 Height() const {}
+		constexpr  uint32 Width() const 
+		{ 
+			return (uint32)viewport.Width; 
+		}
+		constexpr  uint32 Height() const 
+		{
+			return (uint32)viewport.Height;
+		}
+		constexpr ID3D12Resource* const BackBuffer() const 
+		{
+			return renderTargetData[currentBackBufferIndex].Resource;
+		}
+		constexpr D3D12_CPU_DESCRIPTOR_HANDLE RTV() const 
+		{
+			return renderTargetData[currentBackBufferIndex].RTV.CPU;
+		}
+		constexpr const D3D12_VIEWPORT& Viewport() const
+		{
+			return viewport;
+		}
+		constexpr const D3D12_RECT& ScissorRect() const
+		{
+			return scissorRectangle;
+		}
 
 	private:
 		void Release();
@@ -32,7 +54,7 @@ namespace Europa::Graphics::D3D12 {
 		IDXGISwapChain4* swapChain{ nullptr };
 		RenderTargetData renderTargetData[FrameBufferCount]{};
 		Platform::Window window{};
-		uint32 currentBackBufferIndex{};
+		mutable uint32 currentBackBufferIndex{};
 		D3D12_VIEWPORT viewport{};
 		D3D12_RECT scissorRectangle{};
 	};

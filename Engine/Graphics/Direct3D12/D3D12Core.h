@@ -1,6 +1,9 @@
 #pragma once
 #include "D3D12CommonHeaders.h"
-#include "D3D12Resources.h"
+
+namespace Europa::Graphics::D3D12 {
+	class DescriptorHeap;
+}
 
 namespace Europa::Graphics::D3D12::Core {
 	bool Initialize();
@@ -35,4 +38,11 @@ namespace Europa::Graphics::D3D12::Core {
 	uint32 CurrentFrameIndex();
 	DXGI_FORMAT GetDefaultRenderTargetFormat();
 	void SetDeferredReleasesFlag();
+
+	Surface CreateSurface(Platform::Window window);
+	void RemoveSurface(SurfaceID id);
+	void ResizeSurface(SurfaceID id, uint32, uint32);
+	uint32 SurfaceWidth(SurfaceID id);
+	uint32 SurfaceHeight(SurfaceID id);
+	void RenderSurface(SurfaceID id);
 }

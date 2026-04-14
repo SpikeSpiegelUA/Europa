@@ -8,5 +8,12 @@ namespace Europa::Graphics::D3D12 {
 		pi.Initialize = Core::Initialize;
 		pi.Shutdown = Core::Shutdown;
 		pi.Render = Core::Render;
+
+		pi.Surface.Create = Core::CreateSurface;
+		pi.Surface.Remove = Core::RemoveSurface;
+		pi.Surface.Resize = Core::ResizeSurface;
+		pi.Surface.Width = Core::SurfaceWidth;
+		pi.Surface.Height = Core::SurfaceHeight;
+		pi.Surface.Render = Core::RenderSurface;
 	}
 }
