@@ -8,7 +8,29 @@ namespace Europa::Graphics::D3D12 {
 		explicit D3D12Surface(Platform::Window window) : window{ window } {
 			assert(this->window.Handle());
 		}
+#if USE_STL_VECTOR
+		DISABLE_COPY(D3D12Surface);
+		constexpr D3D12Surface(D3D12Surface&& surface) : swapChain{ surface.swapChain },
+			window{ surface.window }, currentBackBufferIndex{ surface.currentBackBufferIndex },
+			viewport{ surface.viewport }, scissorRectangle{ surface.scissorRectangle } 
+		{
+			for (uint32 i{ 0 }; i < FrameBufferCount; i++) {
+				renderTargetData[i].Resource = surface.renderTargetData[i].Resource;
+				renderTargetData[i].RTV = surface.renderTargetData[i].RTV;
+			}
+			surface.Reset();
+		}
 
+		constexpr D3D12Surface& operator=(D3D12Surface&& surface) 
+		{
+			assert(this != &surface);
+			if (this != &surface) {
+				Release();
+				Move(surface);
+			}
+			return *this;
+		}
+#endif
 		~D3D12Surface() {
 			Release();
 		}
@@ -45,6 +67,32 @@ namespace Europa::Graphics::D3D12 {
 	private:
 		void Release();
 		void Finalize();
+
+#if USE_STL_VECTOR
+		constexpr void Move(D3D12Surface& surface) 
+		{
+			swapChain = surface.swapChain;
+			for (uint32 i{ 0 }; i < FrameBufferCount; i++)
+				renderTargetData[i] = surface.renderTargetData[i];
+			window = surface.window;
+			currentBackBufferIndex = surface.currentBackBufferIndex;
+			viewport = surface.viewport;
+			scissorRectangle = surface.scissorRectangle;
+
+			surface.Reset();
+		}
+
+		constexpr void Reset() 
+		{
+			swapChain = nullptr ;
+			for (uint32 i{ 0 }; i < FrameBufferCount; i++) 
+				renderTargetData[i] = {};
+			window = {};
+			currentBackBufferIndex = 0;
+			viewport = {};
+			scissorRectangle = {};
+		}
+#endif
 
 		struct RenderTargetData {
 			ID3D12Resource* Resource{ nullptr };

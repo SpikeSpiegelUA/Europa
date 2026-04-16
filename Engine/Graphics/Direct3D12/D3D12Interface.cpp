@@ -7,7 +7,6 @@ namespace Europa::Graphics::D3D12 {
 	void GetPlatformInterface(PlatformInterface& pi) {
 		pi.Initialize = Core::Initialize;
 		pi.Shutdown = Core::Shutdown;
-		pi.Render = Core::Render;
 
 		pi.Surface.Create = Core::CreateSurface;
 		pi.Surface.Remove = Core::RemoveSurface;

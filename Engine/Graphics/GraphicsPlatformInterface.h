@@ -6,7 +6,6 @@ namespace Europa::Graphics {
 	struct PlatformInterface {
 		bool(*Initialize)(void);
 		void(*Shutdown)(void);
-		void(*Render)(void);
 
 		struct {
 			Surface(*Create)(Platform::Window);

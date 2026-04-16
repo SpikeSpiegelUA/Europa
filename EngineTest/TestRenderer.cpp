@@ -10,42 +10,62 @@ using namespace Europa;
 Platform::Window Windows[4];
 
 Graphics::RenderSurface Surfaces[4];
+Timer timer{};
+
+void DestroyRenderSurface(Graphics::RenderSurface& surface);
 
 LRESULT WinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-	switch (msg) {
-	case WM_DESTROY:
+	switch (msg) 
 	{
-		bool allClosed{ true };
-		for (uint32 i = 0; i < _countof(Surfaces); i++) {
-			if (!Surfaces[i].Window.IsClosed()) {
-				allClosed = false;
-				break;
+		case WM_DESTROY:
+		{
+			bool allClosed{ true };
+			for (uint32 i = 0; i < _countof(Surfaces); ++i) {
+				if (Surfaces[i].Window.IsValid()) 
+				{
+					if (Surfaces[i].Window.IsClosed()) {
+						DestroyRenderSurface(Surfaces[i]);
+					}
+					else {
+						allClosed = false;
+					}
+				}
+			}
+			if (allClosed) {
+				PostQuitMessage(0);
+				return 0;
 			}
 		}
-		if (allClosed) {
-			PostQuitMessage(0);
-			return 0;
-		}
 		break;
-	}
-	case WM_SYSCHAR:
-		if (wparam == VK_RETURN && (HIWORD(lparam) & KF_ALTDOWN)) {
-			Platform::Window win{ Platform::WindowID{(ID::IDType)GetWindowLongPtr(hwnd, GWLP_USERDATA)} };
-			win.SetFullscreen(!win.IsFullscreen());
-			return 0;
-		}
-		break;
+		case WM_SYSCHAR:
+			if (wparam == VK_RETURN && (HIWORD(lparam) & KF_ALTDOWN)) {
+				Platform::Window win{ Platform::WindowID{(ID::IDType)GetWindowLongPtr(hwnd, GWLP_USERDATA)} };
+				win.SetFullscreen(!win.IsFullscreen());
+				return 0;
+			}
+			break;
+		case WM_KEYDOWN:
+			if (wparam == VK_ESCAPE) {
+				PostMessage(hwnd, WM_CLOSE, 0, 0);
+				return 0;
+			}
 	}
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void CreateRenderSurface(Graphics::RenderSurface& surface, Platform::WindowInitInfo info) {
-	surface.Window = Platform::EngineCreateWindow(&info);
+void DestroyRenderSurface(Graphics::RenderSurface& surface) {
+	Graphics::RenderSurface temp{ surface };
+	surface = {};
+	if (temp.Surface.IsValid())
+		Graphics::RemoveSurface(temp.Surface.GetID());
+	if (temp.Window.IsValid())
+		Platform::RemoveWindow(temp.Window.GetID());
 }
 
-void DestroyRenderSurface(Graphics::RenderSurface& surface) {
-	Platform::RemoveWindow(surface.Window.GetID());
+void CreateRenderSurface(Graphics::RenderSurface& surface, Platform::WindowInitInfo info) {
+	surface.Window = Platform::EngineCreateWindow(&info);
+	surface.Surface = Graphics::CreateSurface(surface.Window);
 }
 
 bool EngineTest::Initialize() {
@@ -60,14 +80,20 @@ bool EngineTest::Initialize() {
 	};
 	static_assert(_countof(info) == _countof(Surfaces));
 
-	for (uint32 i{ 0 }; i < _countof(Windows); ++i)
+	for (uint32 i{ 0 }; i < _countof(Surfaces); ++i)
 		CreateRenderSurface(Surfaces[i], info[i]);
 	return result;
 }
 
 void EngineTest::Run() {
+	timer.Begin();
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	Graphics::Render();
+	for (uint32 i{ 0 }; i < _countof(Surfaces); i++) 
+	{
+		if (Surfaces[i].Surface.IsValid())
+			Surfaces[i].Surface.Render();
+	}
+	timer.End();
 }
 
 void EngineTest::Shutdown() {

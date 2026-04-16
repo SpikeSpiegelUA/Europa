@@ -25,10 +25,6 @@ namespace Europa::Graphics {
 		GFX.Shutdown();
 	}
 
-	void Render() {
-		GFX.Render();
-	}
-
 	Surface CreateSurface(Platform::Window window)
 	{
 		return GFX.Surface.Create(window);

@@ -69,7 +69,7 @@ namespace Europa::Graphics::D3D12::Core {
 				DXCall(cmdList->Close());
 				ID3D12CommandList* const cmdlists[]{ cmdList };
 				cmdQueue->ExecuteCommandLists(_countof(cmdlists), &cmdlists[0]);
-				uint64& fenceValue{ fenceValue };
+				uint64& fenceValue{ this->fenceValue };
 				++fenceValue;
 				CommandFrame& frame{ commandFrames[frameIndex] };
 				frame.FenceValue = fenceValue;
@@ -330,16 +330,6 @@ namespace Europa::Graphics::D3D12::Core {
 		Release(MainDevice);
 	}
 
-	void Render() {
-		GFXCommand.BeginFrame();
-		ID3D12GraphicsCommandList* CMDList{GFXCommand.СommandList()};
-		const uint32 frameIndex{ CurrentFrameIndex() };
-		if (DeferredReleasesFlag[frameIndex]) {
-			ProcessDeferredReleases(frameIndex);
-		}
-		GFXCommand.EndFrame();
-	}
-
 	ID3D12Device* const Device()
 	{
 		return MainDevice;
@@ -376,28 +366,49 @@ namespace Europa::Graphics::D3D12::Core {
 	Surface CreateSurface(Platform::Window window)
 	{
 		Surfaces.emplace_back(window);
-		SurfaceID id{ Surfaces.size() - 1 };
+		SurfaceID id{ (uint32)Surfaces.size() - 1 };
 		Surfaces[id].CreateSwapChain(DXGIFactory, GFXCommand.CommandQueue(), RenderTargetFormat);
 		return Surface{ id };
 	}
 	void RemoveSurface(SurfaceID id)
 	{
-	
+		GFXCommand.Flush();
+		//TODO: use proper removal of surfaces.
+		Surfaces[id].~D3D12Surface();
 	}
 	void ResizeSurface(SurfaceID id, uint32, uint32)
 	{
-	
+		GFXCommand.Flush();
+		Surfaces[id].Resize();
 	}
 	uint32 SurfaceWidth(SurfaceID id)
 	{
-		return uint32();
+		return Surfaces[id].Width();
 	}
 	uint32 SurfaceHeight(SurfaceID id)
 	{
-		return uint32();
+		return Surfaces[id].Height();
 	}
 	void RenderSurface(SurfaceID id)
 	{
+		//Wait for the GPU to finish with the command allocator and reset the allocator once
+		//the GPU is done with it. This frees the memory that was used to store commands.
+		GFXCommand.BeginFrame();
+		ID3D12GraphicsCommandList* CMDList{ GFXCommand.СommandList() };
+		const uint32 frameIndex{ CurrentFrameIndex() };
+		if (DeferredReleasesFlag[frameIndex]) {
+			ProcessDeferredReleases(frameIndex);
+		}
 
+		const D3D12Surface& surface = Surfaces[id] ;
+
+		//Presenting swap chain buffers happens in lockstep with frame buffers.
+		surface.Present();
+		//Record commands.
+		// ...
+		//
+		//Done recording commands. Now execute commands, signal and increment the fence value for next frame.
+
+		GFXCommand.EndFrame();
 	}
 }

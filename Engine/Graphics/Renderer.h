@@ -30,7 +30,6 @@ namespace Europa::Graphics {
 
 	bool Initialize(GraphicsPlatform platform);
 	void Shutdown();
-	void Render();
 
 	Surface CreateSurface(Platform::Window window);
 	void RemoveSurface(SurfaceID id);
