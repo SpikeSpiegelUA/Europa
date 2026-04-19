@@ -34,3 +34,5 @@ namespace Europa::Utilities {
 namespace Europa::Utilities {
 	//TODO: Implement our own containers.
 }
+
+#include "FreeList.h"

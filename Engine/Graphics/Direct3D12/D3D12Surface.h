@@ -12,7 +12,8 @@ namespace Europa::Graphics::D3D12 {
 		DISABLE_COPY(D3D12Surface);
 		constexpr D3D12Surface(D3D12Surface&& surface) : swapChain{ surface.swapChain },
 			window{ surface.window }, currentBackBufferIndex{ surface.currentBackBufferIndex },
-			viewport{ surface.viewport }, scissorRectangle{ surface.scissorRectangle } 
+			viewport{ surface.viewport }, scissorRectangle{ surface.scissorRectangle }, allowTearing{ surface.allowTearing },
+			presentFlags{ surface.presentFlags }
 		{
 			for (uint32 i{ 0 }; i < FrameBufferCount; i++) {
 				renderTargetData[i].Resource = surface.renderTargetData[i].Resource;
@@ -76,6 +77,8 @@ namespace Europa::Graphics::D3D12 {
 				renderTargetData[i] = surface.renderTargetData[i];
 			window = surface.window;
 			currentBackBufferIndex = surface.currentBackBufferIndex;
+			allowTearing = surface.allowTearing;
+			presentFlags = surface.presentFlags;
 			viewport = surface.viewport;
 			scissorRectangle = surface.scissorRectangle;
 
@@ -88,6 +91,8 @@ namespace Europa::Graphics::D3D12 {
 			for (uint32 i{ 0 }; i < FrameBufferCount; i++) 
 				renderTargetData[i] = {};
 			window = {};
+			allowTearing = 0;
+			presentFlags = 0;
 			currentBackBufferIndex = 0;
 			viewport = {};
 			scissorRectangle = {};
@@ -103,6 +108,8 @@ namespace Europa::Graphics::D3D12 {
 		RenderTargetData renderTargetData[FrameBufferCount]{};
 		Platform::Window window{};
 		mutable uint32 currentBackBufferIndex{};
+		uint32 allowTearing{ 0 };
+		uint32 presentFlags{ 0 };
 		D3D12_VIEWPORT viewport{};
 		D3D12_RECT scissorRectangle{};
 	};

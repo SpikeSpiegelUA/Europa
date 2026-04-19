@@ -15,11 +15,15 @@ namespace Europa::Graphics::D3D12 {
 		assert(factory && commandQueue);
 		Release();
 
+		if (SUCCEEDED(factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(uint32))) && allowTearing) {
+			presentFlags = DXGI_PRESENT_ALLOW_TEARING;
+		}
+
 		DXGI_SWAP_CHAIN_DESC1 description{};
 		description.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		description.BufferCount = FrameBufferCount;
 		description.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		description.Flags = 0;
+		description.Flags = allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 		description.Format = ToNonSRGB(format);
 		description.Height = window.Height();
 		description.Width = window.Width();
@@ -47,7 +51,7 @@ namespace Europa::Graphics::D3D12 {
 	void D3D12Surface::Present() const
 	{
 		assert(swapChain);
-		DXCall(swapChain->Present(0, 0));
+		DXCall(swapChain->Present(0, presentFlags));
 		currentBackBufferIndex = swapChain->GetCurrentBackBufferIndex();
 	}
 
