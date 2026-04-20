@@ -15,31 +15,10 @@ namespace Europa::Platform {
 			bool IsClosed{ false };
 		};
 
-		Utilities::Vector<WindowInfo> Windows;
-		Utilities::Vector<uint32> AvailableSlots;
-
-		uint32 AddToWindows(WindowInfo info) {
-			uint32 id{ uint32_invalid_id };
-			if (AvailableSlots.empty()) {
-				id = (uint32)Windows.size();
-				Windows.emplace_back(info);
-			}
-			else {
-				id = AvailableSlots.back();
-				AvailableSlots.pop_back();
-				assert(id != uint32_invalid_id);
-				Windows[id] = info;
-			}
-			return id;
-		}
-
-		void RemoveFromWindows(uint32 id) {
-			assert(id < Windows.size());
-			AvailableSlots.emplace_back(id);
-		}
+		Utilities::FreeList<WindowInfo> Windows;
 
 		WindowInfo& GetWindowInfoFromID(WindowID id) {
-			assert(id < Windows.size());
+			assert(id < Windows.Size());
 			assert(Windows[id].HWND);
 			return Windows[id];
 		}
@@ -215,7 +194,7 @@ namespace Europa::Platform {
 		
 		if (info.HWND) {
 			DEBUG_OP(SetLastError(0));
-			const WindowID id{ AddToWindows(info) };
+			const WindowID id{ Windows.Add(info) };
 			SetWindowLongPtr(info.HWND, GWLP_USERDATA, (LONG_PTR)id);
 			//Set in the "extra" bytes  the pointer to the window callback function which handles messages for the window.
 			if (callback)
@@ -232,7 +211,7 @@ namespace Europa::Platform {
 	{
 		WindowInfo& info{ GetWindowInfoFromID(id) };
 		DestroyWindow(info.HWND);
-		RemoveFromWindows(id);
+		Windows.Remove(id);
 	}
 #elif LINUX
 

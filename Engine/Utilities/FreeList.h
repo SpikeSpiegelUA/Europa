@@ -22,7 +22,7 @@ namespace Europa::Utilities {
 			}
 			else {
 				id = nextFreeIndex;
-				assert(id < array.size() && AlreadyRemoved());
+				assert(id < array.size() && AlreadyRemoved(id));
 				nextFreeIndex = *(const uint32* const)std::addressof(array[id]);
 				new (std::addressof(array[id])) T(std::forward<params>(p)...);
 			}
@@ -31,7 +31,7 @@ namespace Europa::Utilities {
 		}
 
 		constexpr void Remove(uint32 id) {
-			assert(id < array.size() && !AlreadyRemoved());
+			assert(id < array.size() && !AlreadyRemoved(id));
 			T& item{ array[id] };
 			item.~T();
 			DEBUG_OP(memset(std::addressof(array[id]), 0xcc, sizeof(T)));
@@ -53,12 +53,12 @@ namespace Europa::Utilities {
 		}
 		
 		[[nodiscard]] constexpr T& operator[](uint32 id){
-			assert(id < array.size() && !AlreadyRemoved());
+			assert(id < array.size() && !AlreadyRemoved(id));
 			return array[id];
 		}
 
 		[[nodiscard]] constexpr const T& operator[](uint32 id) const{
-			assert(id < array.size() && !AlreadyRemoved());
+			assert(id < array.size() && !AlreadyRemoved(id));
 			return array[id];
 		}
 
