@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include "CommonHeaders.h"
 
 namespace Europa::Utilities {
@@ -9,24 +10,33 @@ namespace Europa::Utilities {
 	//clearing/desctructing the vector.
 	template<typename T, bool destruct = true>
 	class Vector {
+	public:
 		//Default constructor. Doesn't allocate memory.
 		Vector() = default;
 
 		//Constructor resizes the vector and initializes 'count' items.
-		constexpr Vector(uint64 count) 
+		constexpr Vector(uint64 count)
 		{
 			Resize(count);
 		}
 
 		//Constructor resizes the vector and initializes 'count' items using 'value'.
-		constexpr explicit Vector(uint64 count, const T& value) 
+		constexpr explicit Vector(uint64 count, const T& value)
 		{
 			Resize(count, value);
 		}
 
+		template<typename it, typename = std::enable_if<std::_Is_iterator_v<it>>>
+		constexpr explicit Vector(it first, it last) {
+			while (first != last) {
+				EmplaceBack(*first);
+				first++;
+			}
+		}
+
 		//Copy-constructor. Constructs by copying another vector. The items
 		//in the copied vector must be copyable.
-		constexpr Vector(const Vector& vector) 
+		constexpr Vector(const Vector& vector)
 		{
 			*this = vector;
 		}
@@ -34,7 +44,7 @@ namespace Europa::Utilities {
 		//Move-constructor. Constructs by moving another vector.
 		//The original vector will be empty after move.
 		constexpr Vector(const Vector&& vector)
-			: capacity{ vector.capacity }, size{ vector.size }, data{ vector.data };
+			: capacity{ vector.capacity }, size{ vector.size }, data{ vector.data }
 		{
 			vector.Reset();
 		}
@@ -46,8 +56,8 @@ namespace Europa::Utilities {
 			if (this != std::addressof(vector)) {
 				Clear();
 				Reserve(vector.size);
-				for (auto& item : vector
-					EmplaceBack(item));
+				for (auto& item : vector)
+					EmplaceBack(item);
 				assert(size == vector.size);
 			}
 
@@ -90,9 +100,9 @@ namespace Europa::Utilities {
 			}
 			assert(size < capacity);
 
-			new(std::addressof(data[size])) T(std::forward<params>(p)...);
+			T* const item{ new(std::addressof(data[size])) T(std::forward<params>(p)...) };
 			++size;
-			return data[size - 1];
+			return *item;
 		}
 
 		//Resize the vector and initializes new items with their default value.
@@ -110,6 +120,8 @@ namespace Europa::Utilities {
 					DestructRange(newSize, size);
 				}
 			}
+
+			size = newSize;
 
 			//Do nothing if newSize == size.
 			assert(newSize == size);
@@ -129,6 +141,8 @@ namespace Europa::Utilities {
 				if constexpr (destruct) {
 					DestructRange(newSize, size);
 				}
+
+				size = newSize;
 			}
 
 			//Do nothing if newSize == size.
@@ -169,8 +183,9 @@ namespace Europa::Utilities {
 				item->~T();
 			--size;
 			if (item < std::addressof(data[size])) {
-				memcpy(item, (std::addressof(data[size]), sizeof(T));
+				memcpy(item, (std::addressof(data[size])), sizeof(T));
 			}
+			return item;
 		}
 
 		//Clears the vector and destructs items as specified in template argument.
@@ -197,9 +212,9 @@ namespace Europa::Utilities {
 		//Swaps two vectors.
 		constexpr void Swap(Vector& vector) {
 			if (this != std::addressof(vector)) {
-				auto temp(vector);
-				vector = *this;
-				*this = temp;
+				auto temp(std::move(vector));
+				vector.Move(*this);
+				Move(temp);
 			}
 		}
 
@@ -247,7 +262,7 @@ namespace Europa::Utilities {
 		}
 
 		//Returns a constant reference to the first item. Will fault the application if called when the vector is empty.
-		[[nodiscard]] constexpr const T& Front() const{
+		[[nodiscard]] constexpr const T& Front() const {
 			assert(data && size);
 			return data[size - 1];
 		}
@@ -276,14 +291,24 @@ namespace Europa::Utilities {
 			return std::addressof(data[0]);
 		}
 
+		//Returns a constant pointer to the first item. Returns null when a vector is empty. Need this for the iterators.
+		[[nodiscard]] constexpr const T* begin() const {
+			return Begin();
+		}
+
 		//Returns a pointer to the memory right after the last item. Returns null when a vector is empty.
 		[[nodiscard]] constexpr T* End() {
 			assert(data);
 			return std::addressof(data[size]);
 		}
 
+		//Returns a pointer to the memory right after the last item. Returns null when a vector is empty. Need this for the iterators.
+		[[nodiscard]] constexpr T* end() {
+			return End();
+		}
+
 		//Returns a constant pointer to the memory right after the last item. Returns null when a vector is empty.
-		[[nodiscard]] constexpr const T* End() const{
+		[[nodiscard]] constexpr const T* End() const {
 			assert(data);
 			return std::addressof(data[size]);
 		}
@@ -300,7 +325,8 @@ namespace Europa::Utilities {
 			size = vector.size;
 			data = vector.data;
 			vector.Reset();
-		
+		}
+
 		constexpr void DestructRange(uint64 first, uint64 last) {
 			assert(destruct);
 			assert(first <= size && last <= size && first <= last);
@@ -317,7 +343,7 @@ namespace Europa::Utilities {
 			Clear();
 			capacity = 0;
 			if (data)
-				Free(data);
+				free(data);
 			data = nullptr;
 		}
 

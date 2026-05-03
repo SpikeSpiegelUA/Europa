@@ -30,7 +30,7 @@ namespace Europa::Script {
 		bool Exists(ScriptID id) {
 			ID::IsValid(id);
 			const ID::IDType index{ ID::Index(id) };
-			assert(index < Generations.size() && IDMapping[index] < EntityScripts.size());
+			assert(index < Generations.Size() && IDMapping[index] < EntityScripts.Size());
 			assert(Generations[index] == ID::Generation(id));
 			return (Generations[index] == ID::Generation(id) && EntityScripts[IDMapping[index]] && EntityScripts[IDMapping[index]]->IsValid());
 		}
@@ -52,7 +52,7 @@ namespace Europa::Script {
 
 		#ifdef USE_WITH_EDITOR
 		uint8 AddScriptName(const char* name) {
-			ScriptNames().emplace_back(name);
+			ScriptNames().EmplaceBack(name);
 			return true;
 		}
 		#endif //USE_WITH_EDITOR.
@@ -75,14 +75,14 @@ namespace Europa::Script {
 			++Generations[ID::Index(id)];
 		}
 		else {
-			id = ScriptID{ (ID::IDType)IDMapping.size() };
-			IDMapping.emplace_back();
-			Generations.push_back(0);
+			id = ScriptID{ (ID::IDType)IDMapping.Size() };
+			IDMapping.EmplaceBack();
+			Generations.PushBack(0);
 		}
 		assert(ID::IsValid(id));
-		EntityScripts.emplace_back(initInfo.ScriptCreator(entity));
-		assert(EntityScripts.back()->GetID() == entity.GetID());
-		const ID::IDType index{ (ID::IDType)EntityScripts.size() - 1 };
+		EntityScripts.EmplaceBack(initInfo.ScriptCreator(entity));
+		assert(EntityScripts.Back()->GetID() == entity.GetID());
+		const ID::IDType index{ (ID::IDType)EntityScripts.Size() - 1 };
 		IDMapping[ID::Index(id)] = index;
 		return Component{ id };
 	}
@@ -94,7 +94,7 @@ namespace Europa::Script {
 		assert(componentToRemove.IsValid() && Exists(componentToRemove.GetID()));
 		const ScriptID id{ componentToRemove.GetID() };
 		const ID::IDType index{ IDMapping[ID::Index(id)] };
-		const ScriptID lastID{ EntityScripts.back()->GetScript().GetID() };
+		const ScriptID lastID{ EntityScripts.Back()->GetScript().GetID() };
 		Utilities::EraseUnordered(EntityScripts, index);
 		IDMapping[ID::Index(lastID)] = index;
 		IDMapping[ID::Index(id)] = ID::InvalidID;

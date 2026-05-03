@@ -1,8 +1,9 @@
 #include "D3D12Resources.h"
 #include "D3D12Core.h"
+#include "D3D12Helpers.h"
 
 namespace Europa::Graphics::D3D12 {
-
+#pragma region DescriptorHeap
 	bool DescriptorHeap::Initialize(uint32 capacity, bool isShaderVisible) {
 		std::lock_guard lock{ mutex };
 		assert(capacity && capacity < D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2);
@@ -36,7 +37,7 @@ namespace Europa::Graphics::D3D12 {
 		for (uint32 i{ 0 }; i < capacity; i++)
 			freeHandles[i] = i;
 		DEBUG_OP(for (uint32 i{ 0 }; i < FrameBufferCount; ++i)
-			assert(deferredFreeIndices[i].empty()));
+			assert(deferredFreeIndices[i].Empty()));
 
 		descriptorSize = device->GetDescriptorHandleIncrementSize(type);
 		cpuStart = heap->GetCPUDescriptorHandleForHeapStart();
@@ -51,12 +52,12 @@ namespace Europa::Graphics::D3D12 {
 		assert(frameIndex < FrameBufferCount);
 
 		Utilities::Vector<uint32>& indices{ deferredFreeIndices[frameIndex] };
-		if (!indices.empty()) {
+		if (!indices.Empty()) {
 			for (auto index : indices) {
 				--size;
 				freeHandles[size] = index;
 			}
-			indices.clear();
+			indices.Clear();
 		}
 	}
 
@@ -101,9 +102,54 @@ namespace Europa::Graphics::D3D12 {
 
 
 		const uint32 frameIndex{Core::CurrentFrameIndex()};
-		deferredFreeIndices[frameIndex].push_back(index);
+		deferredFreeIndices[frameIndex].PushBack(index);
 		Core::SetDeferredReleasesFlag();
 		handle = {};
 	}
+#pragma endregion DescriptorHeap
 
+#pragma region D3D12Texture
+
+	D3D12Texture::D3D12Texture(D3D12TextureInitInfo info) 
+	{
+		auto* const device{ Core::Device() };
+		assert(device);
+
+		D3D12_CLEAR_VALUE* const clearValue
+		{
+			(info.ResourceDescription &&
+			(info.ResourceDescription->Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET ||
+			info.ResourceDescription->Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL))
+			? &info.ClearValue : nullptr
+		};
+
+		if (info.Resource) 
+		{
+			assert(!info.Heap);
+			resource = info.Resource;
+		}
+		else if (info.Heap && info.ResourceDescription) 
+		{
+			assert(!info.Resource);
+			device->CreatePlacedResource(info.Heap, info.AllocationInfo.Offset, info.ResourceDescription,
+				info.InitialState, clearValue, IID_PPV_ARGS(&resource));
+		}
+		else if(info.ResourceDescription)
+		{
+			assert(!info.Heap && !info.Resource);
+			DXCall(device->CreateCommittedResource(&D3DX::HeapProperties.DefaultHeap, D3D12_HEAP_FLAG_NONE, 
+				info.ResourceDescription, info.InitialState, clearValue, IID_PPV_ARGS(&resource)));
+		}
+
+		assert(resource);
+		srv = Core::GetSRVHeap().Allocate();
+		device->CreateShaderResourceView(resource, info.SRVDescription, srv.CPU);
+	}
+
+	void D3D12Texture::Release() 
+	{
+		Core::GetSRVHeap().Free(srv);
+		Core::DeferredRelease(resource);
+	}
+#pragma endregion D3D12Texture
 }

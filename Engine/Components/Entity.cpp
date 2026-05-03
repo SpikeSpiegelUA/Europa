@@ -24,15 +24,15 @@ namespace Europa::GameEntity {
 			++Generations[ID::Index(newID)];
 		}
 		else {
-			newID = EntityID{ (ID::IDType)Generations.size()};
-			Generations.push_back(0);
+			newID = EntityID{ (ID::IDType)Generations.Size()};
+			Generations.PushBack(0);
 
 			//Resize components.
 			//NOTE: we don't call resize(), cause it will reallocate memory exactly for the number of elements we have in the vector,
 			//and we won't to reserve more memory for future elements.
 
-			TransformComponents.emplace_back();
-			Scripts.emplace_back();
+			TransformComponents.EmplaceBack();
+			Scripts.EmplaceBack();
 		}
 
 		const Entity newEntity{ newID };
@@ -71,7 +71,7 @@ namespace Europa::GameEntity {
 	{
 		assert(ID::IsValid(entityID));
 		const ID::IDType index{ ID::Index(entityID) };
-		assert(index < Generations.size());
+		assert(index < Generations.Size());
 		return (Generations[index] == ID::Generation(entityID) && TransformComponents[index].IsValid());
 	}
 

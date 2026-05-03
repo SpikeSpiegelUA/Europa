@@ -139,10 +139,12 @@ namespace Europa::Graphics::D3D12::Core {
 			uint32 frameIndex{ 0 };
 		};
 
+		using SurfaceCollection = Utilities::FreeList<D3D12Surface>;
+
 		ID3D12Device14* MainDevice{ nullptr };
 		IDXGIFactory7* DXGIFactory{ nullptr };
 		D3D12Command GFXCommand;
-		Utilities::Vector<D3D12Surface> Surfaces;
+		SurfaceCollection Surfaces;
 
 		DescriptorHeap rtvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV };
 		DescriptorHeap dsvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV };
@@ -170,10 +172,10 @@ namespace Europa::Graphics::D3D12::Core {
 			uavDescriptorHeap.ProcessDeferredFree(frameIndex);
 
 			Utilities::Vector<IUnknown*>& resources{DeferredReleases[frameIndex]};
-			if (!resources.empty()) {
-				for (auto& resource : resources)
+			if (!resources.Empty()) {
+				for (auto resource : resources)
 					Release(resource);
-				resources.clear();
+				resources.Clear();
 			}
 		}
 
@@ -218,7 +220,7 @@ namespace Europa::Graphics::D3D12::Core {
 		{
 			const uint32 frameIndex{ CurrentFrameIndex() };
 			std::lock_guard lock{ DeferredReleasesMutex };
-			DeferredReleases[frameIndex].push_back(resource);
+			DeferredReleases[frameIndex].PushBack(resource);
 			SetDeferredReleasesFlag();
 		}
 	}//Details namespace
@@ -365,16 +367,14 @@ namespace Europa::Graphics::D3D12::Core {
 	}
 	Surface CreateSurface(Platform::Window window)
 	{
-		Surfaces.emplace_back(window);
-		SurfaceID id{ (uint32)Surfaces.size() - 1 };
+		SurfaceID id{ Surfaces.Add(window) };
 		Surfaces[id].CreateSwapChain(DXGIFactory, GFXCommand.CommandQueue(), RenderTargetFormat);
 		return Surface{ id };
 	}
 	void RemoveSurface(SurfaceID id)
 	{
 		GFXCommand.Flush();
-		//TODO: use proper removal of surfaces.
-		Surfaces[id].~D3D12Surface();
+		Surfaces.Remove(id);
 	}
 	void ResizeSurface(SurfaceID id, uint32, uint32)
 	{

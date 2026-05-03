@@ -77,15 +77,74 @@ namespace Europa::Graphics::D3D12{
 		}
 
 	private:
-		ID3D12DescriptorHeap* heap{};
-		D3D12_CPU_DESCRIPTOR_HANDLE cpuStart{};
-		D3D12_GPU_DESCRIPTOR_HANDLE gpuStart{};
-		std::unique_ptr<uint32[]> freeHandles{};
-		uint32 capacity{ 0 };
-		Utilities::Vector<uint32> deferredFreeIndices[FrameBufferCount];
-		std::mutex mutex;
-		uint32 size{ 0 };
-		uint32 descriptorSize{};
+		ID3D12DescriptorHeap*			 heap{};
+		D3D12_CPU_DESCRIPTOR_HANDLE		 cpuStart{};
+		D3D12_GPU_DESCRIPTOR_HANDLE		 gpuStart{};
+		std::unique_ptr<uint32[]>		 freeHandles{};
+		uint32							 capacity{ 0 };
+		Utilities::Vector<uint32>		 deferredFreeIndices[FrameBufferCount];
+		std::mutex						 mutex;
+		uint32						     size{ 0 };
+		uint32							 descriptorSize{};
 		const D3D12_DESCRIPTOR_HEAP_TYPE type{};
+	};
+
+	struct D3D12TextureInitInfo
+	{
+		ID3D12Heap1*				     Heap{};
+		ID3D12Resource*					 Resource{};
+		D3D12_SHADER_RESOURCE_VIEW_DESC* SRVDescription{};
+		D3D12_RESOURCE_DESC*			 ResourceDescription{};
+		D3D12_RESOURCE_ALLOCATION_INFO1  AllocationInfo{};
+		D3D12_RESOURCE_STATES			 InitialState{};
+		D3D12_CLEAR_VALUE				 ClearValue{};
+	};
+
+	class D3D12Texture {
+	public:
+		D3D12Texture() = default;
+		explicit D3D12Texture(D3D12TextureInitInfo info);
+		DISABLE_COPY(D3D12Texture);
+		constexpr D3D12Texture(D3D12Texture&& texture) : resource{ texture.resource },
+			srv{ texture.srv }
+		{
+			texture.Reset();
+		}
+
+		constexpr D3D12Texture& operator=(D3D12Texture&& texture) 
+		{
+			assert(this != &texture);
+			if (this != &texture) 
+			{
+				Release();
+				Move(texture);
+			}
+			return *this;
+		}
+
+		void Release();
+		constexpr ID3D12Resource* const GetResource() const 
+		{
+			return resource;
+		}
+		constexpr DescriptorHandle GetDescriptorHandle() const 
+		{
+			return srv;
+		}
+	private:
+		constexpr void Move(D3D12Texture& texture) 
+		{
+			resource = texture.resource;
+			srv = texture.srv;
+			texture.Reset();
+		}
+
+		constexpr void Reset() {
+			resource = nullptr;
+			srv = {};
+		}
+
+		ID3D12Resource* resource{ nullptr };
+		DescriptorHandle srv;
 	};
 }

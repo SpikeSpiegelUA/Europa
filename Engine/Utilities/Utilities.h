@@ -1,6 +1,6 @@
 #pragma once
 
-#define USE_STL_VECTOR 1
+#define USE_STL_VECTOR 0
 #define USE_STL_DEQUE 1
 
 #if USE_STL_VECTOR
@@ -9,6 +9,14 @@
 namespace Europa::Utilities {
 	template<typename T>
 	using Vector = typename std::vector<T>;
+}
+#else
+#include "Vector.h"
+namespace Europa::Utilities {
+	template<typename T>
+	void EraseUnordered(T& vector, size_t index) {
+		vector.EraseUnordered(index);
+	}
 }
 #endif
 

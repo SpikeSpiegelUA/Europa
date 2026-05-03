@@ -5,6 +5,7 @@
 namespace Europa::Graphics::D3D12 {
 	class D3D12Surface {
 	public:
+		constexpr static uint32 BufferCount{ 3 };
 		explicit D3D12Surface(Platform::Window window) : window{ window } {
 			assert(this->window.Handle());
 		}
@@ -31,6 +32,8 @@ namespace Europa::Graphics::D3D12 {
 			}
 			return *this;
 		}
+#else
+		DISABLE_COPY_AND_MOVE(D3D12Surface)
 #endif
 		~D3D12Surface() {
 			Release();
@@ -88,7 +91,7 @@ namespace Europa::Graphics::D3D12 {
 		constexpr void Reset() 
 		{
 			swapChain = nullptr ;
-			for (uint32 i{ 0 }; i < FrameBufferCount; i++) 
+			for (uint32 i{ 0 }; i < BufferCount; i++) 
 				renderTargetData[i] = {};
 			window = {};
 			allowTearing = 0;
@@ -105,7 +108,7 @@ namespace Europa::Graphics::D3D12 {
 		};
 
 		IDXGISwapChain4* swapChain{ nullptr };
-		RenderTargetData renderTargetData[FrameBufferCount]{};
+		RenderTargetData renderTargetData[BufferCount]{};
 		Platform::Window window{};
 		mutable uint32 currentBackBufferIndex{};
 		uint32 allowTearing{ 0 };

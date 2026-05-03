@@ -75,8 +75,8 @@ namespace Europa::Content {
 		//Read game.bin file and create the entities from it.
 		std::ifstream game("game.bin", std::ios::in | std::ios::binary);
 		Europa::Utilities::Vector<uint8> buffer(std::istreambuf_iterator<char>(game), {});
-		assert(buffer.size());
-		const uint8* at{ buffer.data() };
+		assert(buffer.Size());
+		const uint8* at{ buffer.Data() };
 		constexpr uint32 suint32{ sizeof(uint32) };
 		const uint32 numEntities{ *at };
 		at += suint32;
@@ -104,10 +104,10 @@ namespace Europa::Content {
 			GameEntity::Entity entity{ GameEntity::Create(info) };
 			if (!entity.IsValid())
 				return false;
-			entities.emplace_back(entity);
+			entities.EmplaceBack(entity);
 		}
 
-		assert(at == buffer.data() + buffer.size());
+		assert(at == buffer.Data() + buffer.Size());
 		return true;
 	}
 

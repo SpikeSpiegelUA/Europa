@@ -21,7 +21,7 @@ namespace Europa::Graphics::D3D12 {
 
 		DXGI_SWAP_CHAIN_DESC1 description{};
 		description.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-		description.BufferCount = FrameBufferCount;
+		description.BufferCount = BufferCount;
 		description.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		description.Flags = allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 		description.Format = ToNonSRGB(format);
@@ -42,7 +42,7 @@ namespace Europa::Graphics::D3D12 {
 
 		currentBackBufferIndex = this->swapChain->GetCurrentBackBufferIndex();
 
-		for (uint32 i{ 0 }; i < FrameBufferCount; i++) {
+		for (uint32 i{ 0 }; i < BufferCount; i++) {
 			renderTargetData[i].RTV = Core::GetRTVHeap().Allocate();
 		}
 
@@ -57,7 +57,7 @@ namespace Europa::Graphics::D3D12 {
 
 	void D3D12Surface::Release()
 	{
-		for (uint32 i{ 0 }; i < FrameBufferCount; i++) {
+		for (uint32 i{ 0 }; i < BufferCount; i++) {
 			RenderTargetData& data{ renderTargetData[i] };
 			Core::Release(data.Resource);
 			Core::GetRTVHeap().Free(data.RTV);
@@ -74,7 +74,7 @@ namespace Europa::Graphics::D3D12 {
 	void D3D12Surface::Finalize()
 	{
 		//Create RTVs for back-buffers.
-		for (uint32 i{ 0 }; i < FrameBufferCount; i++) {
+		for (uint32 i{ 0 }; i < BufferCount; i++) {
 			RenderTargetData& data{ renderTargetData[i] };
 			assert(!data.Resource);
 			DXCall(swapChain->GetBuffer(i, IID_PPV_ARGS(&data.Resource)));

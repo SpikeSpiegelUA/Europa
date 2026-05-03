@@ -12,16 +12,16 @@ namespace Europa::TransformComponent {
 	Component Create(const InitInfo& initInfo, GameEntity::Entity entity) {
 		assert(entity.IsValid());
 		const ID::IDType entityIndex{ ID::Index(entity.GetID()) };
-		if (positions.size() > entityIndex) {
+		if (positions.Size() > entityIndex) {
 			rotations[entityIndex] = Math::Vector4(initInfo.rotation);
 			positions[entityIndex] = Math::Vector3(initInfo.position);
 			scales[entityIndex] = Math::Vector3(initInfo.scale);
 		}
 		else {
-			assert(positions.size() == entityIndex);
-			rotations.emplace_back(initInfo.rotation);
-			positions.emplace_back(initInfo.position);
-			scales.emplace_back(initInfo.scale);
+			assert(positions.Size() == entityIndex);
+			rotations.EmplaceBack(initInfo.rotation);
+			positions.EmplaceBack(initInfo.position);
+			scales.EmplaceBack(initInfo.scale);
 		}
 		return Component{ TransformID{entity.GetID()} };
 	}
