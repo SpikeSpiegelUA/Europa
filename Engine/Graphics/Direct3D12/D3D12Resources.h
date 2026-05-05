@@ -102,6 +102,7 @@ namespace Europa::Graphics::D3D12{
 
 	class D3D12Texture {
 	public:
+		constexpr static uint32 MaxMIPS{ 14 }; //Support up to 16k resolutions. 
 		D3D12Texture() = default;
 		explicit D3D12Texture(D3D12TextureInitInfo info);
 		DISABLE_COPY(D3D12Texture);
@@ -109,6 +110,10 @@ namespace Europa::Graphics::D3D12{
 			srv{ texture.srv }
 		{
 			texture.Reset();
+		}
+
+		~D3D12Texture() {
+			Release();
 		}
 
 		constexpr D3D12Texture& operator=(D3D12Texture&& texture) 
@@ -146,5 +151,72 @@ namespace Europa::Graphics::D3D12{
 
 		ID3D12Resource* resource{ nullptr };
 		DescriptorHandle srv;
+	};
+
+	class D3D12RenderTexture {
+	public:
+		D3D12RenderTexture() = default;
+		explicit D3D12RenderTexture(D3D12TextureInitInfo info);
+		DISABLE_COPY(D3D12RenderTexture);
+		constexpr D3D12RenderTexture(D3D12RenderTexture&& texture) :
+			texture{ std::move(texture.texture) }, mipCount{ texture.mipCount } 
+		{
+			for (uint32 i{ 0 }; i < mipCount; i++)
+				rtv[i] = texture.rtv[i];
+			texture.Reset();
+		}
+
+		~D3D12RenderTexture() {
+			Release();
+		}
+
+		constexpr D3D12RenderTexture& operator=(D3D12RenderTexture&& texture) 
+		{
+			assert(this != &texture);
+			if (this != &texture)
+			{
+				Release();
+				Move(texture);
+			}
+			return *this;
+		}
+
+		void Release();
+		constexpr uint32 MipCount() const 
+		{
+			return mipCount;
+		}
+		constexpr D3D12_CPU_DESCRIPTOR_HANDLE RTV(uint32 mipIndex) const {
+			assert(mipIndex < mipCount);
+			return rtv[mipIndex].CPU;
+		}
+		constexpr DescriptorHandle SRV() const 
+		{
+			return texture.GetDescriptorHandle();
+		}
+		constexpr ID3D12Resource* const Resource() const 
+		{
+			return texture.GetResource();
+		}
+
+	private:
+		constexpr void Move(D3D12RenderTexture& texture) 
+		{
+			this->texture = std::move(texture.texture);
+			mipCount = texture.mipCount;
+			for (uint32 i{ 0 }; i < mipCount; i++)
+				rtv[i] = texture.rtv[i];
+			texture.Reset();
+		}
+
+		constexpr void Reset() {
+			for (uint32 i{ i }; i < mipCount; i++)
+				rtv[i] = {};
+			mipCount = 0;
+		}
+
+		D3D12Texture texture{};
+		DescriptorHandle rtv[D3D12Texture::MaxMIPS]{};
+		uint32 mipCount{ 0 };
 	};
 }

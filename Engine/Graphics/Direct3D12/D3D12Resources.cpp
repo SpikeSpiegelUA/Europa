@@ -15,7 +15,7 @@ namespace Europa::Graphics::D3D12 {
 
 		Release();
 
-		ID3D12Device* const device{ Core::Device() };
+		auto* const device{ Core::Device() };
 		assert(device);
 
 		D3D12_DESCRIPTOR_HEAP_DESC desc{};
@@ -152,4 +152,37 @@ namespace Europa::Graphics::D3D12 {
 		Core::DeferredRelease(resource);
 	}
 #pragma endregion D3D12Texture
+#pragma region D3D12RenderTexture
+	D3D12RenderTexture::D3D12RenderTexture(D3D12TextureInitInfo info) 
+		: texture{info}
+	{
+		assert(info.ResourceDescription);
+		mipCount = Resource()->GetDesc().MipLevels;
+		assert(mipCount && mipCount <= D3D12Texture::MaxMIPS);
+
+		DescriptorHeap& rtvHeap{ Core::GetRTVHeap() };
+		D3D12_RENDER_TARGET_VIEW_DESC desc{};
+		desc.Format = info.ResourceDescription->Format;
+		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipSlice = 0;
+		
+		auto* const device{ Core::Device() };
+		assert(device);
+
+		for (uint32 i{ 0 }; i < mipCount; i++) 
+		{
+			rtv[i] = rtvHeap.Allocate();
+			device->CreateRenderTargetView(Resource(), &desc, rtv[i].CPU);
+			++desc.Texture2D.MipSlice;
+		}
+	}
+
+	void D3D12RenderTexture::Release() 
+	{
+		for (uint32 i{ 0 }; i < mipCount; i++)
+			Core::GetRTVHeap().Free(rtv[i]);
+		texture.Release();
+		mipCount = 0;
+	}
+#pragma endregion D3D12RenderTexture
 }
