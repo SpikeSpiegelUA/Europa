@@ -185,46 +185,4 @@ namespace Europa::Graphics::D3D12 {
 		mipCount = 0;
 	}
 #pragma endregion D3D12RenderTexture
-#pragma region D3D12DepthBuffer
-	D3D12DepthBuffer::D3D12DepthBuffer(D3D12TextureInitInfo info) 
-	{
-		const DXGI_FORMAT dsvFormat{ info.ResourceDescription->Format };
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		if (info.ResourceDescription->Format == DXGI_FORMAT_D32_FLOAT) 
-		{
-			info.ResourceDescription->Format = DXGI_FORMAT_R32_TYPELESS;
-			srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-		}
-
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MipLevels = 1;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.PlaneSlice = 0;
-		srvDesc.Texture2D.ResourceMinLODClamp = 0.f;
-
-		assert(!info.SRVDescription && !info.Resource);
-		info.SRVDescription = &srvDesc;
-		texture = D3D12Texture(info);
-
-		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-		dsvDesc.Format = dsvFormat;
-		dsvDesc.Texture2D.MipSlice = 0;
-
-		dsv = Core::GetDSVHeap().Allocate();
-
-		auto* const device{ Core::Device() };
-		assert(device);
-		device->CreateDepthStencilView(Resource(), &dsvDesc, dsv.CPU);
-	}
-
-	void D3D12DepthBuffer::Release() 
-	{
-		Core::GetDSVHeap().Free(dsv);
-		texture.Release();
-	}
-#pragma endregion D3D12DepthBuffer
 }

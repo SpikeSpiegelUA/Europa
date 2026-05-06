@@ -166,9 +166,6 @@ namespace Europa::Graphics::D3D12{
 			texture.Reset();
 		}
 
-		~D3D12RenderTexture() {
-			Release();
-		}
 
 		constexpr D3D12RenderTexture& operator=(D3D12RenderTexture&& texture) 
 		{
@@ -179,6 +176,10 @@ namespace Europa::Graphics::D3D12{
 				Move(texture);
 			}
 			return *this;
+		}
+
+		~D3D12RenderTexture() {
+			Release();
 		}
 
 		void Release();
@@ -218,5 +219,50 @@ namespace Europa::Graphics::D3D12{
 		D3D12Texture texture{};
 		DescriptorHandle rtv[D3D12Texture::MaxMIPS]{};
 		uint32 mipCount{ 0 };
+	};
+
+	class D3D12DepthBuffer 
+	{
+	public:
+		D3D12DepthBuffer() = default;
+		explicit D3D12DepthBuffer(D3D12TextureInitInfo info);
+		DISABLE_COPY(D3D12DepthBuffer);
+		constexpr D3D12DepthBuffer(D3D12DepthBuffer&& depthBuffer)
+			: texture{ std::move(depthBuffer.texture) }, dsv{ depthBuffer.dsv }
+		{
+			depthBuffer.dsv = {};
+		}
+
+		constexpr D3D12DepthBuffer& operator =(D3D12DepthBuffer&& depthBuffer)
+		{
+			assert(this != &depthBuffer);
+			if (this != &depthBuffer)
+			{
+				texture = std::move(depthBuffer.texture);
+				dsv = depthBuffer.dsv;
+				depthBuffer.dsv = {};
+			}
+			return *this;
+		}
+
+		~D3D12DepthBuffer() {
+			Release();
+		}
+
+		void Release();
+		constexpr D3D12_CPU_DESCRIPTOR_HANDLE DSV() const {
+			return dsv.CPU;
+		}
+		constexpr DescriptorHandle SRV() const
+		{
+			return texture.GetDescriptorHandle();
+		}
+		constexpr ID3D12Resource* const Resource() const
+		{
+			return texture.GetResource();
+		}
+	private:
+		D3D12Texture texture{};
+		DescriptorHandle dsv{};
 	};
 }
