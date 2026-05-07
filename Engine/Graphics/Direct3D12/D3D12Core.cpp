@@ -411,40 +411,4 @@ namespace Europa::Graphics::D3D12::Core {
 
 		GFXCommand.EndFrame();
 	}
-
-	//NOTE: this function demonstrates how to create a root signature as an example it will be removed later.
-	void CreateRootSignature()
-	{
-		D3D12_ROOT_PARAMETER1 params[3];
-		{
-			auto& param = params[0];
-			param.ParameterType;
-		};
-
-
-
-		D3D12_ROOT_SIGNATURE_DESC2 description;
-
-		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription{};
-		rootSignatureDescription.Version = D3D_ROOT_SIGNATURE_VERSION_1_2;
-		rootSignatureDescription.Desc_1_2 = description;
-
-		HRESULT hr{ S_OK };
-		ID3DBlob* rootSignatureBlob{ nullptr };
-		ID3DBlob* errorBlob{ nullptr };
-		if (FAILED(hr = D3D12SerializeVersionedRootSignature(, &rootSignatureBlob, &errorBlob)))
-		{
-			DEBUG_OP(const char* errorMessage{errorBlob ? (const char*)errorBlob->GetBufferPointer() : ""});
-			DEBUG_OP(OutputDebugStringA(errorMessage));
-			return;
-		}
-
-		assert(rootSignatureBlob);
-		ID3D12RootSignature* rootSignature{ nullptr };
-		DXCall(hr = Device()->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), 
-			rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
-
-		Release(rootSignatureBlob);
-		Release(errorBlob);
-	}
 }
