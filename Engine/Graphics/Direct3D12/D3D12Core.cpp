@@ -4,6 +4,8 @@
 using namespace Microsoft::WRL;
 
 namespace Europa::Graphics::D3D12::Core {
+	//TODO: remove when you're done showing hot to create a root signature a tedious way
+	void CreateARootSignature();
 	namespace {
 		bool FailedInit() {
 			Shutdown();
@@ -290,6 +292,8 @@ namespace Europa::Graphics::D3D12::Core {
 		NAME_D3D12_OBJECT(srvDescriptorHeap.Heap(), L"SRV Descriptor Heap");
 		NAME_D3D12_OBJECT(uavDescriptorHeap.Heap(), L"UAV Descriptor Heap");
 
+		CreateARootSignature();
+
 		return true;
 	}
 
@@ -416,23 +420,69 @@ namespace Europa::Graphics::D3D12::Core {
 	void CreateRootSignature()
 	{
 		D3D12_ROOT_PARAMETER1 params[3];
-		{
+		{//param 0: 2 constants
 			auto& param = params[0];
-			param.ParameterType;
+			param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+			D3D12_ROOT_CONSTANTS consts{};
+			consts.Num32BitValues = 2;
+			consts.ShaderRegister = 0;
+			consts.RegisterSpace = 0;
+			param.Constants = consts;
+			param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 		};
+		{//param 1: Constant Buffer View(Descriptor)
+			auto& param = params[1];
+			param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			D3D12_ROOT_DESCRIPTOR1 rootDescriptor{};
+			rootDescriptor.Flags = D3D12_ROOT_DESCRIPTOR_FLAG_NONE;
+			rootDescriptor.ShaderRegister = 1;
+			rootDescriptor.RegisterSpace = 0;
+			param.Descriptor = rootDescriptor;
+			param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+		}
+		{// param 2: descriptor table(unbounded/bindless)
+			auto& param = params[2];
+			param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			D3D12_ROOT_DESCRIPTOR_TABLE1 table{};
+			table.NumDescriptorRanges = 1;
+			D3D12_DESCRIPTOR_RANGE1 range{};
+			range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			range.NumDescriptors = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+			range.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+			range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+			range.BaseShaderRegister = 0;
+			range.RegisterSpace = 0;
+			table.pDescriptorRanges = &range;
+			param.DescriptorTable = table;
+			param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+		}
 
+		D3D12_STATIC_SAMPLER_DESC1 samplerDescription{};
+		samplerDescription.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		samplerDescription.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		samplerDescription.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		samplerDescription.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+		D3D12_ROOT_SIGNATURE_DESC2 rootSignatureDescription;
+		rootSignatureDescription.Flags =
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_AMPLIFICATION_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_MESH_SHADER_ROOT_ACCESS;
+		rootSignatureDescription.NumParameters = _countof(params);
+		rootSignatureDescription.pParameters = &params[0];
+		rootSignatureDescription.NumStaticSamplers = 1;
+		rootSignatureDescription.pStaticSamplers = &samplerDescription;
 
-		D3D12_ROOT_SIGNATURE_DESC2 description;
-
-		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription{};
-		rootSignatureDescription.Version = D3D_ROOT_SIGNATURE_VERSION_1_2;
-		rootSignatureDescription.Desc_1_2 = description;
+		D3D12_VERSIONED_ROOT_SIGNATURE_DESC versionedRootSignatureDescription{};
+		versionedRootSignatureDescription.Version = D3D_ROOT_SIGNATURE_VERSION_1_2;
+		versionedRootSignatureDescription.Desc_1_2 = rootSignatureDescription;
 
 		HRESULT hr{ S_OK };
 		ID3DBlob* rootSignatureBlob{ nullptr };
 		ID3DBlob* errorBlob{ nullptr };
-		if (FAILED(hr = D3D12SerializeVersionedRootSignature(, &rootSignatureBlob, &errorBlob)))
+		if (FAILED(hr = D3D12SerializeVersionedRootSignature(&versionedRootSignatureDescription, &rootSignatureBlob, &errorBlob)))
 		{
 			DEBUG_OP(const char* errorMessage{errorBlob ? (const char*)errorBlob->GetBufferPointer() : ""});
 			DEBUG_OP(OutputDebugStringA(errorMessage));
@@ -446,5 +496,10 @@ namespace Europa::Graphics::D3D12::Core {
 
 		Release(rootSignatureBlob);
 		Release(errorBlob);
+
+		//Use Root Signature
+
+		//When renderer shuts down
+		Release(rootSignature);
 	}
 }
