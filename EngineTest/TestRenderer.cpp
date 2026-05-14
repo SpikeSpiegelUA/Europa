@@ -87,7 +87,7 @@ bool EngineTest::Initialize() {
 
 void EngineTest::Run() {
 	timer.Begin();
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	for (uint32 i{ 0 }; i < _countof(Surfaces); i++) 
 	{
 		if (Surfaces[i].Surface.IsValid())

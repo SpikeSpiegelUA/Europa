@@ -186,9 +186,9 @@ namespace Europa::Graphics::D3D12 {
 	}
 #pragma endregion D3D12RenderTexture
 #pragma region D3D12DepthBuffer
-	D3D12DepthBuffer::D3D12DepthBuffer(D3D12TextureInitInfo info) 
+	D3D12DepthBuffer::D3D12DepthBuffer(D3D12TextureInitInfo info)
 	{
-		const DXGI_FORMAT dsvFormat{ info.ResourceDescription->Format };
+		const DXGI_FORMAT dsvFormat{info.ResourceDescription->Format};
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		if (info.ResourceDescription->Format == DXGI_FORMAT_D32_FLOAT) 
