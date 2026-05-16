@@ -1,11 +1,13 @@
 #include "D3D12Core.h"
 #include "D3D12Resources.h"
 #include "D3D12Surface.h"
+#include "D3D12Helpers.h"
 using namespace Microsoft::WRL;
 
 namespace Europa::Graphics::D3D12::Core {
 	//TODO: remove when you're done showing hot to create a root signature a tedious way
 	void CreateARootSignature();
+	void CreateARootSignature2();
 	namespace {
 		bool FailedInit() {
 			Shutdown();
@@ -498,6 +500,21 @@ namespace Europa::Graphics::D3D12::Core {
 		Release(errorBlob);
 
 		//Use Root Signature
+
+		//When renderer shuts down
+		Release(rootSignature);
+	}
+
+	void CreateARootSignature2() {
+		D3DX::D3D12DescriptorRange range{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND, 0};
+		D3DX::D3D12RootParameter params[3];
+		params[0].AsConstants(2, D3D12_SHADER_VISIBILITY_PIXEL, 0);
+		params[1].AsCBV(D3D12_SHADER_VISIBILITY_PIXEL, 1);
+		params[2].AsDescriptorTable(D3D12_SHADER_VISIBILITY_PIXEL, &range,1);
+		D3DX::D3D12RootSignatureDescription rootSignatureDescription{&params[0], _countof(params)};
+		ID3D12RootSignature* rootSignature{ rootSignatureDescription.Create() };
+
+		//Use rootSignature
 
 		//When renderer shuts down
 		Release(rootSignature);
