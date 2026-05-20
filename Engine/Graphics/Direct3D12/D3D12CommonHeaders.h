@@ -12,6 +12,8 @@
 
 namespace Europa::Graphics::D3D12 {
 	constexpr uint32 FrameBufferCount{ 3 };
+	using CoreID3D12Device = ID3D12Device8;
+	using CoreID3D12GraphicsCommandList = ID3D12GraphicsCommandList6;
 }
 #ifdef _DEBUG
 #ifndef DXCall

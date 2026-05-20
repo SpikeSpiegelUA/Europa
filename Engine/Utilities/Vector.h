@@ -107,7 +107,7 @@ namespace Europa::Utilities {
 
 		//Resize the vector and initializes new items with their default value.
 		constexpr void Resize(uint64 newSize) {
-			static_assert(std::is_default_constructible_v<T>, "Type must be default-constructible.");
+			static_assert(std::is_default_constructible<T>::value, "Type must be default-constructible.");
 
 			if (newSize > size) {
 				Reserve(newSize);
@@ -129,7 +129,7 @@ namespace Europa::Utilities {
 
 		//Resize the vector and initializes new items by copying 'value'.
 		constexpr void Resize(uint64 newSize, const T& value) {
-			static_assert(std::is_copy_constructible_v<T>, "Type must be copy-constructible.");
+			static_assert(std::is_copy_constructible<T>::value, "Type must be copy-constructible.");
 
 			if (newSize > size) {
 				Reserve(newSize);

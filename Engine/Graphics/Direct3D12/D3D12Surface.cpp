@@ -19,6 +19,8 @@ namespace Europa::Graphics::D3D12 {
 			presentFlags = DXGI_PRESENT_ALLOW_TEARING;
 		}
 
+		this->format = format;
+
 		DXGI_SWAP_CHAIN_DESC1 description{};
 		description.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		description.BufferCount = BufferCount;
@@ -79,7 +81,7 @@ namespace Europa::Graphics::D3D12 {
 			assert(!data.Resource);
 			DXCall(swapChain->GetBuffer(i, IID_PPV_ARGS(&data.Resource)));
 			D3D12_RENDER_TARGET_VIEW_DESC desc{};
-			desc.Format = Core::GetDefaultRenderTargetFormat();
+			desc.Format = format;
 			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			Core::Device()->CreateRenderTargetView(data.Resource, &desc, data.RTV.CPU);
 		}

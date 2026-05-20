@@ -6,6 +6,7 @@ namespace Europa::Graphics::D3D12 {
 	class D3D12Surface {
 	public:
 		constexpr static uint32 BufferCount{ 3 };
+		constexpr static DXGI_FORMAT defaultBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 		explicit D3D12Surface(Platform::Window window) : window{ window } {
 			assert(this->window.Handle());
 		}
@@ -39,7 +40,7 @@ namespace Europa::Graphics::D3D12 {
 			Release();
 		}
 
-		void CreateSwapChain(IDXGIFactory7* factory, ID3D12CommandQueue* commandQueue, DXGI_FORMAT format);
+		void CreateSwapChain(IDXGIFactory7* factory, ID3D12CommandQueue* commandQueue, DXGI_FORMAT format = defaultBackBufferFormat);
 		void Present() const;
 		void Resize();
 
@@ -111,6 +112,7 @@ namespace Europa::Graphics::D3D12 {
 		RenderTargetData renderTargetData[BufferCount]{};
 		Platform::Window window{};
 		mutable uint32 currentBackBufferIndex{};
+		DXGI_FORMAT format{ defaultBackBufferFormat };
 		uint32 allowTearing{ 0 };
 		uint32 presentFlags{ 0 };
 		D3D12_VIEWPORT viewport{};

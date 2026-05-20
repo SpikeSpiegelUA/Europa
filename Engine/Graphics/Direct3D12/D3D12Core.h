@@ -29,13 +29,12 @@ namespace Europa::Graphics::D3D12::Core {
 		}
 	}
 
-	ID3D12Device* const Device();
+	CoreID3D12Device* const Device();
 	DescriptorHeap& GetRTVHeap();
 	DescriptorHeap& GetDSVHeap();
 	DescriptorHeap& GetSRVHeap();
 	DescriptorHeap& GetUAVHeap();
 	uint32 CurrentFrameIndex();
-	DXGI_FORMAT GetDefaultRenderTargetFormat();
 	void SetDeferredReleasesFlag();
 
 	Surface CreateSurface(Platform::Window window);
