@@ -3,14 +3,17 @@
 #include "..\Platform\Platform.h"
 #include "..\Platform\PlatformTypes.h"
 #include "..\Graphics\Renderer.h"
+#include "ShaderCompilation.h"
 #if TEST_RENDERER 
-
 using namespace Europa;
 
 Platform::Window Windows[4];
 
 Graphics::RenderSurface Surfaces[4];
 Timer timer{};
+bool IsRestatring{ false };
+bool TestInitialize();
+void TestShutdown();
 
 void DestroyRenderSurface(Graphics::RenderSurface& surface);
 
@@ -31,7 +34,7 @@ LRESULT WinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 					}
 				}
 			}
-			if (allClosed) {
+			if (allClosed && !IsRestatring) {
 				PostQuitMessage(0);
 				return 0;
 			}
@@ -48,6 +51,12 @@ LRESULT WinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 			if (wparam == VK_ESCAPE) {
 				PostMessage(hwnd, WM_CLOSE, 0, 0);
 				return 0;
+			}
+			else if (wparam == VK_F11) 
+			{
+				IsRestatring = true;
+				TestShutdown();
+				TestInitialize();
 			}
 	}
 
@@ -68,10 +77,17 @@ void CreateRenderSurface(Graphics::RenderSurface& surface, Platform::WindowInitI
 	surface.Surface = Graphics::CreateSurface(surface.Window);
 }
 
-bool EngineTest::Initialize() {
-	bool result{ Graphics::Initialize(Graphics::GraphicsPlatform::Direct3D12) };
-	if (!result)
-		return result;
+bool TestInitialize() 
+{
+	while (!CompileShaders())
+	{
+		//Pop up a message box allowing the user to retry compilation.
+		if (MessageBox(nullptr, L"Failed to compile engine shaders.", L"Shader Compilation Error", MB_RETRYCANCEL) != IDRETRY)
+			return false;
+	}
+
+	if (!Graphics::Initialize(Graphics::GraphicsPlatform::Direct3D12))
+		return false;
 	Platform::WindowInitInfo info[]{
 		{&WinProc, nullptr, L"Render Window 1", 100, 100, 400, 800},
 		{&WinProc, nullptr, L"Render Window 2", 150, 150, 800, 400},
@@ -82,7 +98,21 @@ bool EngineTest::Initialize() {
 
 	for (uint32 i{ 0 }; i < _countof(Surfaces); ++i)
 		CreateRenderSurface(Surfaces[i], info[i]);
-	return result;
+
+	IsRestatring = false;
+	return true;
+}
+
+void TestShutdown() {
+	for (uint32 i{ 0 }; i < _countof(Surfaces); ++i) {
+		DestroyRenderSurface(Surfaces[i]);
+	}
+
+	Graphics::Shutdown();
+}
+
+bool EngineTest::Initialize() {
+	return TestInitialize();
 }
 
 void EngineTest::Run() {
@@ -97,11 +127,7 @@ void EngineTest::Run() {
 }
 
 void EngineTest::Shutdown() {
-	for (uint32 i{ 0 }; i < _countof(Surfaces); ++i) {
-		DestroyRenderSurface(Surfaces[i]);
-	}
-
-	Graphics::Shutdown();
+	TestShutdown();
 }
 
 #endif

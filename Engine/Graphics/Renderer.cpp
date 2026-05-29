@@ -4,7 +4,17 @@
 
 namespace Europa::Graphics {
 	namespace {
+
+		//Defines where the compiled engine shaders file is located for each one of the supported APIs.
+		constexpr const char* EngineShaderPaths[]
+		{
+			".\\shaders\\d3d12\\shaders.bin",
+			// ".\\shaders\\vulkan\\shaders.bin, etc.
+		};
+
+
 		PlatformInterface GFX{};
+
 		bool SetPlatformInterface(GraphicsPlatform platform) {
 			switch (platform) {
 				case GraphicsPlatform::Direct3D12:
@@ -13,6 +23,8 @@ namespace Europa::Graphics {
 				default:
 					return false;
 			}
+
+			assert(GFX.Platform == platform);
 			return true;
 		}
 	}
@@ -23,6 +35,16 @@ namespace Europa::Graphics {
 
 	void Shutdown() {
 		GFX.Shutdown();
+	}
+
+	const char* GetEngineShadersPath() 
+	{
+		return EngineShaderPaths[(uint32)GFX.Platform];
+	}
+
+	const char* GetEngineShadersPath(GraphicsPlatform platform)
+	{
+		return EngineShaderPaths[(uint32)platform];
 	}
 
 	Surface CreateSurface(Platform::Window window)

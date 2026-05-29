@@ -14,5 +14,7 @@ namespace Europa::Graphics::D3D12 {
 		pi.Surface.Width = Core::SurfaceWidth;
 		pi.Surface.Height = Core::SurfaceHeight;
 		pi.Surface.Render = Core::RenderSurface;
+
+		pi.Platform = GraphicsPlatform::Direct3D12;
 	}
 }

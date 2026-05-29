@@ -112,7 +112,7 @@ namespace Europa::Script {
 
 extern "C" __declspec(dllexport)
 LPSAFEARRAY GetScriptNames() {
-	const uint32 size{ (uint32)Europa::Script::ScriptNames().size() };
+	const uint32 size{ (uint32)Europa::Script::ScriptNames().Size() };
 	if (!size)
 		return nullptr;
 	CComSafeArray<BSTR> names(size);

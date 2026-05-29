@@ -26,14 +26,6 @@ namespace Europa::Utilities {
 			Resize(count, value);
 		}
 
-		template<typename it, typename = std::enable_if<std::_Is_iterator_v<it>>>
-		constexpr explicit Vector(it first, it last) {
-			while (first != last) {
-				EmplaceBack(*first);
-				first++;
-			}
-		}
-
 		//Copy-constructor. Constructs by copying another vector. The items
 		//in the copied vector must be copyable.
 		constexpr Vector(const Vector& vector)
@@ -43,7 +35,7 @@ namespace Europa::Utilities {
 
 		//Move-constructor. Constructs by moving another vector.
 		//The original vector will be empty after move.
-		constexpr Vector(const Vector&& vector)
+		constexpr Vector(Vector&& vector)
 			: capacity{ vector.capacity }, size{ vector.size }, data{ vector.data }
 		{
 			vector.Reset();

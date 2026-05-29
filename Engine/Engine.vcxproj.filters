@@ -28,6 +28,10 @@
     <ClInclude Include="Utilities\FreeList.h" />
     <ClInclude Include="Utilities\Vector.h" />
     <ClInclude Include="Graphics\Direct3D12\D3D12Helpers.h" />
+    <ClInclude Include="Graphics\Direct3D12\D3D12Shaders.h" />
+    <ClInclude Include="AI\GOAP.h" />
+    <ClInclude Include="Graphics\Direct3D12\D3D12GPass.h" />
+    <ClInclude Include="Graphics\Direct3D12\D3D12PostProcess.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\Entity.cpp" />
@@ -43,5 +47,11 @@
     <ClCompile Include="Graphics\Direct3D12\D3D12Resources.cpp" />
     <ClCompile Include="Graphics\Direct3D12\D3D12Surface.cpp" />
     <ClCompile Include="Graphics\Direct3D12\D3D12Helpers.cpp" />
+    <ClCompile Include="Graphics\Direct3D12\D3D12Shaders.cpp" />
+    <ClCompile Include="Graphics\Direct3D12\D3D12GPass.cpp" />
+    <ClCompile Include="Graphics\Direct3D12\D3D12PostProcess.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Graphics\Direct3D12\Shaders\FullScreenTriangle.hlsl" />
   </ItemGroup>
 </Project>

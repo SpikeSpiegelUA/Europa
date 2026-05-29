@@ -1,0 +1,38 @@
+﻿<Window x:Class="YourEngineEditor.GoapDialogueWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AI Subsystem Evaluator (Dialogue)" Height="400" Width="440" 
+        Background="#1E1E1E" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid Margin="15">
+        <StackPanel>
+            <TextBlock Text="GOAP Planner Configuration Node" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,0,12"/>
+
+            <TextBlock Text="Target Agent Goal:" Foreground="#AAAAAA" Margin="0,4,0,2"/>
+            <ComboBox x:Name="ComboBoxGoal" SelectedIndex="0" Height="25" Background="#333333" Foreground="Black">
+                <ComboBoxItem Content="Write Engine Code (Complex Path)"/>
+                <ComboBoxItem Content="Acquire Coffee (Simple Path)"/>
+            </ComboBox>
+
+            <TextBlock Text="Agent Starting Location Context:" Foreground="#AAAAAA" Margin="0,8,0,2"/>
+            <ComboBox x:Name="ComboBoxLocation" SelectedIndex="0" Height="25" Background="#333333" Foreground="Black">
+                <ComboBoxItem Content="At Home (Requires traveling precondition)"/>
+                <ComboBoxItem Content="At Workspace Office (Direct access)"/>
+            </ComboBox>
+
+            <TextBlock Text="Precondition Toggles:" Foreground="#AAAAAA" Margin="0,12,0,5"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <CheckBox x:Name="CheckBoxIdea" Content="Has Idea" Foreground="White" Margin="0,0,20,0" IsChecked="False"/>
+                <CheckBox x:Name="CheckBoxTired" Content="Is Tired" Foreground="White" IsChecked="True"/>
+            </StackPanel>
+
+            <Button Content="Execute C++ GOAP Graph Evaluation" Click="OnComputePlanClicked" Height="30" Background="#007ACC" Foreground="White" FontWeight="Bold" Margin="0,8,0,12"/>
+
+            <TextBlock Text="Generated Action Execution Sequence:" Foreground="#888888" Margin="0,4,0,2"/>
+            <Border Background="#2D2D2D" BorderBrush="#3F3F46" BorderThickness="1" Padding="8" CornerRadius="4" Height="95">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="TextBlockGOAPOutput" Text="Query the C++ DLL layer..." Foreground="#00FF00" FontSize="12" FontFamily="Consolas" TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>

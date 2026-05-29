@@ -18,7 +18,6 @@ namespace Europa::Platform {
 		Utilities::FreeList<WindowInfo> Windows;
 
 		WindowInfo& GetWindowInfoFromID(WindowID id) {
-			assert(id < Windows.Size());
 			assert(Windows[id].HWND);
 			return Windows[id];
 		}
@@ -192,6 +191,8 @@ namespace Europa::Platform {
 			/* [in, optional] LPVOID    lpParam			 */ NULL				 //Extra creation parameters.
 		);
 		
+		OutputDebugStringW(L"My output string.");
+
 		if (info.HWND) {
 			DEBUG_OP(SetLastError(0));
 			const WindowID id{ Windows.Add(info) };

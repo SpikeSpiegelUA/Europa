@@ -1,6 +1,5 @@
 #pragma once
 #include "D3D12CommonHeaders.h"
-#include "D3D12Resources.h"
 
 namespace Europa::Graphics::D3D12 {
 	class D3D12Surface {

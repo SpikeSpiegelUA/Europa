@@ -1,7 +1,8 @@
 #include "D3D12Core.h"
-#include "D3D12Resources.h"
 #include "D3D12Surface.h"
-#include "D3D12Helpers.h"
+#include "D3D12Shaders.h"
+#include "D3D12GPass.h"
+#include "D3D12PostProcess.h"
 using namespace Microsoft::WRL;
 
 namespace Europa::Graphics::D3D12::Core {
@@ -66,10 +67,14 @@ namespace Europa::Graphics::D3D12::Core {
 				DXCall(cmdList->Reset(frame.CMDAllocator, nullptr));
 			}
 
-			void EndFrame() {
+			void EndFrame(const D3D12Surface& surface) {
 				DXCall(cmdList->Close());
 				ID3D12CommandList* const cmdlists[]{ cmdList };
 				cmdQueue->ExecuteCommandLists(_countof(cmdlists), &cmdlists[0]);
+
+				//Presenting swap chain buffers happens in lockstep with frame buffers.
+				surface.Present();
+	
 				uint64& fenceValue{ this->fenceValue };
 				++fenceValue;
 				CommandFrame& frame{ commandFrames[frameIndex] };
@@ -144,8 +149,9 @@ namespace Europa::Graphics::D3D12::Core {
 
 		ID3D12Device14* MainDevice{ nullptr };
 		IDXGIFactory7* DXGIFactory{ nullptr };
-		D3D12Command GFXCommand;
+		D3D12Command CoreGFXCommand;
 		SurfaceCollection Surfaces;
+		D3DX::D3D12ResourceBarrier ResourceBarriers{};
 
 		DescriptorHeap rtvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV };
 		DescriptorHeap dsvDescriptorHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV };
@@ -156,7 +162,6 @@ namespace Europa::Graphics::D3D12::Core {
 		uint32 DeferredReleasesFlag[FrameBufferCount]{};
 		std::mutex DeferredReleasesMutex{};
 
-		constexpr DXGI_FORMAT RenderTargetFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel{ D3D_FEATURE_LEVEL_11_0 };
 
 		void __declspec(noinline) ProcessDeferredReleases(uint32 frameIndex) {
@@ -281,8 +286,12 @@ namespace Europa::Graphics::D3D12::Core {
 		if (!result)
 			return FailedInit();
 
-		new (&GFXCommand) D3D12Command(MainDevice, D3D12_COMMAND_LIST_TYPE_DIRECT);
-		if (!GFXCommand.CommandQueue())
+		new (&CoreGFXCommand) D3D12Command(MainDevice, D3D12_COMMAND_LIST_TYPE_DIRECT);
+		if (!CoreGFXCommand.CommandQueue())
+			return FailedInit();
+
+		//Initialize modules.
+		if (!(Shaders::Initialize() && GPass::Initialize() && FX::Initialize()))
 			return FailedInit();
 
 		NAME_D3D12_OBJECT(MainDevice, L"Main D3D12 Device");
@@ -295,14 +304,23 @@ namespace Europa::Graphics::D3D12::Core {
 	}
 
 	void Shutdown() {
-		GFXCommand.Release();
+		CoreGFXCommand.Release();
 
 		//Note: we don't call ProcessDeferredReleases at the end because some resouces
 		//(such as swap chains) can't be released before their depending resources are released.
 		for (uint32 i{ 0 }; i < FrameBufferCount; ++i)
 			ProcessDeferredReleases(i);
 
+		//Shutdown modules.
+		FX::Shutdown();
+		GPass::Shutdown();
+		Shaders::Shutdown();
+
 		Release(DXGIFactory);
+
+		//NOTE:: some modules free their descriptors when they shutdown.
+		//We process those by calling ProcessDeferredFree once more.
+
 
 		rtvDescriptorHeap.Release();
 		dsvDescriptorHeap.Release();
@@ -356,12 +374,9 @@ namespace Europa::Graphics::D3D12::Core {
 
 	uint32 CurrentFrameIndex()
 	{
-		return GFXCommand.FrameIndex();
+		return CoreGFXCommand.FrameIndex();
 	}
-	DXGI_FORMAT GetDefaultRenderTargetFormat()
-	{
-		return RenderTargetFormat;
-	}
+
 	void SetDeferredReleasesFlag()
 	{
 		DeferredReleasesFlag[CurrentFrameIndex()] = 1;
@@ -369,17 +384,17 @@ namespace Europa::Graphics::D3D12::Core {
 	Surface CreateSurface(Platform::Window window)
 	{
 		SurfaceID id{ Surfaces.Add(window) };
-		Surfaces[id].CreateSwapChain(DXGIFactory, GFXCommand.CommandQueue(), RenderTargetFormat);
+		Surfaces[id].CreateSwapChain(DXGIFactory, CoreGFXCommand.CommandQueue());
 		return Surface{ id };
 	}
 	void RemoveSurface(SurfaceID id)
 	{
-		GFXCommand.Flush();
+		CoreGFXCommand.Flush();
 		Surfaces.Remove(id);
 	}
 	void ResizeSurface(SurfaceID id, uint32, uint32)
 	{
-		GFXCommand.Flush();
+		CoreGFXCommand.Flush();
 		Surfaces[id].Resize();
 	}
 	uint32 SurfaceWidth(SurfaceID id)
@@ -394,22 +409,62 @@ namespace Europa::Graphics::D3D12::Core {
 	{
 		//Wait for the GPU to finish with the command allocator and reset the allocator once
 		//the GPU is done with it. This frees the memory that was used to store commands.
-		GFXCommand.BeginFrame();
-		ID3D12GraphicsCommandList* CMDList{ GFXCommand.СommandList() };
+		CoreGFXCommand.BeginFrame();
+		ID3D12GraphicsCommandList* cmdList{ CoreGFXCommand.СommandList() };
 		const uint32 frameIndex{ CurrentFrameIndex() };
 		if (DeferredReleasesFlag[frameIndex]) {
 			ProcessDeferredReleases(frameIndex);
 		}
 
 		const D3D12Surface& surface = Surfaces[id];
+		ID3D12Resource* currentBackBuffer{ surface.BackBuffer() };
+
+		D3D12FrameInfo frameInfo
+		{
+			surface.Width(),
+			surface.Height()
+		};
+
+		GPass::SetSize({ frameInfo.SurfaceWidth, frameInfo.SurfaceHeight});
+		D3DX::D3D12ResourceBarrier& barriers{ ResourceBarriers };
+
+		//Record commands.
+		ID3D12DescriptorHeap* const heaps[]{ srvDescriptorHeap.Heap() };
+		cmdList->SetDescriptorHeaps(1, &heaps[0]);
+		
+
+		cmdList->RSSetViewports(1, &surface.Viewport());
+		cmdList->RSSetScissorRects(1, &surface.ScissorRect());
+
+		//Depth prepass.
+		GPass::AddTransitionsForDepthPrepass(barriers);
+		barriers.Apply(cmdList);
+		GPass::SetRenderTargetsForDepthPrepass(cmdList);
+		GPass::DepthPrepass(cmdList, frameInfo);
+
+		//Geometry and lighting pass.
+		GPass::AddTransitionsForGPass(barriers);
+		barriers.Apply(cmdList);
+		GPass::SetRenderTargetsForGPass(cmdList);
+		GPass::Render(cmdList, frameInfo);
+
+		D3DX::TransitionResource(cmdList, currentBackBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+
+		//Post-process
+		GPass::AddTransitionsForPostProcess(barriers);
+		barriers.Apply(cmdList);
+		//Will write to the current back buffer, so back buffer is a render target.
+		FX::PostProcess(cmdList, surface.RTV());
+		//after post-process
+		D3DX::TransitionResource(cmdList, currentBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
 		//Presenting swap chain buffers happens in lockstep with frame buffers.
-		surface.Present();
-		//Record commands.
-		// ...
-		//
-		//Done recording commands. Now execute commands, signal and increment the fence value for next frame.
+		//surface.Present();
 
-		GFXCommand.EndFrame();
+		//Done recording commands. Now execute commands, signal and increment the fence value for next frame.
+		//Signal and increment the fence value for the next frame.
+
+		CoreGFXCommand.EndFrame(surface);
 	}
 }

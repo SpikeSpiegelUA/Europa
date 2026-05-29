@@ -6,6 +6,8 @@
 	4)Set foce include files(GameEntityAPI.h);
 	5)Set C++ version and calling convension.
 */
+#include "CommonHeaders.h"
+#include <filesystem>
 
 #ifdef _WIN64
 
@@ -16,6 +18,20 @@
 #endif
 #include <Windows.h>
 #include <crtdbg.h>
+//TODO: we might want to have an IO utility header/library and move this function in there.
+namespace {
+	std::filesystem::path SetCurrentDirectoryToExecutablePath()
+	{
+		//Set the working directory to the executable path
+		wchar_t path[MAX_PATH]{};
+		const uint32 length{ GetModuleFileName(0, &path[0], MAX_PATH) };
+		if (!length || GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+			return {};
+		std::filesystem::path p{ path };
+		std::filesystem::current_path(p.parent_path());
+		return std::filesystem::current_path();
+	}
+}
 #ifndef USE_WITH_EDITOR
 
 extern bool EngineInitialize();
@@ -26,6 +42,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	#if _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	#endif
+	
+	SetCurrentDirectoryToExecutablePath();
+
 	if (EngineInitialize()) {
 		MSG msg{};
 		bool isRunning{ true };

@@ -9,6 +9,7 @@ namespace Europa::Graphics::D3D12{
 	struct DescriptorHandle {
 		D3D12_CPU_DESCRIPTOR_HANDLE CPU{};
 		D3D12_GPU_DESCRIPTOR_HANDLE GPU{};
+		uint32 index{ uint32_invalid_id };
 
 		constexpr bool IsValid() const 
 		{
@@ -24,7 +25,6 @@ namespace Europa::Graphics::D3D12{
 	private:
 		friend class DescriptorHeap;
 		DescriptorHeap* container{ nullptr };
-		uint32 index{ uint32_invalid_id };
 	};
 #endif
 
@@ -43,36 +43,36 @@ namespace Europa::Graphics::D3D12{
 		[[nodiscard]] DescriptorHandle Allocate();
 		void Free(DescriptorHandle& handle);
 
-		constexpr D3D12_DESCRIPTOR_HEAP_TYPE Type() const 
+		[[nodiscard]]constexpr D3D12_DESCRIPTOR_HEAP_TYPE Type() const 
 		{ 
 			return type; 
 		}
 
-		constexpr D3D12_CPU_DESCRIPTOR_HANDLE CPUStart() const {
+		[[nodiscard]] constexpr D3D12_CPU_DESCRIPTOR_HANDLE CPUStart() const {
 			return cpuStart;
 		}
 
-		constexpr D3D12_GPU_DESCRIPTOR_HANDLE GPUStart() const {
+		[[nodiscard]] constexpr D3D12_GPU_DESCRIPTOR_HANDLE GPUStart() const {
 			return gpuStart;
 		}
 
-		constexpr ID3D12DescriptorHeap* const Heap() const {
+		[[nodiscard]] constexpr ID3D12DescriptorHeap* const Heap() const {
 			return heap;
 		}
 
-		constexpr uint32 Capacity() const {
+		[[nodiscard]] constexpr uint32 Capacity() const {
 			return capacity;
 		}
 
-		constexpr uint32 Size() const {
+		[[nodiscard]] constexpr uint32 Size() const {
 			return size;
 		}
 
-		constexpr uint32 DescriptorSize() const {
+		[[nodiscard]] constexpr uint32 DescriptorSize() const {
 			return descriptorSize;
 		}
 
-		constexpr bool IsShaderVisible() const {
+		[[nodiscard]] constexpr bool IsShaderVisible() const {
 			return gpuStart.ptr != 0;
 		}
 
@@ -128,11 +128,11 @@ namespace Europa::Graphics::D3D12{
 		}
 
 		void Release();
-		constexpr ID3D12Resource* const GetResource() const 
+		[[nodiscard]] constexpr ID3D12Resource* const GetResource() const
 		{
 			return resource;
 		}
-		constexpr DescriptorHandle SRV() const 
+		[[nodiscard]] constexpr DescriptorHandle SRV() const
 		{
 			return srv;
 		}
@@ -182,19 +182,19 @@ namespace Europa::Graphics::D3D12{
 		}
 
 		void Release();
-		constexpr uint32 MipCount() const 
+		[[nodiscard]] constexpr uint32 MipCount() const
 		{
 			return mipCount;
 		}
-		constexpr D3D12_CPU_DESCRIPTOR_HANDLE RTV(uint32 mipIndex) const {
+		[[nodiscard]] constexpr D3D12_CPU_DESCRIPTOR_HANDLE RTV(uint32 mipIndex) const {
 			assert(mipIndex < mipCount);
 			return rtv[mipIndex].CPU;
 		}
-		constexpr DescriptorHandle SRV() const 
+		[[nodiscard]] constexpr DescriptorHandle SRV() const
 		{
 			return texture.SRV();
 		}
-		constexpr ID3D12Resource* const Resource() const 
+		[[nodiscard]] constexpr ID3D12Resource* const Resource() const
 		{
 			return texture.GetResource();
 		}
@@ -210,7 +210,7 @@ namespace Europa::Graphics::D3D12{
 		}
 
 		constexpr void Reset() {
-			for (uint32 i{ i }; i < mipCount; i++)
+			for (uint32 i{ 0 }; i < mipCount; i++)
 				rtv[i] = {};
 			mipCount = 0;
 		}
@@ -221,8 +221,12 @@ namespace Europa::Graphics::D3D12{
 	};
 
 	class D3D12DepthBuffer {
+	public:
 		D3D12DepthBuffer() = default;
 		explicit D3D12DepthBuffer(D3D12TextureInitInfo info);
+		~D3D12DepthBuffer() {
+			Release();
+		}
 		DISABLE_COPY(D3D12DepthBuffer);
 		constexpr D3D12DepthBuffer(D3D12DepthBuffer&& depthBuffer) : texture{ std::move(depthBuffer.texture) }, dsv{ depthBuffer.dsv } {
 			depthBuffer.dsv = {};
@@ -239,22 +243,18 @@ namespace Europa::Graphics::D3D12{
 			return *this;
 		}
 
-		~D3D12DepthBuffer() {
-			Release();
-		}
-
 		void Release();
-		constexpr D3D12_CPU_DESCRIPTOR_HANDLE DSV() const 
+		[[nodiscard]] constexpr D3D12_CPU_DESCRIPTOR_HANDLE DSV() const
 		{
 			return dsv.CPU;
 		}
 
-		constexpr DescriptorHandle SRV() const 
+		[[nodiscard]] constexpr DescriptorHandle SRV() const
 		{
 			return texture.SRV();
 		}
 
-		constexpr ID3D12Resource* const Resource() const {
+		[[nodiscard]] constexpr ID3D12Resource* const Resource() const {
 			return texture.GetResource();
 		}
 

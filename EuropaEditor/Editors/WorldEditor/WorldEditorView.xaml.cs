@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using YourEngineEditor;
 
 namespace EuropaEditor.Editors.WorldEditor
 {
@@ -45,6 +46,17 @@ namespace EuropaEditor.Editors.WorldEditor
         {
             var dialogueWindow = new PrimitiveMeshDialogue();
             dialogueWindow.ShowDialog();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            {
+                // Instantiate the dialogue window
+                GoapDialogueWindow goapDialog = new GoapDialogueWindow();
+
+                // Open modally
+                goapDialog.ShowDialog();
+            }
         }
     }
 }

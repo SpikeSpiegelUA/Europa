@@ -15,5 +15,7 @@ namespace Europa::Graphics {
 			uint32(*Width)(SurfaceID);
 			void(*Render)(SurfaceID);
 		} Surface;
+
+		GraphicsPlatform Platform = (GraphicsPlatform)-1;
 	};
 }

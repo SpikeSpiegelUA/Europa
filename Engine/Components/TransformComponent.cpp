@@ -26,7 +26,7 @@ namespace Europa::TransformComponent {
 		return Component{ TransformID{entity.GetID()} };
 	}
 
-	void Remove(Component componentToRemove) {
+	void Remove([[maybe_unused]]Component componentToRemove) {
 		assert(componentToRemove.IsValid());
 	}
 

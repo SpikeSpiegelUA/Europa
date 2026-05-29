@@ -3,6 +3,11 @@
 #include "Graphics/Renderer.h"
 #include "Platform\Window.h";
 
+//Skip definition of min/max macros in Windows.h
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <dxgi1_6.h>
 #include <d3d12.h>
 #include <wrl.h>
@@ -52,3 +57,6 @@ if (FAILED(x)) {\
 #else
 #define NAME_D3D12_OBJECT(x, name)
 #endif
+
+#include "D3D12Resources.h"
+#include "D3D12Helpers.h"

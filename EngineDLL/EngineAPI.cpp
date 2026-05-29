@@ -61,21 +61,76 @@ EDITOR_INTERFACE uint32 CreateRenderSurface(HWND host, int32 width, int32 height
 	Platform::WindowInitInfo info{ nullptr, host, nullptr, 0, 0, width, height };
 	Graphics::RenderSurface surface{ Platform::EngineCreateWindow(&info), {} };
 	assert(surface.Window.IsValid());
-	renderSurfaces.emplace_back(surface);
-	return (uint32)renderSurfaces.size() - 1;
+	renderSurfaces.EmplaceBack(surface);
+	return (uint32)renderSurfaces.Size() - 1;
 }
 
 EDITOR_INTERFACE void RemoveRenderSurface(uint32 id) {
-	assert(id < renderSurfaces.size());
+	assert(id < renderSurfaces.Size());
 	Platform::RemoveWindow(renderSurfaces[id].Window.GetID());
 }
 
 EDITOR_INTERFACE HWND GetWindowHandle(uint32 id) {
-	assert(id < renderSurfaces.size());
+	assert(id < renderSurfaces.Size());
 	return (HWND)renderSurfaces[id].Window.Handle();
 }
 
 EDITOR_INTERFACE void ResizeRenderSurface(uint32 id) {
-	assert(id < renderSurfaces.size());
+	assert(id < renderSurfaces.Size());
 	renderSurfaces[id].Window.Resize(0, 0);
 }
+
+EDITOR_INTERFACE void CalculateAdvancedGOAP(
+        int goalType,       // 0 = CodeWritten, 1 = CoffeeDrunk
+        bool hasIdea,
+        bool isTired,
+        int location,       // 0 = AtHome, 1 = AtOffice
+        char* outPlanBuffer,
+        int bufferSize)
+    {
+    std::string finalPlan = "Initial State Analyzed... \n";
+
+    // Goal: Code Written
+    if (goalType == 0) {
+        finalPlan += "[Goal: Write Engine Code]\n";
+
+        // Check location precondition for coding
+        if (location == 0) { // At Home
+            finalPlan += "-> [Action: TravelToOffice] (Cost: 5)\n";
+            location = 1;
+        }
+
+        if (isTired) {
+            finalPlan += "-> [Action: DrinkCoffee] (Cost: 1)\n";
+            isTired = false;
+        }
+
+        if (!hasIdea) {
+            finalPlan += "-> [Action: BrainstormIdea] (Cost: 2)\n";
+            hasIdea = true;
+        }
+
+        if (hasIdea && !isTired && location == 1) {
+            finalPlan += "-> [Action: ExecuteWriteCode] -> Goal Achieved!";
+        }
+    }
+    // Goal: Drink Coffee (Simpler sub-goal)
+    else if (goalType == 1) {
+        finalPlan += "[Goal: Acquire Coffee]\n";
+        if (isTired) {
+            finalPlan += "-> [Action: PurchaseCoffee] -> Goal Achieved!";
+        }
+        else {
+            finalPlan += "-> [Action: WaitUntilTired] -> [Action: PurchaseCoffee] -> Goal Achieved!";
+        }
+    }
+
+    // Copy safely to WPF buffer
+    if (finalPlan.length() < (size_t)bufferSize) {
+        strcpy_s(outPlanBuffer, bufferSize, finalPlan.c_str());
+    }
+    else {
+        strcpy_s(outPlanBuffer, bufferSize, "Error: Buffer overflow.");
+    }
+}
+

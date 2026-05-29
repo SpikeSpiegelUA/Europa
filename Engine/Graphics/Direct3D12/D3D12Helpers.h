@@ -13,6 +13,146 @@ namespace Europa::Graphics::D3D12::D3DX {
 		};
 	} HeapProperties;
 
+	constexpr struct {
+		const D3D12_RASTERIZER_DESC NoCulling{
+			D3D12_FILL_MODE_SOLID,
+			D3D12_CULL_MODE_NONE,
+			0,
+			0,
+			0,
+			0,
+			1,
+			1,
+			0,
+			0,
+			D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF
+		};
+
+		const D3D12_RASTERIZER_DESC BackfaceCulling{
+			D3D12_FILL_MODE_SOLID,
+			D3D12_CULL_MODE_BACK,
+			0,
+			0,
+			0,
+			0,
+			1,
+			1,
+			0,
+			0,
+			D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF
+		};
+
+		const D3D12_RASTERIZER_DESC FrontfaceCulling{
+			D3D12_FILL_MODE_SOLID,
+			D3D12_CULL_MODE_FRONT,
+			0,
+			0,
+			0,
+			0,
+			1,
+			1,
+			0,
+			0,
+			D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF
+		};
+
+		const D3D12_RASTERIZER_DESC Wireframe{
+			D3D12_FILL_MODE_WIREFRAME,
+			D3D12_CULL_MODE_NONE,
+			0,
+			0,
+			0,
+			0,
+			1,
+			1,
+			0,
+			0,
+			D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF
+		};
+	} RasterizerState;
+
+	constexpr struct {
+		const D3D12_DEPTH_STENCIL_DESC1 Disabled{
+			0,
+			D3D12_DEPTH_WRITE_MASK_ZERO,
+			D3D12_COMPARISON_FUNC_LESS_EQUAL,
+			0,
+			0,
+			0,
+			{},
+			{},
+			0
+		};
+	} DepthState;
+
+	class D3D12ResourceBarrier 
+	{
+	public:
+		constexpr static uint32 MaxResourceBarriers{ 32 };
+		//Add a transition barrier to the list of barriers.
+		constexpr void Add(ID3D12Resource* resource,
+			D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after,
+			D3D12_RESOURCE_BARRIER_FLAGS flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
+			uint32 subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
+		{
+			assert(resource);
+			assert(offset < MaxResourceBarriers);
+			D3D12_RESOURCE_BARRIER& barrier { barriers[offset]};
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = flags;
+			barrier.Transition.pResource = resource;
+			barrier.Transition.StateBefore = before;
+			barrier.Transition.StateAfter = after;
+			barrier.Transition.Subresource = subresource;
+
+			offset++;
+		}
+
+		//Add a UAV barrier to the list of barriers.
+		constexpr void Add(ID3D12Resource* resource,
+			D3D12_RESOURCE_BARRIER_FLAGS flags = D3D12_RESOURCE_BARRIER_FLAG_NONE) 
+		{
+			assert(resource);
+			assert(offset < MaxResourceBarriers);
+			D3D12_RESOURCE_BARRIER& barrier{ barriers[offset] };
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+			barrier.Flags = flags;
+			barrier.UAV.pResource = resource;
+
+			offset++;
+		}
+
+		//Add an aliasing barrier to the list of barriers.
+		constexpr void Add(ID3D12Resource* resourceBefore, ID3D12Resource* resourceAfter,
+			D3D12_RESOURCE_BARRIER_FLAGS flags = D3D12_RESOURCE_BARRIER_FLAG_NONE)
+		{
+			assert(resourceBefore && resourceAfter);
+			assert(offset < MaxResourceBarriers);
+			D3D12_RESOURCE_BARRIER& barrier{ barriers[offset] };
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_ALIASING;
+			barrier.Flags = flags;
+			barrier.Aliasing.pResourceBefore = resourceBefore;
+			barrier.Aliasing.pResourceAfter = resourceAfter;
+
+			offset++;
+		}
+
+		void Apply(ID3D12GraphicsCommandList* cmdList) 
+		{
+			assert(offset);
+			cmdList->ResourceBarrier(offset, barriers);
+			offset = 0;
+		}
+	private:
+		D3D12_RESOURCE_BARRIER barriers[MaxResourceBarriers]{};
+		uint32 offset{ 0 };
+	};
+
+	void TransitionResource(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* resource,
+		D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after,
+		D3D12_RESOURCE_BARRIER_FLAGS flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
+		uint32 subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
+
 	ID3D12RootSignature* CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC2& desc);
 
 	struct D3D12DescriptorRange : public D3D12_DESCRIPTOR_RANGE1
@@ -110,7 +250,7 @@ namespace Europa::Graphics::D3D12::D3DX {
 		}
 		D3D12PipelineStateSubobject& operator=(const T& subobject)
 		{
-			subobject = subobject;
+			this->subobject = subobject;
 			return *this;
 		}
 	private:
@@ -121,6 +261,8 @@ namespace Europa::Graphics::D3D12::D3DX {
 #define PSS(name, ...) using D3D12PipelineStateSubobject ##name =\
 	D3D12PipelineStateSubobject<__VA_ARGS__>;
 
+#pragma warning (push)
+#pragma warning(disable : 4324) //Disable padding warning
 	PSS(RootSignature, D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_ROOT_SIGNATURE, ID3D12RootSignature*);
 	PSS(VS, D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_VS, D3D12_SHADER_BYTECODE)
 	PSS(PS, D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PS, D3D12_SHADER_BYTECODE);

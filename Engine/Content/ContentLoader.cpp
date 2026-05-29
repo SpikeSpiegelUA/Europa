@@ -2,6 +2,7 @@
 #include "../Components/Entity.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/Script.h"
+#include "Graphics/Renderer.h"
 
 #if !defined(SHIPPING)
 
@@ -47,7 +48,7 @@ namespace Europa::Content {
 			const uint32 nameLength{ *data };
 			data += sizeof(uint32);
 			assert(nameLength < 256);
-			char scriptName[256];
+			char scriptName[256]{};
 			memcpy(&scriptName[0], data, nameLength);
 			data += nameLength;
 			scriptName[nameLength] = 0;
@@ -62,21 +63,37 @@ namespace Europa::Content {
 			ReadScript
 		};
 		static_assert(_countof(ComponentReaders) == EComponentType::Count);
-	}
+
+		bool ReadFile(std::filesystem::path path, std::unique_ptr<uint8[]>& data, uint64& size) 
+		{
+			if (!std::filesystem::exists(path))
+				return false;
+
+			size = std::filesystem::file_size(path);
+			assert(size);
+			if (!size)
+				return false;
+			data = std::make_unique<uint8[]>(size);
+			std::ifstream file{ path, std::ios::in | std::ios::binary };
+			if (!file || !file.read((char*)data.get(), size)) 
+			{
+				file.close();
+				return false;
+			}
+
+			file.close();
+			return true;
+		}
+	}//Anonymous namespace.
 	bool LoadGame()
 	{
-		//Set the working directory for the executable path.
-		wchar_t path[MAX_PATH];
-		const uint32 length{ GetModuleFileName(0, &path[0], MAX_PATH) };
-		if (!length || GetLastError() == ERROR_INSUFFICIENT_BUFFER)
-			return false;
-		std::filesystem::path p{ path };
-		SetCurrentDirectory(p.parent_path().wstring().c_str());
 		//Read game.bin file and create the entities from it.
-		std::ifstream game("game.bin", std::ios::in | std::ios::binary);
-		Europa::Utilities::Vector<uint8> buffer(std::istreambuf_iterator<char>(game), {});
-		assert(buffer.Size());
-		const uint8* at{ buffer.Data() };
+		std::unique_ptr<uint8[]> gameData{};
+		uint64 size{ 0 };
+		if (!ReadFile("game.bin", gameData, size))
+			return false;
+		assert(gameData.get());
+		const uint8* at{ gameData.get() };
 		constexpr uint32 suint32{ sizeof(uint32) };
 		const uint32 numEntities{ *at };
 		at += suint32;
@@ -107,7 +124,7 @@ namespace Europa::Content {
 			entities.EmplaceBack(entity);
 		}
 
-		assert(at == buffer.Data() + buffer.Size());
+		assert(at == gameData.get() + size);
 		return true;
 	}
 
@@ -115,6 +132,12 @@ namespace Europa::Content {
 	{
 		for (auto entity : entities)
 			GameEntity::Remove(entity.GetID());
+	}
+
+	bool LoadEngineShaders(std::unique_ptr<uint8[]>& shaders, uint64& size) 
+	{
+		auto path = Graphics::GetEngineShadersPath();
+		return ReadFile(path, shaders, size);
 	}
 #endif //!defined(SHIPPING)
 }

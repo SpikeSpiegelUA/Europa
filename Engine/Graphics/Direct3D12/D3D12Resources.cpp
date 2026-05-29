@@ -1,6 +1,4 @@
-#include "D3D12Resources.h"
 #include "D3D12Core.h"
-#include "D3D12Helpers.h"
 
 namespace Europa::Graphics::D3D12 {
 #pragma region DescriptorHeap
@@ -81,8 +79,8 @@ namespace Europa::Graphics::D3D12 {
 			handle.GPU.ptr = gpuStart.ptr + offset;
 		}
 
+		handle.index = index;
 		DEBUG_OP(handle.container = this);
-		DEBUG_OP(handle.index = index);
 		return handle;
 	}
 

@@ -2,7 +2,11 @@
 #include "D3D12CommonHeaders.h"
 
 namespace Europa::Graphics::D3D12 {
-	class DescriptorHeap;
+	struct D3D12FrameInfo 
+	{
+		uint32 SurfaceWidth{};
+		uint32 SurfaceHeight{};
+	};
 }
 
 namespace Europa::Graphics::D3D12::Core {

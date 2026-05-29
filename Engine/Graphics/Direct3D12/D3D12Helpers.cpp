@@ -1,10 +1,25 @@
-#include "D3D12Helpers.h"
 #include "D3D12Core.h"
 
 namespace Europa::Graphics::D3D12::D3DX {
 	namespace {
 
 	} //anonymous namespace
+
+	void TransitionResource(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* resource,
+		D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after,
+		D3D12_RESOURCE_BARRIER_FLAGS flags,
+		uint32 subresource) 
+	{
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = flags;
+		barrier.Transition.pResource = resource;
+		barrier.Transition.StateBefore = before;
+		barrier.Transition.StateAfter = after;
+		barrier.Transition.Subresource = subresource;
+
+		cmdList->ResourceBarrier(1, &barrier);
+	}
 
 	ID3D12RootSignature* CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC2& desc) {
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC versionedRootSignatureDescription{};
@@ -48,6 +63,7 @@ namespace Europa::Graphics::D3D12::D3DX {
 		assert(stream && streamSize);
 		D3D12_PIPELINE_STATE_STREAM_DESC desc{};
 		desc.pPipelineStateSubobjectStream = stream;
+		desc.SizeInBytes = streamSize;
 		return CreatePipelineState(desc);
 	}
 
