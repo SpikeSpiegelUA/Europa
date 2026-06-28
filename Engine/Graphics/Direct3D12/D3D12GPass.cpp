@@ -4,6 +4,13 @@
 
 namespace Europa::Graphics::D3D12::GPass {
 	namespace {
+		struct GPassRootParamIndices {
+			enum : uint32 {
+				RootConstants,
+				Count
+			};
+		};
+
 		constexpr Math::UInt32Vector2 InitialDimensions{ 100, 100 };
 		constexpr DXGI_FORMAT MainBufferFormat{ DXGI_FORMAT_R16G16B16A16_FLOAT };
 		constexpr DXGI_FORMAT DepthBufferFormat{ DXGI_FORMAT_D32_FLOAT };
@@ -11,6 +18,7 @@ namespace Europa::Graphics::D3D12::GPass {
 		D3D12RenderTexture GPassMainBuffer{};
 		D3D12DepthBuffer GPassDepthBuffer{};
 		Math::UInt32Vector2 Dimensions{ InitialDimensions };
+		D3D12_RESOURCE_BARRIER_FLAGS Flags{};
 
 		ID3D12RootSignature* GPassRootSignature{ nullptr };
 		ID3D12PipelineState* GPassPSO{ nullptr };
@@ -69,6 +77,8 @@ namespace Europa::Graphics::D3D12::GPass {
 			NAME_D3D12_OBJECT(GPassMainBuffer.Resource(), L"GPass Main Buffer");
 			NAME_D3D12_OBJECT(GPassDepthBuffer.Resource(), L"GPass Depth Buffer");
 
+			Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
 			return GPassMainBuffer.Resource() && GPassDepthBuffer.Resource();
 		}
 
@@ -77,9 +87,10 @@ namespace Europa::Graphics::D3D12::GPass {
 			assert(!GPassRootSignature && !GPassPSO);
 
 			//Create GPass root signature
-			D3DX::D3D12RootParameter parameters[1]{};
-			parameters[0].AsConstants(1, D3D12_SHADER_VISIBILITY_PIXEL, 1);
-			const D3DX::D3D12RootSignatureDescription rootSignature{ &parameters[0], _countof(parameters) };
+			using IDX = GPassRootParamIndices;
+			D3DX::D3D12RootParameter parameters[IDX::Count]{};
+			parameters[0].AsConstants(3, D3D12_SHADER_VISIBILITY_PIXEL, 1);
+			const D3DX::D3D12RootSignatureDescription rootSignature{ &parameters[0], IDX::Count };
 			GPassRootSignature = rootSignature.Create();
 			assert(GPassRootSignature);
 			NAME_D3D12_OBJECT(GPassRootSignature, L"GPass Root Signature");
@@ -151,8 +162,14 @@ namespace Europa::Graphics::D3D12::GPass {
 		cmdList->SetPipelineState(GPassPSO);
 
 		static uint32 frame{ 0 };
-		frame++;
-		cmdList->SetGraphicsRoot32BitConstant(0, frame, 0);
+		struct {
+			float32 width;
+			float32 height;
+			uint32 frame;
+		} constants { (float32)info.SurfaceWidth, (float32)info.SurfaceHeight, ++frame};
+
+		using IDX = GPassRootParamIndices;
+		cmdList->SetGraphicsRoot32BitConstants(IDX::RootConstants, 3, &constants, 0);
 
 		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		cmdList->DrawInstanced(3, 1, 0, 0);
@@ -160,19 +177,25 @@ namespace Europa::Graphics::D3D12::GPass {
 
 	void AddTransitionsForDepthPrepass(D3DX::D3D12ResourceBarrier& barriers) 
 	{
+		barriers.Add(GPassMainBuffer.Resource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_BARRIER_FLAG_BEGIN_ONLY);
 		barriers.Add(GPassDepthBuffer.Resource(), D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
-		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE, Flags);
+
+		Flags = D3D12_RESOURCE_BARRIER_FLAG_END_ONLY;
 	}
 	void AddTransitionsForGPass(D3DX::D3D12ResourceBarrier& barriers) 
 	{
 		barriers.Add(GPassMainBuffer.Resource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
-			D3D12_RESOURCE_STATE_RENDER_TARGET);
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_BARRIER_FLAG_END_ONLY);
 		barriers.Add(GPassDepthBuffer.Resource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ |
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	}
 	void AddTransitionsForPostProcess(D3DX::D3D12ResourceBarrier& barriers) 
 	{
 		barriers.Add(GPassMainBuffer.Resource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		barriers.Add(GPassDepthBuffer.Resource(), D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
+			D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_BARRIER_FLAG_BEGIN_ONLY);
 	}
 
 	void SetRenderTargetsForDepthPrepass(ID3D12GraphicsCommandList* cmdList) 

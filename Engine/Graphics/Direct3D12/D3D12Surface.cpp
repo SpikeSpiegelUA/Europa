@@ -70,7 +70,18 @@ namespace Europa::Graphics::D3D12 {
 
 	void D3D12Surface::Resize() 
 	{
+		assert(swapChain);
+		for (uint32 i{ 0 }; i < BufferCount; i++) {
+			Core::Release(renderTargetData[i].Resource);
+		}
 
+		const uint32 flags{ allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0ul };
+		DXCall(swapChain->ResizeBuffers(BufferCount, 0, 0, DXGI_FORMAT_UNKNOWN, flags));
+		currentBackBufferIndex = swapChain->GetCurrentBackBufferIndex();
+
+		Finalize();
+
+		DEBUG_OP(OutputDebugString(L"::D3D12 Surface Resized.\n"));
 	}
 
 	void D3D12Surface::Finalize()

@@ -67,12 +67,14 @@ namespace {
 			std::wstring file{ ToWString(info.File) };
 			std::wstring func{ ToWString(info.Function) };
 			std::wstring prof{ ToWString(profileStrings[(uint32)info.Type]) };
+			std::wstring inc{ ToWString(ShadersSourcePath) };
 
 			LPCWSTR args[]
 			{
 				file.c_str(),				//Optional shader source file name for error reporting
 				L"-E", func.c_str(),		//Entry function
 				L"-T", prof.c_str(),		//Target profile
+				L"-I", inc.c_str(),			//Include path
 				DXC_ARG_ALL_RESOURCES_BOUND,
 #if _DEBUG
 				DXC_ARG_DEBUG,

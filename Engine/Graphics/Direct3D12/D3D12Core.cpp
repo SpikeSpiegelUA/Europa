@@ -106,13 +106,13 @@ namespace Europa::Graphics::D3D12::Core {
 				}
 			}
 
-			constexpr ID3D12CommandQueue* const CommandQueue() const {
+			[[nodiscard]] constexpr ID3D12CommandQueue* const CommandQueue() const {
 				return cmdQueue;
 			}
-			constexpr CoreID3D12GraphicsCommandList* const СommandList() const {
+			[[nodiscard]] constexpr CoreID3D12GraphicsCommandList* const СommandList() const {
 				return cmdList;
 			}
-			constexpr uint32 FrameIndex() const {
+			[[nodiscard]] constexpr uint32 FrameIndex() const {
 				return frameIndex;
 			}
 		private:
@@ -138,11 +138,12 @@ namespace Europa::Graphics::D3D12::Core {
 
 			ID3D12CommandQueue* cmdQueue{ nullptr };
 			CoreID3D12GraphicsCommandList* cmdList{ nullptr };
+			uint32 frameIndex{ 0 };
+
 			ID3D12Fence1* fence{};
 			HANDLE fenceEvent{};
 			uint64 fenceValue{};
 			CommandFrame commandFrames[FrameBufferCount]{};
-			uint32 frameIndex{ 0 };
 		};
 
 		using SurfaceCollection = Utilities::FreeList<D3D12Surface>;
@@ -238,8 +239,13 @@ namespace Europa::Graphics::D3D12::Core {
 #ifdef _DEBUG
 		{
 			ComPtr<ID3D12Debug3> debugInterface;
-			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface))))
+			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)))) {
 				debugInterface->EnableDebugLayer();
+#if 0
+#pragma message("WARNING: GPU based validation is enabled. This will considerably slow down the renderer!");
+				debugInterface->SetEnableGPUBasedValidation(1);
+#endif
+			}
 			else
 				OutputDebugStringA("Warning: D3D12 Debug interface is not available. Verify that Graphics\
 					Tools optional feature is installed in this system.\n");
@@ -437,6 +443,7 @@ namespace Europa::Graphics::D3D12::Core {
 		cmdList->RSSetScissorRects(1, &surface.ScissorRect());
 
 		//Depth prepass.
+		barriers.Add(currentBackBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_BARRIER_FLAG_BEGIN_ONLY);
 		GPass::AddTransitionsForDepthPrepass(barriers);
 		barriers.Apply(cmdList);
 		GPass::SetRenderTargetsForDepthPrepass(cmdList);
@@ -448,10 +455,13 @@ namespace Europa::Graphics::D3D12::Core {
 		GPass::SetRenderTargetsForGPass(cmdList);
 		GPass::Render(cmdList, frameInfo);
 
-		D3DX::TransitionResource(cmdList, currentBackBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		D3DX::TransitionResource(cmdList, currentBackBuffer, D3D12_RESOURCE_STATE_PRESENT, 
+			D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 
 		//Post-process
+		barriers.Add(currentBackBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET, 
+			D3D12_RESOURCE_BARRIER_FLAG_END_ONLY);
 		GPass::AddTransitionsForPostProcess(barriers);
 		barriers.Apply(cmdList);
 		//Will write to the current back buffer, so back buffer is a render target.

@@ -11,6 +11,8 @@ Platform::Window Windows[4];
 
 Graphics::RenderSurface Surfaces[4];
 Timer timer{};
+
+bool Resized{ false };
 bool IsRestatring{ false };
 bool TestInitialize();
 void TestShutdown();
@@ -18,6 +20,7 @@ void TestShutdown();
 void DestroyRenderSurface(Graphics::RenderSurface& surface);
 
 LRESULT WinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+	bool toggleFullscreen{ false };
 	switch (msg) 
 	{
 		case WM_DESTROY:
@@ -40,12 +43,11 @@ LRESULT WinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 			}
 		}
 		break;
+		case WM_SIZE:
+			Resized = (wparam != SIZE_MINIMIZED);
+			break;
 		case WM_SYSCHAR:
-			if (wparam == VK_RETURN && (HIWORD(lparam) & KF_ALTDOWN)) {
-				Platform::Window win{ Platform::WindowID{(ID::IDType)GetWindowLongPtr(hwnd, GWLP_USERDATA)} };
-				win.SetFullscreen(!win.IsFullscreen());
-				return 0;
-			}
+			toggleFullscreen = (wparam == VK_RETURN && (HIWORD(lparam) & KF_ALTDOWN));
 			break;
 		case WM_KEYDOWN:
 			if (wparam == VK_ESCAPE) {
@@ -58,6 +60,26 @@ LRESULT WinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 				TestShutdown();
 				TestInitialize();
 			}
+	}
+
+	if ((Resized && GetAsyncKeyState(VK_LBUTTON) >= 0) || toggleFullscreen) {
+		Platform::Window win{ Platform::WindowID{(ID::IDType)GetWindowLongPtr(hwnd, GWLP_USERDATA)} };
+		for (uint32 i{ 0 }; i < _countof(Surfaces); i++) {
+			if (win.GetID() == Surfaces[i].Window.GetID()) {
+				if (toggleFullscreen) {
+					win.SetFullscreen(!win.IsFullscreen());
+					//The default window procedure will play a system notification sound
+					//when pressing the Alt+Enter keyboard combination. If WM_SYSCHAR is
+					// not handled. By returning 0 we can tell the system that we handled this message.
+					return 0;
+				}
+				else {
+					Surfaces[i].Surface.Resize(win.Width(), win.Height());
+					Resized = false;
+				}
+				break;
+			}
+		}
 	}
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);

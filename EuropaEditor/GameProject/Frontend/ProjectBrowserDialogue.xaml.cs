@@ -23,6 +23,8 @@ namespace EuropaEditor
     {
         private readonly CubicEase _cubicEasing = new CubicEase() { EasingMode = EasingMode.EaseInOut };
 
+        public static bool GotoNewProjectTab { get; internal set; }
+
         public ProjectBrowserDialogue()
         {
             InitializeComponent();
@@ -32,12 +34,17 @@ namespace EuropaEditor
         private void OnProjectBrowserDialogue_Loaded(object sender, RoutedEventArgs e)
         {
             Loaded -= OnProjectBrowserDialogue_Loaded;
-            if (!OpenProject.Projects.Any())
+            if (!OpenProject.Projects.Any() || GotoNewProjectTab)
             {
-                openProjectButton.IsEnabled = false;
-                openProjectView.Visibility = Visibility.Hidden;
+                if (!GotoNewProjectTab)
+                {
+                    openProjectButton.IsEnabled = false;
+                    openProjectView.Visibility = Visibility.Hidden;
+                }
                 OnToggleProjectButton_Click(createProjectButton, new RoutedEventArgs());
             }
+
+            GotoNewProjectTab = false;
         }
 
         private void AnimateToCreateProject()

@@ -1,8 +1,8 @@
+#ifdef _WIN64
 #include "Platform.h"
 #include "PlatformTypes.h"
 
 namespace Europa::Platform {
-#ifdef _WIN64
 	namespace {
 
 		struct WindowInfo {
@@ -27,32 +27,37 @@ namespace Europa::Platform {
 			return GetWindowInfoFromID(id);
 		}
 
+		bool Resized{ false };
+
 		LRESULT CALLBACK InternalWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 			WindowInfo* info{ nullptr };
+			
 			switch (msg) {
+				case WM_NCCREATE:
+				{
+					//Put the window id in the user data field of window's data buffer.
+					DEBUG_OP(SetLastError(0));
+					const WindowID id{ Windows.Add(info) };
+					Windows[id].HWND = hwnd;
+					SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)id);
+					assert(GetLastError() == 0);
+				}
+				break;
 				case WM_DESTROY:
 					GetWindowInfoFromHandle(hwnd).IsClosed = true;
 					break;
-				case WM_EXITSIZEMOVE:
-					info = &GetWindowInfoFromHandle(hwnd);
-					break;
 				case WM_SIZE:
-					if (wparam == SIZE_MAXIMIZED) {
-						info = &GetWindowInfoFromHandle(hwnd);
-					}
-					break;
-				case WM_SYSCOMMAND:
-					if (wparam == SC_RESTORE) {
-						info = &GetWindowInfoFromHandle(hwnd);
-					}
+					Resized = (wparam != SIZE_MINIMIZED);
 					break;
 				default:
 					break;
 			}
 
-			if (info) {
-				assert(info->HWND);
-				GetClientRect(info->HWND, info->IsFullscreen ? &info->FullscreenArea : &info->ClientArea);
+			if (Resized && GetAsyncKeyState(VK_LBUTTON) >= 0) {
+				WindowInfo& info{ GetWindowInfoFromHandle(hwnd) };
+				assert(info.HWND);
+				GetClientRect(info.HWND, info.IsFullscreen ? &info.FullscreenArea : &info.ClientArea);
+				Resized = false;
 			}
 
 			LONG_PTR longPtr{ GetWindowLongPtr(hwnd, 0) };
@@ -194,15 +199,17 @@ namespace Europa::Platform {
 		OutputDebugStringW(L"My output string.");
 
 		if (info.HWND) {
-			DEBUG_OP(SetLastError(0));
-			const WindowID id{ Windows.Add(info) };
-			SetWindowLongPtr(info.HWND, GWLP_USERDATA, (LONG_PTR)id);
 			//Set in the "extra" bytes  the pointer to the window callback function which handles messages for the window.
+			DEBUG_OP(SetLastError(0));
 			if (callback)
 				SetWindowLongPtr(info.HWND, 0, (LONG_PTR)callback);
 			assert(GetLastError() == 0);
 			ShowWindow(info.HWND, SW_SHOWNORMAL);
 			UpdateWindow(info.HWND);
+
+			WindowID id{ (ID::IDType)GetWindowLongPtr(info.HWND, GWLP_USERDATA) };
+			Windows[id] = info;
+
 			return Window{ id };
 		}
 
@@ -214,55 +221,6 @@ namespace Europa::Platform {
 		DestroyWindow(info.HWND);
 		Windows.Remove(id);
 	}
-#elif LINUX
-
-#else
-#error "One has to implement at least one platform."
-#endif
-
-	void Window::SetFullscreen(bool isFullscreen) const {
-		assert(IsValid());
-		SetWindowFullscreen(ID, isFullscreen);
-	}
-
-	bool Window::IsFullscreen() const {
-		assert(IsValid());
-		return IsWindowFullscreen(ID);
-	}
-
-	void* Window::Handle() const {
-		assert(IsValid());
-		return GetWindowHandle(ID);
-	}
-
-	void Window::SetCaption(const wchar_t* caption) const {
-		assert(IsValid());
-		SetWindowCaption(ID, caption);
-	}
-
-	const Math::UInt32Vector4 Window::Size() const {
-		assert(IsValid());
-		return GetWindowSize(ID);
-	}
-
-	void Window::Resize(uint32 width, uint32 height) const {
-		assert(IsValid());
-		ResizeWindow(ID, width, height);
-	}
-
-	const uint32 Window::Width() const {
-		Math::UInt32Vector4 s{ Size() };
-		return s.z - s.x;
-	}
-
-	const uint32 Window::Height() const {
-		Math::UInt32Vector4 s{ Size() };
-		return s.w - s.y;
-	}
-
-	bool Window::IsClosed() const {
-		assert(IsValid());
-		return IsWindowClosed(ID);
-	}
-
+#include "IncludeWindowCpp.h"
 }
+#endif

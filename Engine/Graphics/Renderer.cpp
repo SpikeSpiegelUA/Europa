@@ -34,7 +34,8 @@ namespace Europa::Graphics {
 	}
 
 	void Shutdown() {
-		GFX.Shutdown();
+		if(GFX.Platform > (GraphicsPlatform) - 1)
+			GFX.Shutdown();
 	}
 
 	const char* GetEngineShadersPath() 
