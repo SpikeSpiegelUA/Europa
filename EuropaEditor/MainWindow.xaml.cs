@@ -1,7 +1,9 @@
-﻿using EuropaEditor.GameProject.Backend;
+﻿using EuropaEditor.Content;
+using EuropaEditor.GameProject.Backend;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -91,7 +93,10 @@ namespace EuropaEditor
             else
             {
                 Project.CurrentProject?.Unload();
-                DataContext = projectBrowserDialogue.DataContext;
+                var project = projectBrowserDialogue.DataContext as Project;
+                Debug.Assert(project != null);
+                AssetRegistry.Reset(project.ContentPath);
+                DataContext = project;
             }
         }
     }

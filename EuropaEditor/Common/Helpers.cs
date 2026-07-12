@@ -46,6 +46,21 @@ namespace EuropaEditor
             return sb.ToString(0, length);
         }
 
+        public static bool IsDirectory(string path)
+        {
+            try
+            {
+                return File.GetAttributes(path).HasFlag(FileAttributes.Directory);
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        public static bool IsOlder(this DateTime date, DateTime other) => date < other;
+
         public static string SanitizeFilename(string name)
         {
             var path = new StringBuilder(name.Substring(0, name.LastIndexOf(Path.DirectorySeparatorChar) + 1));

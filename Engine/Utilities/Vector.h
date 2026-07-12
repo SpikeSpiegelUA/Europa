@@ -279,7 +279,6 @@ namespace Europa::Utilities {
 
 		//Returns a constant pointer to the first item. Returns null when a vector is empty.
 		[[nodiscard]] constexpr const T* Begin() const {
-			assert(data);
 			return std::addressof(data[0]);
 		}
 
@@ -290,7 +289,7 @@ namespace Europa::Utilities {
 
 		//Returns a pointer to the memory right after the last item. Returns null when a vector is empty.
 		[[nodiscard]] constexpr T* End() {
-			assert(data);
+			assert(!(data == nullptr && size > 0));
 			return std::addressof(data[size]);
 		}
 
@@ -301,7 +300,7 @@ namespace Europa::Utilities {
 
 		//Returns a constant pointer to the memory right after the last item. Returns null when a vector is empty.
 		[[nodiscard]] constexpr const T* End() const {
-			assert(data);
+			assert(!(data == nullptr && size > 0));
 			return std::addressof(data[size]);
 		}
 

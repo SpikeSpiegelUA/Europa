@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:EuropaEditor.Editors.WorldEditor"
              xmlns:utilities="clr-namespace:EuropaEditor.Utilities"
              xmlns:controls="clr-namespace:EuropaEditor.Utilities.Controls"
+             xmlns:content="clr-namespace:EuropaEditor.Content"
              xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:backend="clr-namespace:EuropaEditor.GameProject.Backend" 
              d:DataContext="{d:DesignInstance Type=backend:Project}"
              mc:Ignorable="d" Focusable="True"
@@ -75,12 +76,15 @@
                 <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="Transparent"/>
                 <Grid Grid.Row="1" Margin="0,5,0,0">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <utilities:UndoRedoView DataContext="{Binding UndoRedoManager}" Grid.Column="0" Background="{StaticResource Editor.Window.GrayBrush2}" />
                     <GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Left" Background="Transparent"/>
                     <utilities:LoggerView Grid.Column="1" Margin="5,0,0,0"/>
+                    <GridSplitter Grid.Column="2" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Left" Background="Transparent"/>
+                    <content:ControlBrowserView Grid.Column="2" Margin="5, 0, 0, 0"/>
                 </Grid>
             </Grid>
             <GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Left" Background="Transparent"/>

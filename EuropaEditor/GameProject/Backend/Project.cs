@@ -24,19 +24,11 @@ namespace EuropaEditor.GameProject.Backend
             Name = name;
             Path = path;
 
-            _scenes.Add(new Scene(this, "Default Scene") { IsActive = true });
+            Debug.Assert(File.Exists((Path + Name + Extension).ToLower()));
             OnDeserialized(new StreamingContext());
         }
 
-        public enum BuildConfiguration
-        {
-            Debug,
-            DebugEditor,
-            Release,
-            ReleaseEditor,
-        }
-
-        public static string Extension = ".europa";
+        public static string Extension => ".europa";
         [DataMember]
         public string Name { get; private set; } = "New Project";
         [DataMember]
@@ -44,14 +36,6 @@ namespace EuropaEditor.GameProject.Backend
         public string FullPath => $@"{Path}{Name}{Extension}";
         public string Solution => $@"{Path}{Name}.sln";
         public string ContentPath => $@"{Path}Content\";
-
-        private static readonly string[] _buildConfigurationNames = new string[]
-        {
-            "Debug",
-            "DebugEditor",
-            "Release",
-            "ReleaseEditor"
-        };
 
         private int _buildConfig;
         [DataMember]
@@ -74,7 +58,7 @@ namespace EuropaEditor.GameProject.Backend
         private string[] _availableScripts;
         public string[] AvailableScripts{
             get => _availableScripts;
-            set
+            private set
             {
                 if(_availableScripts != value)
                 {
@@ -85,8 +69,8 @@ namespace EuropaEditor.GameProject.Backend
         }
 
 
-        [DataMember(Name = "Scenes")]
-        private ObservableCollection<Scene> _scenes = new ObservableCollection<Scene>();
+        [DataMember(Name = nameof(Scenes))]
+        private readonly ObservableCollection<Scene> _scenes = new ObservableCollection<Scene>();
         public ReadOnlyObservableCollection<Scene> Scenes { get; private set; }
 
         public static UndoRedo UndoRedoManager { get; } = new UndoRedo();
@@ -148,8 +132,6 @@ namespace EuropaEditor.GameProject.Backend
             OnPropertyChanged(nameof(SaveCommand));
         }
 
-        private static string GetConfigurationName(BuildConfiguration config) => _buildConfigurationNames[(int)config];
-
         private void AddSceneInternal(in string sceneName){
             Debug.Assert(!string.IsNullOrEmpty(sceneName.Trim()));
             _scenes.Add(new Scene(this, sceneName));
@@ -193,7 +175,7 @@ namespace EuropaEditor.GameProject.Backend
         
         private void SaveToBinary()
         {
-            var configName = GetConfigurationName(StandAloneBuildConfig);
+            var configName = VisualStudio.GetConfigurationName(StandAloneBuildConfig);
             var bin = $@"{Path}x64\{configName}\game.bin";
 
             using (var bw = new BinaryWriter(File.Open(bin, FileMode.Create, FileAccess.Write)))
@@ -214,12 +196,11 @@ namespace EuropaEditor.GameProject.Backend
 
         private async Task RunGame(bool debug)
         {
-            var configName = GetConfigurationName(StandAloneBuildConfig);
-            await Task.Run(() => VisualStudio.BuildSolution(this, configName, debug));
+            await Task.Run(() => VisualStudio.BuildSolution(this, StandAloneBuildConfig, debug));
             if (VisualStudio.BuildSucceeded)
             {
                 SaveToBinary();
-                await Task.Run(() => VisualStudio.Run(this, configName, debug));
+                await Task.Run(() => VisualStudio.Run(this, StandAloneBuildConfig, debug));
             }
         }
 
@@ -230,7 +211,7 @@ namespace EuropaEditor.GameProject.Backend
             try
             {
                 UnloadGameCodeDLL();
-                await Task.Run(() => VisualStudio.BuildSolution(this, GetConfigurationName(DLLBuildConfig), showWindow));
+                await Task.Run(() => VisualStudio.BuildSolution(this, DLLBuildConfig, showWindow));
                 if (VisualStudio.BuildSucceeded)
                 {
                     LoadGameCodeDLL();
@@ -244,7 +225,7 @@ namespace EuropaEditor.GameProject.Backend
 
         private void LoadGameCodeDLL()
         {
-            var configName = GetConfigurationName(DLLBuildConfig);
+            var configName = VisualStudio.GetConfigurationName(DLLBuildConfig);
             var dll = $@"{Path}x64\{configName}\{Name}.dll";
             AvailableScripts = null;
             if(File.Exists(dll) && EngineAPI.LoadGameCodeDLL(dll) != 0)
@@ -274,6 +255,7 @@ namespace EuropaEditor.GameProject.Backend
             UnloadGameCodeDLL();
             VisualStudio.CloseVisualStudio();
             UndoRedoManager.Reset();
+            Logger.Clear();
         }
 
         [OnDeserialized]
@@ -284,7 +266,7 @@ namespace EuropaEditor.GameProject.Backend
                 Scenes = new ReadOnlyObservableCollection<Scene>(_scenes);
                 OnPropertyChanged(nameof(Scenes));
             }
-            ActiveScene = Scenes.FirstOrDefault(x => x.IsActive);
+            ActiveScene = _scenes.FirstOrDefault(x => x.IsActive);
             Debug.Assert(ActiveScene != null);
 
             await BuildGameCodeDLL(false);

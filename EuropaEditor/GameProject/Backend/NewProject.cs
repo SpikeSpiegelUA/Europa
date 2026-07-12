@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace EuropaEditor.GameProject.Backend
@@ -94,7 +95,7 @@ namespace EuropaEditor.GameProject.Backend
             }
         }
 
-        private ObservableCollection<ProjectTemplate> _projectTemplates = new ObservableCollection<ProjectTemplate>();
+        private readonly ObservableCollection<ProjectTemplate> _projectTemplates = new ObservableCollection<ProjectTemplate>();
         public ReadOnlyObservableCollection<ProjectTemplate> ProjectTemplates { get; }
 
         private bool ValidateProjectPath()
@@ -103,13 +104,13 @@ namespace EuropaEditor.GameProject.Backend
             if (!path.Last().Equals(Path.DirectorySeparatorChar))
                 path += Path.DirectorySeparatorChar;
             path += $@"{ProjectName}\";
-
+            var nameRegex = new Regex(@"^[A-Za-z_][A-za-z0-9_]*$");
             IsValid = false;
             if (string.IsNullOrWhiteSpace(ProjectName.Trim()))
             {
                 ErrorMessage = "Type in a project name.";
             }
-            else if(ProjectName.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
+            else if (!nameRegex.IsMatch(ProjectName))
             {
                 ErrorMessage = "Invalid character(s) used in a project name.";
             }
@@ -183,7 +184,7 @@ namespace EuropaEditor.GameProject.Backend
             Debug.Assert(File.Exists(Path.Combine(projectTemplate.TemplatePath, "MSVCSolution.xml")));
             Debug.Assert(File.Exists(Path.Combine(projectTemplate.TemplatePath, "MSVCProject.xml")));
 
-            string engineAPIPath = Path.Combine(MainWindow.EuropaPath, @"Engine\EngineAPI\");
+            string engineAPIPath = @"$(EUROPA_ENGINE)Engine\EngineAPI\";
             Debug.Assert(Directory.Exists(engineAPIPath));
 
             string solutionZeroParameter = ProjectName;
@@ -197,7 +198,7 @@ namespace EuropaEditor.GameProject.Backend
             string projectZeroParameter = ProjectName;
             string projectFirstParameter = '{' + Guid.NewGuid().ToString().ToUpper() + '}';
             string projectSecondParameter = engineAPIPath;
-            string projectThirdParameter = MainWindow.EuropaPath;
+            string projectThirdParameter = "$(EUROPA_ENGINE)";
 
 
             string project = File.ReadAllText(Path.Combine(projectTemplate.TemplatePath, "MSVCProject.xml"));

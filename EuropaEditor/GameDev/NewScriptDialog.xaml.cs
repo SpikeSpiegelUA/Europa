@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -59,7 +60,8 @@ namespace {1}
         private static string GetNamespaceFromProjectName()
         {
             var projectName = GameProject.Backend.Project.CurrentProject.Name;
-            projectName = projectName.Replace(' ', '_');
+            if (string.IsNullOrEmpty(projectName))
+                return string.Empty;
             return projectName;
         }
 
@@ -76,11 +78,12 @@ namespace {1}
             var name = scriptNameTextBox.Text.Trim();
             var path = scriptPathTextBox.Text.Trim();
             string errorMsg = string.Empty;
+            var nameRegex = new Regex(@"^[A-Za-z_][A-za-z0-9_]*$");
             if (string.IsNullOrEmpty(name))
             {
                 errorMsg = "Type in a script name.";
             }
-            else if(name.IndexOfAny(Path.GetInvalidFileNameChars()) != -1 || name.Any(x => char.IsWhiteSpace(x)))
+            else if (!nameRegex.IsMatch(name))
             {
                 errorMsg = "Invalid character(s) used in script name.";
             }
@@ -190,14 +193,7 @@ namespace {1}
 
             string[] files = new string[] { cpp, h };
 
-            for (int i = 0; i < 3; i++)
-            {
-                if (!VisualStudio.AddFilesToSolution(solution, projectName, files))
-                    System.Threading.Thread.Sleep(1000);
-                else
-                    break;
-            }
-            
+            VisualStudio.AddFilesToSolution(solution, projectName, files);
         }
     }
 }
