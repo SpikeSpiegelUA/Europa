@@ -8,7 +8,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 
-namespace EuropaEditor.Content.ContentBrowser
+namespace EuropaEditor.Content
 {
     sealed class ContentInfo
     {
@@ -33,7 +33,7 @@ namespace EuropaEditor.Content.ContentBrowser
             FullPath = fullPath;
         }
     }
-    class ContentBrowser : ViewModelBase, IDisposable
+    internal class ContentBrowser : ViewModelBase, IDisposable
     {
         private static readonly object lockObject = new object();
         private static readonly DelayEventTimer refreshTimer = new DelayEventTimer(TimeSpan.FromMilliseconds(250));
