@@ -79,7 +79,7 @@ namespace Europa::Utilities {
 		}
 
 		//Inserts an item at the end of the vector by moving 'value'.
-		constexpr void PushBack(const T&& value) {
+		constexpr void PushBack(T&& value) {
 			EmplaceBack(std::move(value));
 		}
 
@@ -256,13 +256,13 @@ namespace Europa::Utilities {
 		//Returns a constant reference to the first item. Will fault the application if called when the vector is empty.
 		[[nodiscard]] constexpr const T& Front() const {
 			assert(data && size);
-			return data[size - 1];
+			return data[0];
 		}
 
 		//Returns a constant reference to the last item. Will fault the application if called when the vector is empty.
 		[[nodiscard]] constexpr T& Back() {
 			assert(data && size);
-			return data[0];
+			return data[size - 1];
 		}
 
 		//Returns a constant reference to the last item. Will fault the application if called when the vector is empty.
@@ -287,6 +287,11 @@ namespace Europa::Utilities {
 			return Begin();
 		}
 
+		//Returns a pointer to the first item. Returns null when a vector is empty. Need this for the iterators.
+		[[nodiscard]] constexpr T* begin() {
+			return Begin();
+		}
+
 		//Returns a pointer to the memory right after the last item. Returns null when a vector is empty.
 		[[nodiscard]] constexpr T* End() {
 			assert(!(data == nullptr && size > 0));
@@ -302,6 +307,11 @@ namespace Europa::Utilities {
 		[[nodiscard]] constexpr const T* End() const {
 			assert(!(data == nullptr && size > 0));
 			return std::addressof(data[size]);
+		}
+
+		//Returns a constant pointer to the memory right after the last item. Returns null when a vector is empty.
+		[[nodiscard]] constexpr const T* end() const{
+			return End();
 		}
 
 	private:

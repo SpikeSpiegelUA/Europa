@@ -56,12 +56,12 @@ namespace Europa::Tools {
 					float32* const asArray{ &position.x };
 					asArray[horizontalIndex] += i * horizontalStep;
 					asArray[verticalIndex] += j * verticalStep;
-					mesh.Positions.emplace_back(position.x * info.Size.x, position.y * info.Size.y, position.z * info.Size.z);
+					mesh.Positions.EmplaceBack(position.x * info.Size.x, position.y * info.Size.y, position.z * info.Size.z);
 
 					Vector2 uv{ uRange.x, 1.f - vRange.x };
 					uv.x += i * uStep;
 					uv.y -= j * vStep;
-					uvs.emplace_back(uv);
+					uvs.EmplaceBack(uv);
 				}
 
 			const uint32 rowLength{ horizontalCount + 1 };
@@ -76,23 +76,23 @@ namespace Europa::Tools {
 
 					};
 
-					mesh.RawIndices.emplace_back(index[0]);
-					mesh.RawIndices.emplace_back(index[flipWinding ? 2 : 1]);
-					mesh.RawIndices.emplace_back(index[flipWinding ? 1 : 2]);
+					mesh.RawIndices.EmplaceBack(index[0]);
+					mesh.RawIndices.EmplaceBack(index[flipWinding ? 2 : 1]);
+					mesh.RawIndices.EmplaceBack(index[flipWinding ? 1 : 2]);
 
-					mesh.RawIndices.emplace_back(index[2]);
-					mesh.RawIndices.emplace_back(index[flipWinding ? 3 : 1]);
-					mesh.RawIndices.emplace_back(index[flipWinding ? 1 : 3]);
+					mesh.RawIndices.EmplaceBack(index[2]);
+					mesh.RawIndices.EmplaceBack(index[flipWinding ? 3 : 1]);
+					mesh.RawIndices.EmplaceBack(index[flipWinding ? 1 : 3]);
 				}
 				++k;
 			}
 			const uint32 numIndices{ 3 * 2 * horizontalCount * verticalCount };
-			assert(mesh.RawIndices.size() == numIndices);
+			assert(mesh.RawIndices.Size() == numIndices);
 
-			mesh.UVSets.resize(1);
+			mesh.UVSets.Resize(1);
 
 			for (uint32 i{ 0 }; i < numIndices; ++i) {
-				mesh.UVSets[0].emplace_back(uvs[mesh.RawIndices[i]]);
+				mesh.UVSets[0].EmplaceBack(uvs[mesh.RawIndices[i]]);
 			}
 
 			return mesh;
@@ -108,7 +108,7 @@ namespace Europa::Tools {
 
 			Mesh m;
 			m.Name = "UVSphere";
-			m.Positions.resize(num_vertices);
+			m.Positions.Resize(num_vertices);
 
 			//Add the top vertex.
 			uint32 c{ 0 };
@@ -131,7 +131,7 @@ namespace Europa::Tools {
 			assert(c == num_vertices);
 
 			c = 0;
-			m.RawIndices.resize(num_indices);
+			m.RawIndices.Resize(num_indices);
 			Utilities::Vector<Vector2> uvs(num_indices);
 			const float32 inv_theta_count{ 1.f / theta_count };
 			const float32 inv_phi_count{ 1.f / phi_count };
@@ -201,7 +201,7 @@ namespace Europa::Tools {
 			}
 
 			//Indices for the bottom cap, connecting the south pole to the last ring.
-			const uint32 south_pole_index{ (uint32)m.Positions.size() - 1 };
+			const uint32 south_pole_index{ (uint32)m.Positions.Size() - 1 };
 			for (uint32 i{ 0 }; i < (phi_count - 1); i++) {
 				uvs[c] = { (2 * i + 1) * 0.5f * inv_phi_count, 0.f };
 				m.RawIndices[c++] = south_pole_index;
@@ -220,7 +220,7 @@ namespace Europa::Tools {
 
 			assert(c == num_indices);
 
-			m.UVSets.emplace_back(uvs);
+			m.UVSets.EmplaceBack(uvs);
 
 			return m;
 		}
@@ -228,8 +228,8 @@ namespace Europa::Tools {
 		void CreatePlane(Scene& scene, const PrimitiveInitInfo& info) {
 			LODGroup lodGroup;
 			lodGroup.Name = "Plane";
-			lodGroup.Meshes.emplace_back(CreatePlane(info));
-			scene.LODGroups.emplace_back(lodGroup);
+			lodGroup.Meshes.EmplaceBack(CreatePlane(info));
+			scene.LODGroups.EmplaceBack(lodGroup);
 		}
 
 		void CreateCube(Scene& scene, const PrimitiveInitInfo& info) {
@@ -239,8 +239,8 @@ namespace Europa::Tools {
 		void CreateUVSphere(Scene& scene, const PrimitiveInitInfo& info) {
 			LODGroup lodGroup;
 			lodGroup.Name = "UVSphere";
-			lodGroup.Meshes.emplace_back(CreateUVSphere(info));
-			scene.LODGroups.emplace_back(lodGroup);
+			lodGroup.Meshes.EmplaceBack(CreateUVSphere(info));
+			scene.LODGroups.EmplaceBack(lodGroup);
 		}
 
 		void CreateIcosphere(Scene& scene, const PrimitiveInitInfo& info) {

@@ -126,7 +126,7 @@ namespace EuropaEditor.Content
             }
 
             OnProjectChanged(null, new DependencyPropertyChangedEventArgs(DataContextProperty, null, Project.CurrentProject));
-            FolderListView.AddHandler(Thumb.DragDeltaEvent, new DragDeltaEventHandler(Thumb_DragDelta), true)
+            FolderListView.AddHandler(Thumb.DragDeltaEvent, new DragDeltaEventHandler(Thumb_DragDelta), true);
             FolderListView.Items.SortDescriptions.Add(new SortDescription(sortedProperty, sortDirection));
         }
 
@@ -158,7 +158,7 @@ namespace EuropaEditor.Content
             }
         }
 
-        private void OnSelectedFolderChanged(object? sender, PropertyChangedEventArgs e)
+        private void OnSelectedFolderChanged(object sender, PropertyChangedEventArgs e)
         {
             var vm = sender as ContentBrowser;
             if(e.PropertyName == nameof(vm.SelectedFolder) && !string.IsNullOrEmpty(vm.SelectedFolder))
@@ -173,7 +173,7 @@ namespace EuropaEditor.Content
             var path = Directory.GetParent(System.IO.Path.TrimEndingDirectorySeparator(vm.SelectedFolder)).FullName;
             var contentPath = System.IO.Path.TrimEndingDirectorySeparator(vm.ContentFolder);
 
-            pathStack.Children.RemoveRange(1, pathStack.Children.Count - 1);
+            PathStack.Children.RemoveRange(1, PathStack.Children.Count - 1);
             if (vm.SelectedFolder == vm.ContentFolder)
                 return;
             string[] paths = new string[3];
@@ -202,9 +202,9 @@ namespace EuropaEditor.Content
                         TextTrimming = TextTrimming.CharacterEllipsis
                     }
                 };
-                pathStack.Children.Add(btn);
+                PathStack.Children.Add(btn);
                 if (i > 0)
-                    pathStack.Children.Add(new System.Windows.Shapes.Path());
+                    PathStack.Children.Add(new System.Windows.Shapes.Path());
             }
         }
 

@@ -13,6 +13,7 @@ namespace Europa::Platform {
 			DWORD Style{ WS_VISIBLE };
 			bool IsFullscreen{ false };
 			bool IsClosed{ false };
+
 		};
 
 		Utilities::FreeList<WindowInfo> Windows;
@@ -37,7 +38,7 @@ namespace Europa::Platform {
 				{
 					//Put the window id in the user data field of window's data buffer.
 					DEBUG_OP(SetLastError(0));
-					const WindowID id{ Windows.Add(info) };
+					const WindowID id {Windows.Add()};
 					Windows[id].HWND = hwnd;
 					SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)id);
 					assert(GetLastError() == 0);

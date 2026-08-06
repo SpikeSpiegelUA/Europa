@@ -8,13 +8,16 @@ namespace Europa::Utilities {
 	public:
 		FreeList() = default;
 		explicit FreeList(uint32 count) {
-			array.reserve(count);
+			array.Reserve(count);
 		}
 		~FreeList() {
 			assert(!size);
 		}
 		template<class... params>
 		constexpr uint32 Add(params&&... p) {
+
+			static_assert(std::is_constructible_v<T, params...>,
+				"T is not constructible from params...");
 			uint32 id{ uint32_invalid_id };
 			if (nextFreeIndex == uint32_invalid_id) {
 				id = (uint32)array.Size();

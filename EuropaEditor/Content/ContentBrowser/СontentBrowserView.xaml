@@ -115,7 +115,7 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     Background="{TemplateBinding Background}"
                                     Padding="{TemplateBinding Padding}">
-                                <TextBlock x:Name="Header Content" Margin="0,0, 0, 1"
+                                <TextBlock x:Name="HeaderContent" Margin="0,0, 0, 1"
                                            Text="{TemplateBinding Content}"
                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -225,7 +225,7 @@
 
         </GridView>
 
-        <DataTemplate x:Key="tileTemplate">
+        <DataTemplate x:Key="TileTemplate">
             <StackPanel Width="96" HorizontalAlignment="Center" Margin="-4,0,0,0">
                 <Image Style="{StaticResource LargeIconStyle}" Width="90" HorizontalAlignment="Center"/>
                 <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" TextWrapping="Wrap"
@@ -234,7 +234,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <local:PlainView x:Key="TileView" ItemTemplate="{StaticResource tileTemplate}">
+        <local:PlainView x:Key="TileView" ItemTemplate="{StaticResource TileTemplate}">
             <local:PlainView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource ListBoxItemStyle}">
                     <EventSetter Event="MouseDoubleClick" Handler="OnContext_Item_MouseDoubleClick"/>
@@ -301,7 +301,60 @@
             <DockPanel>
                 <DockPanel Margin="5" DockPanel.Dock="Top">
                     <ToggleButton DockPanel.Dock="Right" Style="{StaticResource ListViewToggleButtonStyle}" x:Name="ListViewToggle"/>
+                    <StackPanel Orientation="Horizontal" x:Name="PathStack" Margin="0,0,0,5">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type Button}" x:Key="{x:Type Button}">
+                                <Setter Property="Margin" Value="2,1"/>
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="{StaticResource Editor.FontBrush}"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="3, 1"/>
+                                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="MinWidth" Value="48"/>
+                                <Setter Property="MaxWidth" Value="128"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Grid SnapsToDevicePixels="True">
+                                                <Border x:Name="borderSelected" SnapsToDevicePixels="True" CornerRadius="1" BorderThickness="0"
+                            BorderBrush="Transparent"/>
+                                                <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="true">
+                                                    <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="White"/>
+                                                    <Setter Property="Background" TargetName="borderSelected" Value="{StaticResource Editor.Selected.BackgroundBrush}"/>
+                                                    <Setter Property="Opacity" TargetName="borderSelected" Value="0.4"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="true">
+                                                    <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="White"/>
+                                                    <Setter Property="Background" TargetName="borderSelected" Value="{StaticResource Editor.Selected.BackgroundBrush}"/>
+                                                    <Setter Property="Opacity" TargetName="borderSelected" Value="1"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <EventSetter Event="Click" Handler="OnPathStack_Button_Click"/>
+                            </Style>
 
+                            <Style TargetType="{x:Type Path}" x:Key="{x:Type Path}">
+                                <Setter Property="Margin" Value="0,0,0,0"/>
+                                <Setter Property="Grid.Column" Value="1"/>
+                                <Setter Property="Data" Value="M0,0 L1.5,0 L4.5,3 L1.5,6 L0,6 L3,3 z"/>
+                                <Setter Property="Fill" Value="{StaticResource Editor.FontBrush}"/>
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <Image Source="/Resources/ContentBrowser/FolderSmall.png" Width="18" Margin="5,0,0,2"/>
+                    </StackPanel>
                 </DockPanel>
             </DockPanel>
         </Border>

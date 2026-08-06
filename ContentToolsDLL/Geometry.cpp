@@ -7,8 +7,8 @@ namespace Europa::Tools {
 		using namespace DirectX;
 
 		void RecalculateNormals(Mesh& m) {
-			const uint32 numIndices{ (uint32)m.RawIndices.size() };
-			m.Normals.resize(numIndices);
+			const uint32 numIndices{ (uint32)m.RawIndices.Size() };
+			m.Normals.Resize(numIndices);
 
 			for (uint32 i{ 0 }; i < numIndices; ++i) {
 				const uint32 i0{ m.RawIndices[i] };
@@ -33,24 +33,24 @@ namespace Europa::Tools {
 			const float32 cosAlpha{ XMScalarCos(PI - smoothingAngle * PI / 180.F) };
 			const bool isHardEdge{ XMScalarNearEqual(smoothingAngle, 180.f, Epsilon) };
 			const bool isSoftEdge{ XMScalarNearEqual(smoothingAngle, 0.f, Epsilon) };
-			const uint32 numIndices{ (uint32)m.RawIndices.size() };
-			const uint32 numVertices{ (uint32)m.Positions.size() };
+			const uint32 numIndices{ (uint32)m.RawIndices.Size() };
+			const uint32 numVertices{ (uint32)m.Positions.Size() };
 			assert(numIndices && numVertices);
 			
-			m.Indices.resize(numIndices);
+			m.Indices.Resize(numIndices);
 
 			Utilities::Vector<Utilities::Vector<uint32>> idxRef(numVertices);
 			for(uint32 i{0}; i < numIndices; ++i)
-				idxRef[m.RawIndices[i]].emplace_back(i);
+				idxRef[m.RawIndices[i]].EmplaceBack(i);
 
 
 
 			for (uint32 i{ 0 }; i < numVertices; ++i) {
 				auto& refs{ idxRef[i] };
-				uint32 numRefs{ (uint32)refs.size() };
+				uint32 numRefs{ (uint32)refs.Size() };
 				for (uint32 j{ 0 }; j < numRefs; ++j) {
-					m.Indices[refs[j]] = (uint32)m.Vertices.size();
-					Vertex& v{ m.Vertices.emplace_back() };
+					m.Indices[refs[j]] = (uint32)m.Vertices.Size();
+					Vertex& v{ m.Vertices.EmplaceBack() };
 					v.Position = m.Positions[m.RawIndices[refs[j]]];
 
 					XMVECTOR n1{ XMLoadFloat3(&m.Normals[refs[j]]) };
@@ -68,7 +68,7 @@ namespace Europa::Tools {
 							if (isSoftEdge || cos_theta >= cosAlpha) {
 								n1 += n2;
 								m.Indices[refs[k]] = m.Indices[refs[j]];
-								refs.erase(refs.begin() + k);
+								refs.Erase(refs.begin() + k);
 								--numRefs;
 								--k;
 							}
@@ -81,32 +81,32 @@ namespace Europa::Tools {
 
 		void ProcessUVs(Mesh& m) {
 			Utilities::Vector<Vertex> oldVertices;
-			oldVertices.swap(m.Vertices);
-			Utilities::Vector<uint32> oldIndices(m.Indices.size());
-			oldIndices.swap(m.Indices);
+			oldVertices.Swap(m.Vertices);
+			Utilities::Vector<uint32> oldIndices(m.Indices.Size());
+			oldIndices.Swap(m.Indices);
 
-			const uint32 numVertices{ (uint32)oldVertices.size() };
-			const uint32 numIndices{ (uint32)oldIndices.size() };
+			const uint32 numVertices{ (uint32)oldVertices.Size() };
+			const uint32 numIndices{ (uint32)oldIndices.Size() };
 			assert(numVertices && numIndices);
 
 			Utilities::Vector<Utilities::Vector<uint32>> idxRef(numVertices);
 			for (uint32 i{ 0 }; i < numIndices; ++i)
-				idxRef[oldIndices[i]].emplace_back(i);
+				idxRef[oldIndices[i]].EmplaceBack(i);
 
 			for (uint32 i{ 0 }; i < numVertices; ++i) {
 				auto& refs{ idxRef[i] };
-				uint32 numRefs{ (uint32)refs.size() };
+				uint32 numRefs{ (uint32)refs.Size() };
 				for (uint32 j{ 0 }; j < numRefs; ++j) {
-					m.Indices[refs[j]] = (uint32)m.Vertices.size();
+					m.Indices[refs[j]] = (uint32)m.Vertices.Size();
 					Vertex& v{ oldVertices[oldIndices[refs[j]]] };
 					v.UV = m.UVSets[0][refs[j]];
-					m.Vertices.emplace_back(v);
+					m.Vertices.EmplaceBack(v);
 
 					for (uint32 k{ j + 1 }; k < numRefs; ++k) {
 						Vector2& uv1{ m.UVSets[0][refs[k]] };
 						if (XMScalarNearEqual(v.UV.x, uv1.x, Epsilon) && XMScalarNearEqual(v.UV.y, uv1.y, Epsilon)) {
 							m.Indices[refs[k]] = m.Indices[refs[j]];
-							refs.erase(refs.begin() + k);
+							refs.Erase(refs.begin() + k);
 							--numRefs;
 							--k;
 						}
@@ -116,9 +116,9 @@ namespace Europa::Tools {
 		}
 
 		void PackVerticesStatic(Mesh& m) {
-			const uint32 numVertices{ (uint32)m.Vertices.size() };
+			const uint32 numVertices{ (uint32)m.Vertices.Size() };
 			assert(numVertices);
-			m.PackedVerticesStatic.reserve(numVertices);
+			m.PackedVerticesStatic.Reserve(numVertices);
 
 			for (uint32 i{ 0 }; i < numVertices; ++i) {
 				Vertex& v{ m.Vertices[i] };
@@ -126,21 +126,21 @@ namespace Europa::Tools {
 				const uint16 normalX{ (uint16)PackFloat<16>(v.Normal.x, -1.f, 1.f) };
 				const uint16 normalY{ (uint16)PackFloat<16>(v.Normal.y, -1.f, 1.f) };
 
-				m.PackedVerticesStatic.emplace_back(PackedVertex::VertexStatic{
+				m.PackedVerticesStatic.EmplaceBack(PackedVertex::VertexStatic{
 					v.Position, {0,0,0}, signs, {normalX, normalY}, {}, v.UV
 					});
 			}
 		}
 
 		void ProcessVertices(Mesh& m, const GeometryImportSettings& settings) {
-			assert((m.RawIndices.size() % 3) == 0);
-			if (settings.CalculateNormals || m.Normals.empty()) {
+			assert((m.RawIndices.Size() % 3) == 0);
+			if (settings.CalculateNormals || m.Normals.Empty()) {
 				RecalculateNormals(m);
 			}
 
 			ProcessNormals(m, settings.SmoothingAngle);
 
-			if (!m.UVSets.empty()) {
+			if (!m.UVSets.Empty()) {
 				ProcessUVs(m);
 			}
 
@@ -149,10 +149,10 @@ namespace Europa::Tools {
 
 
 		uint64 GetMeshSize(const Mesh& m) {
-			const uint64 numVertices{ m.Vertices.size() };
+			const uint64 numVertices{ m.Vertices.Size() };
 			const uint64 vertexBufferSize{ sizeof(PackedVertex::VertexStatic) * numVertices };
 			const uint64 indexSize{ (numVertices < (1 << 16)) ? sizeof(uint16) : sizeof(uint32) };
-			const uint64 indexBufferSize{ indexSize * m.Indices.size() };
+			const uint64 indexBufferSize{ indexSize * m.Indices.Size() };
 			constexpr uint64 suint32{ sizeof(uint32) };
 
 			const uint64 size{
@@ -214,7 +214,7 @@ namespace Europa::Tools {
 			memcpy(&buffer[at], &source, suint32);
 			at += suint32;
 			//Number of vertices
-			const uint32 numVertices{ (uint32)mesh.Vertices.size() };
+			const uint32 numVertices{ (uint32)mesh.Vertices.Size() };
 			source = numVertices;
 			memcpy(&buffer[at], &source, suint32);
 			at += suint32;
@@ -224,7 +224,7 @@ namespace Europa::Tools {
 			memcpy(&buffer[at], &source, suint32);
 			at += suint32;
 			//Number of indices
-			const uint32 numIndices{ (uint32)mesh.Indices.size() };
+			const uint32 numIndices{ (uint32)mesh.Indices.Size() };
 			source = numIndices;
 			memcpy(&buffer[at], &source, suint32);
 			at += suint32;
@@ -233,18 +233,18 @@ namespace Europa::Tools {
 			at += sizeof(float32);
 			//Vertex data.
 			source = vertexSize * numVertices;
-			memcpy(&buffer[at], mesh.PackedVerticesStatic.data(), source);
+			memcpy(&buffer[at], mesh.PackedVerticesStatic.Data(), source);
 			at += source;
 			//Index data
 			source = indexSize * numIndices;
-			void* data{ (void*)mesh.Indices.data() };
+			void* data{ (void*)mesh.Indices.Data() };
 			Utilities::Vector<uint16> indices;
 
 			if (indexSize == sizeof(uint16)) {
-				indices.resize(numIndices);
+				indices.Resize(numIndices);
 				for (uint32 i = 0; i < numIndices; ++i)
 					indices[i] = (uint16)mesh.Indices[i];
-				data = (void*)indices.data();
+				data = (void*)indices.Data();
 			}
 
 			memcpy(&buffer[at], data, source);
@@ -281,7 +281,7 @@ namespace Europa::Tools {
 		at += source;
 
 		//Number of LODs
-		source = (uint32)scene.LODGroups.size();
+		source = (uint32)scene.LODGroups.Size();
 		memcpy(&buffer[at], &source, suint32);
 		at += suint32;
 
@@ -293,7 +293,7 @@ namespace Europa::Tools {
 			memcpy(&buffer[at], lod.Name.c_str(), source);
 			at += source;
 			//Number of meshes in this LOD
-			source = (uint32)lod.Meshes.size();
+			source = (uint32)lod.Meshes.Size();
 			memcpy(&buffer[at], &source, suint32);
 			at += suint32;
 

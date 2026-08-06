@@ -29,7 +29,7 @@ namespace EuropaEditor.Content
             DateModified = lastModified ?? info.LastWriteTime;
             Size = IsDirectory ? (long?)null : info.Length;
             Icon = icon;
-            IconSmall = IconSmall ?? icon;
+            IconSmall = smallIcon ?? icon;
             FullPath = fullPath;
         }
     }
@@ -110,7 +110,7 @@ namespace EuropaEditor.Content
             folderContent.ForEach(x => folderContent.Add(x));
         }
 
-        private List<ContentInfo> GetFolderContent(string path)
+        private static List<ContentInfo> GetFolderContent(string path)
         {
             Debug.Assert(!string.IsNullOrEmpty(path));
             var folderContent = new List<ContentInfo>();
