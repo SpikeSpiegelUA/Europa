@@ -9,5 +9,6 @@
   <ItemGroup>
     <ClCompile Include="PrimitiveMesh.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="FBXImporter.cpp" />
   </ItemGroup>
 </Project>
