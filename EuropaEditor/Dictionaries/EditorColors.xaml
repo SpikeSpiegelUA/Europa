@@ -29,5 +29,5 @@
     <SolidColorBrush Color="{StaticResource Editor.BlueColor}" x:Key="Editor.BlueBrush"/>
     <SolidColorBrush Color="{StaticResource Editor.OrangeColor}" x:Key="Editor.OrangeBrush"/>
     <SolidColorBrush Color="{StaticResource Editor.Selected.BackgroundColor}" x:Key="Editor.Selected.BackgroundBrush"/>
-    <SolidColorBrush Color="{StaticResource Editor.MouseOver.BorderColor}" x:Key="Editor.MouseOver.BackgroundBrush"/>
+    <SolidColorBrush Color="{StaticResource Editor.MouseOver.BorderColor}" x:Key="Editor.MouseOver.BorderBrush"/>
 </ResourceDictionary>

@@ -1,22 +1,13 @@
 ﻿using EuropaEditor.GameProject.Backend;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace EuropaEditor.Content
 {
@@ -99,18 +90,45 @@ namespace EuropaEditor.Content
             set { SetValue(ItemHeightProperty, value); }
         }
 
-        protected override object DefaultStyleKey => new ComponentResourceKey(GetType(), "PlainViewSourceID");
+        protected override object DefaultStyleKey => new ComponentResourceKey(GetType(), "PlainViewResourceID");
     }
 
     /// <summary>
-    /// Interaction logic for ControlBrowserView.xaml
+    /// Interaction logic for ContentBrowserView.xaml
     /// </summary>
-    public partial class ControlBrowserView : UserControl
+    public partial class ContentBrowserView : UserControl, IDisposable
     {
         private string sortedProperty = nameof(ContentInfo.FileName);
         private ListSortDirection sortDirection;
 
-        public ControlBrowserView()
+        public SelectionMode SelectionMode
+        {
+            get => (SelectionMode)GetValue(SelectionModeProperty); 
+            set => SetValue(SelectionModeProperty, value); 
+        }
+
+        public static readonly DependencyProperty SelectionModeProperty = DependencyProperty.Register("SelectionMode",
+            typeof(SelectionMode), typeof(ContentBrowserView), new PropertyMetadata(SelectionMode.Extended));
+
+        public FileAccess FileAccess
+        {
+            get => (FileAccess)GetValue(FileAccessProperty);
+            set => SetValue(FileAccessProperty, value);
+        }
+
+        //Using a DependencyProperty as the backing store for FileAccess. This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty FileAccessProperty = DependencyProperty.Register("FileAccess",
+            typeof(FileAccess), typeof(ContentBrowserView), new PropertyMetadata(FileAccess.ReadWrite));
+
+        internal ContentInfo SelectedItem
+        {
+            get => (ContentInfo)GetValue(SelectedItemProperty);
+            set => SetValue(SelectedItemProperty, value);
+        }
+
+        public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register(nameof(SelectedItem), typeof(ContentInfo), typeof(ContentBrowserView), new PropertyMetadata(null));
+
+        public ContentBrowserView()
         {
             DataContext = null;
             InitializeComponent();
@@ -226,7 +244,7 @@ namespace EuropaEditor.Content
             FolderListView.Items.SortDescriptions.Add(new SortDescription(sortBy, newDir));
         }
 
-        private void OnContext_Item_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void OnContent_Item_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var info = (sender as FrameworkElement).DataContext as ContentInfo;
             ExecuteSelection(info);
@@ -234,8 +252,11 @@ namespace EuropaEditor.Content
 
         private void OnContent_Item_KeyDown(object sender, KeyEventArgs e)
         {
-            var info = (sender as FrameworkElement).DataContext as ContentInfo;
-            ExecuteSelection(info);
+            if (e.Key == Key.Enter)
+            {
+                var info = (sender as FrameworkElement).DataContext as ContentInfo;
+                ExecuteSelection(info);
+            }
         }
 
         private void ExecuteSelection(ContentInfo info)
@@ -254,6 +275,23 @@ namespace EuropaEditor.Content
         {
             var vm = DataContext as ContentBrowser;
             vm.SelectedFolder = (sender as Button).DataContext as string;
+        }
+
+        private void OnFolderListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var item = FolderListView.SelectedItem as ContentInfo;
+            SelectedItem = item?.IsDirectory == true ? null : item;
+        }
+
+        public void Dispose()
+        {
+            if(Application.Current?.MainWindow != null)
+            {
+                Application.Current.MainWindow.DataContextChanged -= OnProjectChanged;
+            }
+
+            (DataContext as ContentBrowser)?.Dispose();
+            DataContext = null;
         }
     }
 }

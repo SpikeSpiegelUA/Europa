@@ -12,25 +12,8 @@ namespace EuropaEditor.Content
 {
     static class AssetRegistry
     {
-        private static readonly DelayEventTimer refreshTimer = new DelayEventTimer(TimeSpan.FromMilliseconds(250));
         private static readonly Dictionary<string, AssetInfo> assetDictionary = new Dictionary<string, AssetInfo>();
         private static readonly ObservableCollection<AssetInfo> assets = new ObservableCollection<AssetInfo>();
-        private static readonly FileSystemWatcher contentWatcher = new FileSystemWatcher()
-        {
-            IncludeSubdirectories = true,
-            Filter = "",
-            NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite
-        };
-
-        static AssetRegistry()
-        {
-            contentWatcher.Changed += OnContentModified;
-            contentWatcher.Created += OnContentModified;
-            contentWatcher.Deleted += OnContentModified;
-            contentWatcher.Renamed += OnContentModified;
-
-            refreshTimer.Triggered += Refresh;
-        }
 
         public static ReadOnlyObservableCollection<AssetInfo> Assets { get; } = new ReadOnlyObservableCollection<AssetInfo>(assets);
 
@@ -59,39 +42,18 @@ namespace EuropaEditor.Content
             }
         }
 
-        private static async void OnContentModified(object sender, FileSystemEventArgs e)
+        private static void OnContentModified(object sender, ContentModifiedEventArgs e)
         {
-            var x = 0;
-            if (Path.GetExtension(e.FullPath) != Asset.AssetFileExtension)
-                return;
-
-            await Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            if (ContentHelper.IsDirectory(e.FullPath))
             {
-                refreshTimer.Trigger(e);
-            }));
-        }
-
-        private static void Refresh(object? sender, DelayEventTimerArgs e)
-        {
-            foreach(var item in e.Data)
-            {
-                if (!(item is FileSystemEventArgs eventArgs))
-                    continue;
-
-                if (eventArgs.ChangeType == WatcherChangeTypes.Deleted)
-                {
-                    UnregisterAsset(eventArgs.FullPath);
-                }
-                else
-                {
-                    RegisterAsset(eventArgs.FullPath);
-                    if(eventArgs.ChangeType == WatcherChangeTypes.Renamed)
-                    {
-                        assetDictionary.Keys.Where(key => !File.Exists(key)).ToList().ForEach(file => UnregisterAsset(file));                   
-                    }
-                }
-
+                RegisterAllAssets(e.FullPath);
             }
+            else if (File.Exists(e.FullPath))
+            {
+                RegisterAsset(e.FullPath);
+            }
+
+            assets.Where(x => !File.Exists(x.FullPath)).ToList().ForEach(x => UnregisterAsset(x.FullPath));
         }
 
         private static void RegisterAsset(string file)
@@ -117,23 +79,20 @@ namespace EuropaEditor.Content
             }
         }
 
-        public static void Clear()
-        {
-            contentWatcher.EnableRaisingEvents = false;
-            assetDictionary.Clear();
-            assets.Clear();
-        }
-
         public static AssetInfo GetAssetInfo(string file) => assetDictionary.ContainsKey(file) ? assetDictionary[file] : null;
         public static AssetInfo GetAssetInfo(Guid guid) => assets.FirstOrDefault(x => x.Guid == guid);
 
         public static void Reset(string contentFolder)
         {
-            Clear();
+            ContentWatcher.ContentModified -= OnContentModified;
+
+            assetDictionary.Clear();
+            assets.Clear();
+
             Debug.Assert(Directory.Exists(contentFolder));
             RegisterAllAssets(contentFolder);
-            contentWatcher.Path = contentFolder;
-            contentWatcher.EnableRaisingEvents = true;
+
+            ContentWatcher.ContentModified += OnContentModified;
         }
     }
 }

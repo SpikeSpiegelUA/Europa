@@ -4,6 +4,7 @@
     <ClInclude Include="ToolsCommon.h" />
     <ClInclude Include="PrimitiveMesh.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="FBXImporter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PrimitiveMesh.cpp" />

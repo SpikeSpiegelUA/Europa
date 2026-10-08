@@ -392,7 +392,9 @@ namespace EuropaEditor.Content
                 foreach(var lodGroup in _lodGroups)
                 {
                     Debug.Assert(lodGroup.LODs.Any());
-                    var meshFileName = ContentHelper.SanitizeFilename(path + fileName + "_" + lodGroup.LODs[0].Name + AssetFileExtension);
+                    var meshFileName = ContentHelper.SanitizeFilename(_lodGroups.Count > 1 ?
+                        path + fileName + "_" + lodGroup.LODs[0].Name + AssetFileExtension :
+                        path + fileName + AssetFileExtension);
                     //NOTE: we have to make a different id for each new asset file.
                     Guid = Guid.NewGuid();
                     byte[] data = null;

@@ -84,7 +84,7 @@
                     <GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Left" Background="Transparent"/>
                     <utilities:LoggerView Grid.Column="1" Margin="5,0,0,0"/>
                     <GridSplitter Grid.Column="2" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Left" Background="Transparent"/>
-                    <content:ControlBrowserView Grid.Column="2" Margin="5, 0, 0, 0"/>
+                    <content:ContentBrowserView Grid.Column="2" Margin="5, 0, 0, 0"/>
                 </Grid>
             </Grid>
             <GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Left" Background="Transparent"/>

@@ -95,7 +95,7 @@ namespace EuropaEditor
                 Project.CurrentProject?.Unload();
                 var project = projectBrowserDialogue.DataContext as Project;
                 Debug.Assert(project != null);
-                AssetRegistry.Reset(project.ContentPath);
+                ContentWatcher.Reset(project.ContentPath, project.Path);
                 DataContext = project;
             }
         }
