@@ -28,6 +28,8 @@ namespace Europa::Tools {
 			ZeroMemory(this, sizeof(FBXContext));
 		}
 
+		void GetScene(FbxNode* root = nullptr);
+
 		constexpr bool IsValid() const {
 			return fbxManager && fbxScene;
 		}
@@ -38,6 +40,8 @@ namespace Europa::Tools {
 
 		bool InitializeFBX();
 		void LoadFBXFile(const char* file);
+		void GetMesh(FbxNode* node, Utilities::Vector<Mesh>& meshes);
+		void GetLODGroup(FbxNode* node);
 
 		Scene* scene{ nullptr };
 		SceneData* sceneData{ nullptr };

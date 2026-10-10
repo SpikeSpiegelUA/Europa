@@ -20,7 +20,46 @@ namespace Europa::Tools {
 		std::mutex fbxMutex;
 	} //Anonymous namespace
 
-	bool FBXContext::InitializeFBX() 
+	void FBXContext::GetScene(FbxNode* root /*= nullptr*/)
+	{
+		assert(IsValid());
+
+		if (!root) 
+		{
+			root = fbxScene->GetRootNode();
+			if (!root)
+				return;
+		}
+
+		const int32 numNodes{ root->GetChildCount() };
+		for (int32 i{ 0 }; i < numNodes; ++i) 
+		{
+			FbxNode* node{ root->GetChild(i) };
+			if (!node)
+				continue;
+
+			if (node->GetMesh())
+			{
+				LODGroup lod{};
+				GetMesh(node, lod.Meshes);
+				if (lod.Meshes.Size()) 
+				{
+					lod.Name = lod.Meshes[0].Name;
+					scene->LODGroups.EmplaceBack(lod);
+				}
+			}
+			else if (node->GetLodGroup())
+			{
+				GetLODGroup(node);
+			}
+			else {
+				//See if there's a mesh somewhere further down the hierarchy.
+				GetScene(node);
+			}
+		}
+	}
+
+	bool FBXContext::InitializeFBX()
 	{
 		assert(!IsValid());
 
@@ -56,6 +95,37 @@ namespace Europa::Tools {
 
 		//Get scene scale in meters.
 		sceneScale = (float32)fbxScene->GetGlobalSettings().GetSystemUnit().GetConversionFactorTo(FbxSystemUnit::m);
+	}
+
+	void FBXContext::GetMesh(FbxNode* node, Utilities::Vector<Mesh>& meshes)
+	{
+		assert(node);
+
+		if (FbxMesh * fbxMesh{ node->GetMesh() }) {
+			if (fbxMesh->RemoveBadPolygons() < 0)
+				return;
+
+			//Triangulate the mesh if needed.
+			FbxGeometryConverter gc{ fbxManager };
+			fbxMesh = static_cast<FbxMesh*>(gc.Triangulate(fbxMesh, true));
+			if (!fbxMesh || fbxMesh->RemoveBadPolygons() < 0)
+				return;
+
+			Mesh m;
+			m.LODID = (uint32)meshes.Size();
+			m.LODThreshold = -1.f; 
+			m.Name = (node->GetName()[0] != '\0') ? node->GetName() : fbxMesh->GetName();
+
+			if (GetMeshData(fbxMesh, m)) 
+			{
+				meshes.EmplaceBack(m);
+			}
+		}
+	}
+
+	void FBXContext::GetLODGroup(FbxNode * node)
+	{
+
 	}
 
 
