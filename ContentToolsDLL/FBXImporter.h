@@ -42,6 +42,7 @@ namespace Europa::Tools {
 		void LoadFBXFile(const char* file);
 		void GetMesh(FbxNode* node, Utilities::Vector<Mesh>& meshes);
 		void GetLODGroup(FbxNode* node);
+		bool GetMeshData(FbxMesh* fbxMesh, Mesh& m);
 
 		Scene* scene{ nullptr };
 		SceneData* sceneData{ nullptr };

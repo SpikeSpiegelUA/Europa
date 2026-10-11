@@ -28,6 +28,8 @@ namespace Europa::Tools {
 		Utilities::Vector<Math::Vector3> Normals;
 		Utilities::Vector<Math::Vector4> Tangents;
 		Utilities::Vector<Utilities::Vector<Math::Vector2>> UVSets;
+		Utilities::Vector<uint32> MaterialIndices;
+		Utilities::Vector<uint32> MaterialUsed;
 
 		Utilities::Vector<uint32> RawIndices;
 

@@ -149,4 +149,64 @@ namespace Europa::Tools {
 		ProcessScene(scene, data->Settings);
 		PackData(scene, *data);
 	}
+
+	bool FBXContext::GetMeshData(FbxMesh* fbxMesh, Mesh& m)
+	{
+		assert(fbxMesh);
+
+		const int32 numPolys{fbxMesh->GetPolygonCount()};
+		if(numPolys <= 0)
+			return false;
+
+		//Get Vertices.
+		const int32 numVertices{fbxMesh->GetControlPointsCount()};
+		FbxVector4* vertices{fbxMesh->GetControlPoints()};
+		const int32 numIndices{fbxMesh->GetPolygonVertexCount()};
+		int32* indices{fbxMesh->GetPolygonVertices()};
+
+		assert(numVertices > 0 && vertices && numIndices > 0 && indices);
+		if(!(numVertices > 0 && vertices && numIndices > 0 && indices))
+			return false;
+
+			m.RawIndices.Resize(numIndices);
+			Utilities::Vector vertexRef(numVertices, uint32_invalid_id);
+
+			for(int32 i{0}; i< numIndices; i++)
+			{
+				const uint32 vIdx{indices[i]};
+				//Did we encounter this vertex before? If so, just add its index.
+				//If not, add the vertex and a new index.
+				if(vertexRef[vIdx] != uint32_invalid_id)
+				{
+					m.RawIndices[i] = vertexRef[vIdx];
+				}
+				else
+				{
+					FbxVector4 v = vertices[vIdx] * sceneScale;
+					m.RawIndices[i] = (uint32)m.Positions.Size();
+					vertexRef[vIdx] = m.RawIndices[i];
+					m.Positions.EmplaceBack((float32)v[0], (float32)v[1], (float32)v[2]);
+				}
+			}
+
+		assert(m.RawIndices.Size() % 3 == 0);
+
+		//Get material index per polygon.
+		assert(numPolys > 0);
+		FbxLayerElementArrayTemplate<int32>* mtlIndices;
+		if(fbxMesh->GetMaterialIndices(&mtlIndices))
+		{
+			for(int32 i{0}; i < numPolys; i++){
+				const int32 mtlIndex{mtlIndices->GetAt(i)};
+				assert(mtlIndex >= 0);
+				m.MaterialIndices.EmplaceBack((uint32)mtlIndex);
+				if(std::find(m.MaterialUsed.Begin(), m.MaterialUsed.End(), (uint32)mtlIndex) == m.MaterialUsed.End())
+				{
+					m.MaterialUsed.EmplaceBack((uint32)mtlIndex);
+				}
+			}
+		}
+
+		const bool importNormals{!sceneData->Settings.CalculateNormals};
+	}
 }
