@@ -207,6 +207,35 @@ namespace Europa::Tools {
 			}
 		}
 
+		//Importing normals is ON by default
 		const bool importNormals{!sceneData->Settings.CalculateNormals};
+		//Importing tangents is OFF by default.
+		const bool importTangents{ !sceneData->Settings.CalculateTangents };
+
+		//Import normals
+		if (importNormals) {
+			FbxArray<FbxVector4> normals;
+			//Calculate normals using FBX's built-in method, but only if no normal data is already there.
+			if (fbxMesh->GenerateNormals() && fbxMesh->GetPolygonVertexNormals(normals) && normals.Size() > 0) 
+			{
+				const int32 numNormals{ normals.Size() };
+				for (int32 i{ 0 }; i < numNormals; i++) 
+				{
+					m.Normals.EmplaceBack((float32)normals[i][0], (float32)normals[i][1], (float32)normals[i][2]);
+				}
+			}
+			else
+			{
+				//Something went wrong with importing normals from FBX.
+				//Fall back to our own normal calculation method.
+				sceneData->Settings.CalculateNormals = true;
+			}
+		}
+
+		//Import tangents.
+		if (importTangents) 
+		{
+			FbxLayerElementArrayTemplate<FbxVector4>* tangents{ nullptr };
+		}
 	}
 }
