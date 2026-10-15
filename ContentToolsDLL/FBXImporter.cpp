@@ -125,7 +125,32 @@ namespace Europa::Tools {
 
 	void FBXContext::GetLODGroup(FbxNode * node)
 	{
+		assert(node);
 
+		if (FbxLODGroup * lodGroup{ node->GetLodGroup() }) 
+		{
+			LODGroup lod{};
+			lod.Name = (node->GetName()[0] != '\0') ? node->GetName() : lodGroup->GetName();
+			//Note: number of LODs is exclusive the base mesh(LOD 0)
+			const int32 numLods{ lodGroup->GetNumThresholds() };
+			const int32 numNodes{ node->GetChildCount() };
+			assert(numLods > 0 && numNodes > 0);
+
+			for (int32 i{ 0 }; i < numNodes; i++) 
+			{
+				GetMesh(node->GetChild(i), lod.Meshes);
+
+				if (lod.Meshes.Size() > 1 && lod.Meshes.Size() <= numLods + 1 && lod.Meshes.Back().LODThreshold < 0.f)
+				{
+					FbxDistance threshold;
+					lodGroup->GetThreshold((uint32)lod.Meshes.Size() - 2, threshold);
+					lod.Meshes.Back().LODThreshold = threshold.Value() * sceneScale;
+				}
+
+				if (lod.Meshes.Size())
+					scene->LODGroups.EmplaceBack(lod);
+			}
+		}
 	}
 
 
@@ -236,6 +261,43 @@ namespace Europa::Tools {
 		if (importTangents) 
 		{
 			FbxLayerElementArrayTemplate<FbxVector4>* tangents{ nullptr };
+			//Calculate tangents using FBX's built-in method, but only if no tangent data is already there.
+			if (fbxMesh->GenerateTangentsData() && fbxMesh->GetTangents(&tangents) && tangents && tangents->GetCount() > 0) 
+			{
+				const int32 numTangent{ tangents->GetCount() };
+				for (int32 i{ 0 }; i < numTangent; i++) 
+				{
+					FbxVector4 t{ tangents->GetAt(i) };
+					m.Tangents.EmplaceBack((float32)t[0], (float32)t[1], (float32)t[2], (float32)t[3]);
+				}
+			}
+			else 
+			{
+				//Something went wrong with importing tangents from FBX.
+				//Fall back to our own tangent calculation method.
+				sceneData->Settings.CalculateTangents = true;
+			}
 		}
+
+		FbxStringList uvNames;
+		fbxMesh->GetUVSetNames(uvNames);
+		const int32 uvSetCount{ uvNames.GetCount() };
+		//NOTE: it's ok if we don't have a uv set. Fore example, some emissive objects don't need a uv map.
+		m.UVSets.Resize(uvSetCount);
+
+		for (int32 i{ 0 }; i < uvSetCount; i++) 
+		{
+			FbxArray<FbxVector2> uvs;
+			if (fbxMesh->GetPolygonVertexUVs(uvNames.GetStringAt(i), uvs)) 
+			{
+				const int32 numUVs{ uvs.Size() };
+				for (int32 j{ 0 }; j < numUVs; j++) 
+				{
+					m.UVSets[i].EmplaceBack((float32)uvs[j][0], (float32)uvs[j][1]);
+				}
+			}
+		}
+
+		return true;
 	}
 }
