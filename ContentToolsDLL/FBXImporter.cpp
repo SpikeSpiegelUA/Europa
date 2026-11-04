@@ -15,6 +15,9 @@
 #pragma comment (lib, "C:\\Program Files\\Autodesk\\FBX\\FBX SDK\\2020.3.11\\lib\\x64\\release\\zlib-md.lib")
 #endif
 
+//LNK4099 PDB not found warnings can be resolved either by installing FBX SDK PDBs (separate download) or
+//by disabling this warning in linked options(linked command line: /ignore:4099).
+
 namespace Europa::Tools {
 	namespace {
 		std::mutex fbxMutex;
@@ -144,7 +147,7 @@ namespace Europa::Tools {
 				{
 					FbxDistance threshold;
 					lodGroup->GetThreshold((uint32)lod.Meshes.Size() - 2, threshold);
-					lod.Meshes.Back().LODThreshold = threshold.Value() * sceneScale;
+					lod.Meshes.Back().LODThreshold = threshold.value() * sceneScale;
 				}
 
 				if (lod.Meshes.Size())
@@ -163,7 +166,7 @@ namespace Europa::Tools {
 			std::lock_guard lock{ fbxMutex };
 			FBXContext fbxContext{ file, &scene, data };
 			if (fbxContext.IsValid()) {
-				//get scene.
+				fbxContext.GetScene();
 			}
 			else {
 				//TODO: send failure log message to editor.
@@ -278,6 +281,8 @@ namespace Europa::Tools {
 				sceneData->Settings.CalculateTangents = true;
 			}
 		}
+
+
 
 		FbxStringList uvNames;
 		fbxMesh->GetUVSetNames(uvNames);

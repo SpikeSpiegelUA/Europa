@@ -251,10 +251,99 @@ namespace Europa::Tools {
 			at += source;
 		}
 
+		bool SplitMeshesByMaterial(uint32 materialIndex, const Mesh& m, Mesh& submesh) 
+		{
+			submesh.Name = m.Name;
+			submesh.LODThreshold = m.LODThreshold;
+			submesh.LODID = m.LODID;
+			submesh.MaterialUsed.EmplaceBack(materialIndex);
+			submesh.UVSets.Resize(m.UVSets.Size());
+
+			const uint32 numPolys{ (uint32)m.RawIndices.Size() / 3 };
+			Utilities::Vector<uint32> vertexRef(m.Positions.Size(), uint32_invalid_id);
+
+			for (uint32 i{ 0 }; i < numPolys; i++)
+			{
+				const uint32 mtlIndex{ m.MaterialIndices[i] };
+				if (mtlIndex != materialIndex)
+					continue;
+
+				const uint32 index{ i * 3 };
+				for (uint32 j = index; j < index + 3; j++) 
+				{
+					const uint32 vIndex{ m.RawIndices[j] };
+					if (vertexRef[vIndex] != uint32_invalid_id)
+					{
+						submesh.RawIndices.EmplaceBack(vertexRef[vIndex]);
+					}
+					else 
+					{
+						submesh.RawIndices.EmplaceBack((uint32)submesh.Positions.Size());
+						vertexRef[vIndex] = submesh.RawIndices.Back();
+						submesh.Positions.EmplaceBack(m.Positions[vIndex]);
+					}
+
+					if (m.Normals.Size()) 
+					{
+						submesh.Normals.EmplaceBack(m.Normals[j]);
+					}
+
+					if (m.Tangents.Size()) 
+					{
+						submesh.Tangents.EmplaceBack(m.Tangents[j]);
+					}
+
+					for (uint32 k{ 0 }; k < m.UVSets.Size(); k++) 
+					{
+						if (m.UVSets[k].Size()) 
+						{
+							submesh.UVSets[k].EmplaceBack(m.UVSets[k][j]);
+						}
+					}
+				}
+			}
+
+			assert((submesh.RawIndices.Size() % 3) == 0);
+			return !submesh.RawIndices.Empty();
+		}
+
+		void SplitMeshesByMaterial(Scene& scene) 
+		{
+			for (auto& lod : scene.LODGroups) 
+			{
+				Utilities::Vector<Mesh> newMeshes;
+
+				for (auto& m : lod.Meshes) 
+				{
+					//If more than one material is used in this mesh
+					//then split it into submeshes.
+					const uint32 numMaterials{ (uint32)m.MaterialUsed.Size() };
+					if (numMaterials > 1) 
+					{
+						for (uint32 i{ 0 }; i < numMaterials; ++i) 
+						{
+							Mesh submesh{};
+							if (SplitMeshesByMaterial(m.MaterialUsed[i], m, submesh)) {
+								newMeshes.EmplaceBack(submesh);
+							}
+						}
+					}
+					else 
+					{
+						newMeshes.EmplaceBack(m);
+					}
+				}
+
+				newMeshes.Swap(lod.Meshes);
+			}
+		}
+
 	} //anonymous namespace
 
 	void ProcessScene(Scene& scene, const GeometryImportSettings& settings)
 	{
+		SplitMeshesByMaterial(scene);
+
 		for(auto& lod: scene.LODGroups)
 			for (auto& m : lod.Meshes) {
 				ProcessVertices(m, settings);
