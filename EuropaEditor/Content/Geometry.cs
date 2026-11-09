@@ -1,4 +1,6 @@
-﻿using EuropaEditor.Utilities;
+﻿using EuropaEditor.DLLWrapper;
+using EuropaEditor.GameProject.Backend;
+using EuropaEditor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -263,6 +265,7 @@ namespace EuropaEditor.Content
         class Geometry : Asset
     {
 
+        private readonly object _lock = new object();
         private readonly List<LODGroup> _lodGroups = new List<LODGroup>();
 
         public GeometryImportSettings ImportSettings { get; } = new GeometryImportSettings();
@@ -375,6 +378,48 @@ namespace EuropaEditor.Content
             }
 
             lod.Meshes.Add(mesh);
+        }
+
+        public override void Import(string file)
+        {
+            Debug.Assert(File.Exists(file));
+            Debug.Assert(!string.IsNullOrEmpty(FullPath));
+            var ext = Path.GetExtension(file).ToLower();
+
+            SourcePath = file;
+
+            try
+            {
+                if(ext == ".fbx")
+                {
+                    ImportFbx(file);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                var msg = $"Failed to read {file} for import.";
+                Debug.WriteLine(msg);
+                Logger.Log(MessageType.Error, msg);
+            }
+        }
+
+        private void ImportFbx(string file)
+        {
+            Logger.Log(MessageType.Info, $"Importing FBX file {file}");
+            var tempPath = Application.Current.Dispatcher.Invoke(() => Project.CurrentProject.TempFolder);
+            if (string.IsNullOrEmpty(tempPath))
+                return;
+
+            lock (_lock)
+            {
+                if (!Directory.Exists(tempPath))
+                    Directory.CreateDirectory(tempPath);
+            }
+
+            var tempFile = $"{tempPath}{ContentHelper.GetRandomString()}.fbx";
+            File.Copy(file, tempFile, true);
+            ContentToolsAPI.ImportFbx(tempFile, this);
         }
 
         public override IEnumerable<string> Save(string file)

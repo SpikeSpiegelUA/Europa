@@ -277,6 +277,21 @@ namespace EuropaEditor.Content
             vm.SelectedFolder = (sender as Button).DataContext as string;
         }
 
+        private void OnFolderContent_ListView_Drop(object sender, DragEventArgs e)
+        {
+            var vm = DataContext as ContentBrowser;
+            if (vm.SelectedFolder != null && e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files?.Length > 0 && Directory.Exists(vm.SelectedFolder))
+                {
+                    _ = ContentHelper.ImportFilesAsync(files, vm.SelectedFolder);
+                    e.Handled = true;
+                }
+            }
+
+        }
+
         private void OnFolderListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var item = FolderListView.SelectedItem as ContentInfo;

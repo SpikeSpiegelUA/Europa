@@ -32,10 +32,17 @@ namespace EuropaEditor.GameProject.Backend
         [DataMember]
         public string Name { get; private set; } = "New Project";
         [DataMember]
+        /// <summary>
+        /// Gets the root folder that contains the current project.
+        /// </summary>
         public string Path { get; private set; }
+        /// <summary>
+        ///  Gets the full path of the current Europa project file, including its file name and extension.
+        /// </summary>
         public string FullPath => $@"{Path}{Name}{Extension}";
         public string Solution => $@"{Path}{Name}.sln";
         public string ContentPath => $@"{Path}Content\";
+        public string TempFolder => $@"{Path}.Europa\Temp\";
 
         private int _buildConfig;
         [DataMember]
@@ -256,6 +263,15 @@ namespace EuropaEditor.GameProject.Backend
             VisualStudio.CloseVisualStudio();
             UndoRedoManager.Reset();
             Logger.Clear();
+            DeleteTempFolder();
+        }
+
+        private void DeleteTempFolder()
+        {
+            if (Directory.Exists(TempFolder))
+            {
+                Directory.Delete(TempFolder, true);
+            }
         }
 
         [OnDeserialized]
