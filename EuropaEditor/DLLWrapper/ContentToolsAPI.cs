@@ -3,6 +3,7 @@ using EuropaEditor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -78,16 +79,14 @@ namespace EuropaEditor.DLLWrapper
     {
         private const string _toolsDLL = "ContentToolsDLL.dll";
 
-        [DllImport(_toolsDLL)]
-        private static extern void CreatePrimitiveMesh([In, Out] SceneData data, PrimitiveInitInfo info);
-        public static void CreatePrimitiveMesh(Content.Geometry geometry, PrimitiveInitInfo info)
+        private static void GeometryFromSceneData(Content.Geometry geometry, Action<SceneData> sceneDataGenerator, string failureMessage)
         {
             Debug.Assert(geometry != null);
             using var sceneData = new SceneData();
             try
             {
                 sceneData.ImportSettings.FromContentSettings(geometry);
-                CreatePrimitiveMesh(sceneData, info);
+                sceneDataGenerator(sceneData);
                 Debug.Assert(sceneData.Data != IntPtr.Zero && sceneData.DataSize > 0);
                 var data = new byte[sceneData.DataSize];
                 Marshal.Copy(sceneData.Data, data, 0, (int)sceneData.DataSize);
@@ -95,9 +94,24 @@ namespace EuropaEditor.DLLWrapper
             }
             catch (Exception ex)
             {
-                Logger.Log(MessageType.Error, $"Failed to create a {info.Type} primitive mesh");
+                Logger.Log(MessageType.Error, failureMessage);
                 Debug.WriteLine(ex.Message);
             }
+        }
+
+        [DllImport(_toolsDLL)]
+        private static extern void CreatePrimitiveMesh([In, Out] SceneData data, PrimitiveInitInfo info);
+        public static void CreatePrimitiveMesh(Content.Geometry geometry, PrimitiveInitInfo info)
+        {
+            GeometryFromSceneData(geometry, (sceneData) => CreatePrimitiveMesh(sceneData, info), $"Failed to create {info.Type} primitive mesh.");
+        }
+
+        [DllImport(_toolsDLL)]
+        private static extern void ImportFbx(string file, [In, Out] SceneData data);
+
+        public static void ImportFbx(string file, Content.Geometry geometry)
+        {
+            GeometryFromSceneData(geometry, (sceneData) => ImportFbx(file, sceneData), $"Failed to import from FBX file: {file}.");
         }
     }
 }

@@ -133,6 +133,7 @@ namespace EuropaEditor.Content
             DataContext = null;
             InitializeComponent();
             Loaded += OnContentBrowserLoaded;
+            AllowDrop = true;
         }
 
         private void OnContentBrowserLoaded(object sender, RoutedEventArgs e)

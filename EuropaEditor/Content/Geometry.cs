@@ -482,8 +482,9 @@ namespace EuropaEditor.Content
 
         private byte[] GenerateIcon(MeshLOD lod)
         {
-            var width = 90 * 4;
+            var width = ContentInfo.IconWidth * 4;
 
+            using var memStream = new MemoryStream();
             BitmapSource bmp = null;
             //NOTE: it's not good practie to use a WPF control (view) in the ViewModel.
             //          But we need to make an exception for this case, for as long as we don't
@@ -492,14 +493,13 @@ namespace EuropaEditor.Content
             {
                 bmp = Editors.GeometryView.RenderToBitmap(new Editors.MeshRenderer(lod, null), width, width);
                 bmp = new TransformedBitmap(bmp, new ScaleTransform(0.25, 0.25, 0.5, 0.5));
+
+                memStream.SetLength(0);
+
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(bmp));
+                encoder.Save(memStream);
             });
-
-            using var memStream = new MemoryStream();
-            memStream.SetLength(0);
-
-            var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bmp));
-            encoder.Save(memStream);
 
             return memStream.ToArray();
         }
