@@ -124,6 +124,9 @@ namespace Europa::Tools {
 				meshes.EmplaceBack(m);
 			}
 		}
+
+		//See if there's a mesh somewhere further down the hierarchy
+		GetScene(node);
 	}
 
 	void FBXContext::GetLODGroup(FbxNode * node)
