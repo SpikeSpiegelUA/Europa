@@ -304,5 +304,19 @@ namespace EuropaEditor.Editors
                 MeshRenderer = new MeshRenderer(Geometry.GetLODGroup().LODs[0], MeshRenderer);
             }
         }
+
+        public async void SetAsset(AssetInfo assetInfo)
+        {
+            try
+            {
+                Debug.Assert(assetInfo != null && File.Exists(assetInfo.FullPath));
+                var geometry = new Content.Geometry();
+                await Tas
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+        }
     }
 }

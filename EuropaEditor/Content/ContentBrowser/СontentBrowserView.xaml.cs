@@ -1,4 +1,5 @@
-﻿using EuropaEditor.GameProject.Backend;
+﻿using EuropaEditor.Editors;
+using EuropaEditor.GameProject.Backend;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -270,6 +271,74 @@ namespace EuropaEditor.Content
                 var vm = DataContext as ContentBrowser;
                 vm.SelectedFolder = info.FullPath;
             }
+            else if (FileAccess.HasFlag(FileAccess.Read))
+            {
+                var assetInfo = Asset.GetAssetInfo(info.FileName);
+                if(assetInfo != null)
+                {
+                    OpenAssetEditor(assetInfo);
+                }
+            }
+        }
+
+        private IAssetEditor OpenAssetEditor(AssetInfo assetInfo)
+        {
+            IAssetEditor editor = null;
+            try
+            {
+                switch (assetInfo.Type)
+                {
+                    case AssetType.Animation:
+                        break;
+                    case AssetType.Audio:
+                        break;
+                    case AssetType.Material:
+                        break;
+                    case AssetType.Mesh:
+                        editor = OpenEditorPanel<GeometryEditorView>(assetInfo, assetInfo.Guid, "GeometryEditor");
+                        break;
+                    case AssetType.Skeleton:
+                        break;
+                    case AssetType.Texture:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+
+            return editor;
+        }
+
+        private IAssetEditor OpenEditorPanel<T>(AssetInfo assetInfo, Guid guid, string title)
+            where T : FrameworkElement, new()
+        {
+            //Furst look for a window that's already opened and is displaying the same asset.
+           foreach(Window window in Application.Current.Windows)
+           {
+                if(window.Content is FrameworkElement content && content.DataContext is IAssetEditor editor && editor.Asset.Guid == assetInfo.Guid) {
+                    window.Activate();
+                    return editor;
+                }
+           }
+
+            //If not already open in an asset editor, we create a new window and load the asset.
+            var newEditor = new T();
+            Debug.Assert(newEditor.DataContext is IAssetEditor);
+            (newEditor.DataContext as IAssetEditor).SetAsset(assetInfo);
+
+            var win = new Window()
+            {
+                Content = newEditor,
+                Title = title,
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Style = Application.Current.FindResource("EuropaWindowStyle") as Style
+            };
+
+            win.Show();
+            return newEditor.DataContext as IAssetEditor;
         }
 
         private void OnPathStack_Button_Click(object sender, RoutedEventArgs e)
