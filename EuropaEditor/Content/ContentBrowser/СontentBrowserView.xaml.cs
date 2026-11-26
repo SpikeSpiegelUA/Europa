@@ -273,7 +273,7 @@ namespace EuropaEditor.Content
             }
             else if (FileAccess.HasFlag(FileAccess.Read))
             {
-                var assetInfo = Asset.GetAssetInfo(info.FileName);
+                var assetInfo = Asset.GetAssetInfo(info.FullPath);
                 if(assetInfo != null)
                 {
                     OpenAssetEditor(assetInfo);

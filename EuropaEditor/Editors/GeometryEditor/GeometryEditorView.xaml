@@ -21,10 +21,26 @@
             </Border.Effect>
             <StackPanel Orientation="Horizontal" Margin="5,2">
                 <TextBlock Text="LOD: " Margin="0,0,5,0"/>
-                <Slider Width="128" VerticalAlignment="Center" x:Name="lodSlider"/>
-                <TextBlock Width="32" Text="{Binding Path=Value, ElementName=lodSlider}"/>
+                <Slider Value="{Binding LODIndex}" Minimum="0" Maximum="{Binding MaxLODIndex}" 
+                        Interval="1" IsSnapToTickEnabled="True" TickPlacement="BottomRight" 
+                        Width="128" VerticalAlignment="Center" x:Name="lodSlider">
+                    <Slider.Style>
+                        <Style TargetType="{x:Type Slider}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding MaxLODIndex}" Value="0">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding AutoLOD}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Slider.Style>
+                </Slider>
+                <TextBlock Width="32" Text="{Binding Path=Value, ElementName=lodSlider}"
+                           IsEnabled="{Binding Path=IsEnabled, ElementName=lodSlider}"/>
                 <TextBlock Text="Auto LOD" Margin="15,0,5,0"/>
-                <CheckBox IsChecked="False" VerticalAlignment="Center"/>
+                <CheckBox IsChecked="{Binding AutoLOD}" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
         <Grid>

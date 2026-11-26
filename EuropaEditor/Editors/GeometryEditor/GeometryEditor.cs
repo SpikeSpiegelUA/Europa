@@ -263,7 +263,7 @@ namespace EuropaEditor.Editors
 
      class GeometryEditor : ViewModelBase, IAssetEditor
     {
-        public Asset Asset => Geometry;
+        Asset IAssetEditor.Asset => Geometry;
 
         private Content.Geometry _geometry;
 
@@ -291,6 +291,68 @@ namespace EuropaEditor.Editors
                 {
                     _meshRenderer = value;
                     OnPropertyChanged(nameof(MeshRenderer));
+                    var lods = Geometry.GetLODGroup().LODs;
+                    MaxLODIndex = (lods.Count > 0) ? lods.Count - 1 : 0;
+                    OnPropertyChanged(nameof(MaxLODIndex));
+                    if(lods.Count > 1)
+                    {
+                        MeshRenderer.PropertyChanged += (s, e) =>
+                        {
+                            if (e.PropertyName == nameof(MeshRenderer.OffsetCameraPosition) && AutoLOD)
+                                ComputeLOD(lods);
+                        };
+
+                        ComputeLOD(lods);
+                    }
+                }
+            }
+        }
+
+        private bool _autoLOD = true;
+        public bool AutoLOD
+        {
+            get => _autoLOD;
+            set
+            {
+                if (_autoLOD != value)
+                {
+                    _autoLOD = value;
+                    OnPropertyChanged(nameof(AutoLOD));
+                }
+            }
+        }
+
+        public int MaxLODIndex { get; private set; }
+        private int _lodIndex;
+        public int LODIndex
+        {
+            get => _lodIndex;
+            set
+            {
+                var lods = Geometry.GetLODGroup().LODs;
+                value = Math.Clamp(value, 0, lods.Count);
+                if(_lodIndex != value)
+                {
+                    _lodIndex = value;
+                    OnPropertyChanged(nameof(LODIndex));
+                    MeshRenderer = new MeshRenderer(lods[value], MeshRenderer);
+                }
+            }
+        }
+
+        private void ComputeLOD(IList<MeshLOD> lods)
+        {
+            if(!AutoLOD)
+                return;
+
+            var p = MeshRenderer.OffsetCameraPosition;
+            var distance = new Vector3D(p.X, p.Y, p.Z).Length;
+            for (int i = MaxLODIndex; i >= 0; --i)
+            {
+                if (lods[i].LODThreshold < distance)
+                {
+                    LODIndex = i;
+                    break;
                 }
             }
         }
@@ -301,7 +363,15 @@ namespace EuropaEditor.Editors
             if (asset is Content.Geometry geometry)
             {
                 Geometry = geometry;
-                MeshRenderer = new MeshRenderer(Geometry.GetLODGroup().LODs[0], MeshRenderer);
+                var numLods = Geometry.GetLODGroup().LODs.Count;
+                if(LODIndex >= numLods)
+                {
+                    LODIndex = numLods - 1;
+                }
+                else
+                {
+                    MeshRenderer = new MeshRenderer(Geometry.GetLODGroup().LODs[0], MeshRenderer);
+                }
             }
         }
 
@@ -311,7 +381,12 @@ namespace EuropaEditor.Editors
             {
                 Debug.Assert(assetInfo != null && File.Exists(assetInfo.FullPath));
                 var geometry = new Content.Geometry();
-                await Tas
+                await Task.Run(() =>
+                {
+                    geometry.Load(assetInfo.FullPath);
+                });
+
+                SetAsset(geometry);
             }
             catch(Exception ex)
             {

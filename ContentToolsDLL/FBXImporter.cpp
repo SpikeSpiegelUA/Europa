@@ -41,23 +41,12 @@ namespace Europa::Tools {
 			if (!node)
 				continue;
 
-			if (node->GetMesh())
+			LODGroup lod{};
+			GetMeshes(node, lod.Meshes, 0, -1.f);
+			if (lod.Meshes.Size()) 
 			{
-				LODGroup lod{};
-				GetMesh(node, lod.Meshes);
-				if (lod.Meshes.Size()) 
-				{
-					lod.Name = lod.Meshes[0].Name;
-					scene->LODGroups.EmplaceBack(lod);
-				}
-			}
-			else if (node->GetLodGroup())
-			{
-				GetLODGroup(node);
-			}
-			else {
-				//See if there's a mesh somewhere further down the hierarchy.
-				GetScene(node);
+				lod.Name = lod.Meshes[0].Name;
+				scene->LODGroups.EmplaceBack(lod);
 			}
 		}
 	}
@@ -100,63 +89,91 @@ namespace Europa::Tools {
 		sceneScale = (float32)fbxScene->GetGlobalSettings().GetSystemUnit().GetConversionFactorTo(FbxSystemUnit::m);
 	}
 
-	void FBXContext::GetMesh(FbxNode* node, Utilities::Vector<Mesh>& meshes)
+	void FBXContext::GetMeshes(FbxNode* node, Utilities::Vector<Mesh>& meshes, uint32 lodID, float32 lodThreshold)
 	{
-		assert(node);
+		assert(node && lodID != uint32_invalid_id);
+		bool isLODGroup{ false };
 
-		if (FbxMesh * fbxMesh{ node->GetMesh() }) {
-			if (fbxMesh->RemoveBadPolygons() < 0)
-				return;
-
-			//Triangulate the mesh if needed.
-			FbxGeometryConverter gc{ fbxManager };
-			fbxMesh = static_cast<FbxMesh*>(gc.Triangulate(fbxMesh, true));
-			if (!fbxMesh || fbxMesh->RemoveBadPolygons() < 0)
-				return;
-
-			Mesh m;
-			m.LODID = (uint32)meshes.Size();
-			m.LODThreshold = -1.f; 
-			m.Name = (node->GetName()[0] != '\0') ? node->GetName() : fbxMesh->GetName();
-
-			if (GetMeshData(fbxMesh, m)) 
-			{
-				meshes.EmplaceBack(m);
+		if (const int32 numAttributes{ node->GetNodeAttributeCount() })
+		{
+			for (int32 i{ 0 }; i < numAttributes; i++) {
+				FbxNodeAttribute* attribute{ node->GetNodeAttributeByIndex(i) };
+				const FbxNodeAttribute::EType attributeType{ attribute->GetAttributeType() };
+				if (attributeType == FbxNodeAttribute::eMesh) {
+					GetMesh(attribute, meshes, lodID, lodThreshold);
+				}
+				else if (attributeType == FbxNodeAttribute::eLODGroup) {
+					GetLODGroup(attribute);
+					isLODGroup = true;
+				}
 			}
+		}
+
+		if (!isLODGroup) {
+			if (const int32 numChildren{ node->GetChildCount() }) {
+				for (int32 i{ 0 }; i < numChildren; i++) {
+					GetMeshes(node->GetChild(i), meshes, lodID, lodThreshold);
+				}
+			}
+		}
+	}
+
+	void FBXContext::GetMesh(FbxNodeAttribute* attribute, Utilities::Vector<Mesh>& meshes, uint32 lodID, float32 lodThreshold)
+	{
+		assert(attribute);
+
+		FbxMesh* fbxMesh{ (FbxMesh*)attribute };
+		if (fbxMesh->RemoveBadPolygons() < 0)
+			return;
+
+		//Triangulate the mesh if needed.
+		FbxGeometryConverter gc{ fbxManager };
+		fbxMesh = static_cast<FbxMesh*>(gc.Triangulate(fbxMesh, true));
+		if (!fbxMesh || fbxMesh->RemoveBadPolygons() < 0)
+			return;
+
+		FbxNode* const node{ fbxMesh->GetNode() };
+
+		Mesh m;
+		m.LODID = lodID;
+		m.LODThreshold = lodThreshold;
+		m.Name = (node->GetName()[0] != '\0') ? node->GetName() : fbxMesh->GetName();
+
+		if (GetMeshData(fbxMesh, m)) 
+		{
+			meshes.EmplaceBack(m);
 		}
 
 		//See if there's a mesh somewhere further down the hierarchy
 		GetScene(node);
 	}
 
-	void FBXContext::GetLODGroup(FbxNode * node)
+	void FBXContext::GetLODGroup(FbxNodeAttribute* attribute)
 	{
-		assert(node);
+		assert(attribute);
 
-		if (FbxLODGroup * lodGroup{ node->GetLodGroup() }) 
+		FbxLODGroup* lodGroup{ (FbxLODGroup*)attribute };
+		FbxNode* const node{ lodGroup->GetNode() };
+		LODGroup lod{};
+		lod.Name = (node->GetName()[0] != '\0') ? node->GetName() : lodGroup->GetName();
+		//Note: number of LODs is exclusive the base mesh(LOD 0)
+		const int32 numNodes{ node->GetChildCount() };
+		assert(numNodes > 0 && lodGroup->GetNumThresholds() == (numNodes - 1));
+
+		for (int32 i{ 0 }; i < numNodes; i++) 
 		{
-			LODGroup lod{};
-			lod.Name = (node->GetName()[0] != '\0') ? node->GetName() : lodGroup->GetName();
-			//Note: number of LODs is exclusive the base mesh(LOD 0)
-			const int32 numLods{ lodGroup->GetNumThresholds() };
-			const int32 numNodes{ node->GetChildCount() };
-			assert(numLods > 0 && numNodes > 0);
-
-			for (int32 i{ 0 }; i < numNodes; i++) 
-			{
-				GetMesh(node->GetChild(i), lod.Meshes);
-
-				if (lod.Meshes.Size() > 1 && lod.Meshes.Size() <= numLods + 1 && lod.Meshes.Back().LODThreshold < 0.f)
-				{
-					FbxDistance threshold;
-					lodGroup->GetThreshold((uint32)lod.Meshes.Size() - 2, threshold);
-					lod.Meshes.Back().LODThreshold = threshold.value() * sceneScale;
-				}
-
-				if (lod.Meshes.Size())
-					scene->LODGroups.EmplaceBack(lod);
+			float32 lodThreshold{ -1.f};
+			if (i > 0) {
+				FbxDistance threshold;
+				lodGroup->GetThreshold(i - 1, threshold);
+				lodThreshold = threshold.value() * sceneScale;
 			}
+
+			GetMeshes(node->GetChild(i), lod.Meshes, (uint32)lod.Meshes.Size(), lodThreshold);
 		}
+
+		if (lod.Meshes.Size())
+			scene->LODGroups.EmplaceBack(lod);
 	}
 
 
@@ -185,6 +202,16 @@ namespace Europa::Tools {
 	{
 		assert(fbxMesh);
 
+		FbxNode* const node{ fbxMesh->GetNode() };
+		FbxAMatrix geometricTransform;
+
+		geometricTransform.SetT(node->GetGeometricTranslation(FbxNode::eSourcePivot));
+		geometricTransform.SetR(node->GetGeometricRotation(FbxNode::eSourcePivot));
+		geometricTransform.SetS(node->GetGeometricScaling(FbxNode::eSourcePivot));
+
+		FbxAMatrix transform{ node->EvaluateGlobalTransform() * geometricTransform };
+		FbxAMatrix inverseTranspose{ transform.Inverse().Transpose() };
+
 		const int32 numPolys{fbxMesh->GetPolygonCount()};
 		if(numPolys <= 0)
 			return false;
@@ -204,7 +231,7 @@ namespace Europa::Tools {
 
 			for(int32 i{0}; i< numIndices; i++)
 			{
-				const uint32 vIdx{indices[i]};
+				const uint32 vIdx{(uint32)indices[i]};
 				//Did we encounter this vertex before? If so, just add its index.
 				//If not, add the vertex and a new index.
 				if(vertexRef[vIdx] != uint32_invalid_id)
@@ -213,7 +240,7 @@ namespace Europa::Tools {
 				}
 				else
 				{
-					FbxVector4 v = vertices[vIdx] * sceneScale;
+					FbxVector4 v = transform.MultT(vertices[vIdx]) * sceneScale;
 					m.RawIndices[i] = (uint32)m.Positions.Size();
 					vertexRef[vIdx] = m.RawIndices[i];
 					m.Positions.EmplaceBack((float32)v[0], (float32)v[1], (float32)v[2]);
@@ -252,7 +279,9 @@ namespace Europa::Tools {
 				const int32 numNormals{ normals.Size() };
 				for (int32 i{ 0 }; i < numNormals; i++) 
 				{
-					m.Normals.EmplaceBack((float32)normals[i][0], (float32)normals[i][1], (float32)normals[i][2]);
+					FbxVector4 n{ inverseTranspose.MultT(normals[i]) };
+					n.Normalize();
+					m.Normals.EmplaceBack((float32)n[0], (float32)n[1], (float32)n[2]);
 				}
 			}
 			else
@@ -273,8 +302,13 @@ namespace Europa::Tools {
 				const int32 numTangent{ tangents->GetCount() };
 				for (int32 i{ 0 }; i < numTangent; i++) 
 				{
+					//TODO: not sure if this transformation is correct.
 					FbxVector4 t{ tangents->GetAt(i) };
-					m.Tangents.EmplaceBack((float32)t[0], (float32)t[1], (float32)t[2], (float32)t[3]);
+					const float32 handedness{ (float32)t[3] };
+					t[3] = 0.0;
+					t.Normalize();
+					t = inverseTranspose.MultT(t);
+					m.Tangents.EmplaceBack((float32)t[0], (float32)t[1], (float32)t[2], handedness);
 				}
 			}
 			else 
